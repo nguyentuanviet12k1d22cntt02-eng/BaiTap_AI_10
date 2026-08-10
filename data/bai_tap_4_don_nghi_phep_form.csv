@@ -1,0 +1,4 @@
+﻿Dấu Thời Gian,Email Nhân Viên,Họ Tên Nhân Viên,Phòng Ban,Số Ngày Nghỉ,Từ Ngày,Đến Ngày,Lý Do Nghỉ,Mã Đơn,Trạng Thái,Quản Lý Duyệt
+10/08/2026 08:30:15,dung.hoang.demo@gmail.com,Hoàng Văn Dũng,Kinh Doanh,2,12/08/2026,13/08/2026,Giải quyết việc cá nhân gia đình,NP-2026-0001,Chờ Quản Lý Duyệt,
+10/08/2026 09:15:22,mai.le.demo@gmail.com,Lê Thị Mai,Kế Toán,1,15/08/2026,15/08/2026,Khám sức khỏe định kỳ,NP-2026-0002,Đã Duyệt,Trần Trưởng Phòng
+10/08/2026 10:45:00,toan.tran.demo@gmail.com,Trần Quốc Toản,Kỹ Thuật,3,18/08/2026,20/08/2026,Nghỉ phép năm về quê,NP-2026-0003,Chờ Quản Lý Duyệt,

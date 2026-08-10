@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khóa Học Tự Động Hóa Google Sheets Bằng AI Agent & Gemini Prompting</title>
+  <meta name="description" content="Hướng dẫn dân văn phòng cách viết Prompt ra lệnh cho AI Agent và Gemini tự động hóa quy trình làm việc trên Google Sheets mà không cần biết lập trình.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <i class="ph-bold ph-sparkle"></i>
+          </div>
+          <div class="brand-text">
+            <h2>AI Office Pro</h2>
+            <span>Gemini & Agent Automation</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Download Master Package -->
+      <div class="master-download-box">
+        <div class="download-info">
+          <i class="ph-fill ph-file-xls"></i>
+          <div>
+            <strong>Gói Dữ Liệu Thực Hành</strong>
+            <small>File Excel 5 Sheet + CSV Dữ Liệu</small>
+          </div>
+        </div>
+        <button class="btn-download-all" id="btnDownloadAllExcel" title="Tải xuống file Excel 5 Sheet tổng hợp">
+          <i class="ph-bold ph-download-simple"></i> Tải File Excel Mẫu Thực Hành
+        </button>
+      </div>
+
+      <!-- Course Navigation Tree -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">
+          <span>LỘ TRÌNH PROMPT TỰ ĐỘNG HÓA</span>
+          <span class="badge-count" id="completedCounter">0/5 bài hoàn thành</span>
+        </div>
+
+        <ul class="nav-list" id="exerciseNavList">
+          <!-- Dynamically populated via JS -->
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="user-stats">
+          <div class="stat-item">
+            <span class="stat-label">Tiến độ khóa học</span>
+            <span class="stat-value" id="progressPercentage">0%</span>
+          </div>
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Sticky Header -->
+      <header class="top-navbar">
+        <div class="nav-left">
+          <button class="btn-icon mobile-menu-btn" id="mobileMenuBtn">
+            <i class="ph-bold ph-list"></i>
+          </button>
+          <div class="breadcrumb">
+            <span class="breadcrumb-root"><i class="ph-bold ph-robot"></i> Tự Động Hóa Bằng Prompt</span>
+            <i class="ph ph-caret-right"></i>
+            <span class="breadcrumb-current" id="breadcrumbTitle">Bài 1: Báo cáo Doanh Thu & Sparkline</span>
+          </div>
+        </div>
+
+        <div class="nav-right">
+          <button class="btn-secondary" id="btnResetProgress" title="Đặt lại tiến độ học tập">
+            <i class="ph ph-arrows-counter-clockwise"></i> Đặt lại
+          </button>
+          <button class="btn-primary" id="btnMarkComplete">
+            <i class="ph-bold ph-check-circle"></i> <span id="markCompleteText">Đánh dấu hoàn thành</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Exercise Content Viewport -->
+      <div class="content-viewport" id="contentViewport">
+        
+        <!-- Main Exercise Header Banner -->
+        <section class="exercise-hero">
+          <div class="hero-tags" id="exerciseTags">
+            <!-- Tags rendered via JS -->
+          </div>
+          <h1 class="exercise-title" id="exerciseTitle">Đang tải nội dung...</h1>
+          <p class="exercise-desc" id="exerciseDesc">Mô tả bài tập đang được cập nhật...</p>
+
+          <!-- Action Bar: Download Assets for Current Exercise -->
+          <div class="exercise-action-bar">
+            <div class="action-group">
+              <span class="action-label">Tài nguyên bài thực hành:</span>
+              <button class="btn-tag" id="btnDownloadCurrentCsv">
+                <i class="ph-bold ph-file-csv"></i> Tải Dữ Liệu CSV
+              </button>
+              <button class="btn-tag" id="btnCopyMasterPrompt">
+                <i class="ph-bold ph-copy"></i> Sao Chép Master Prompt
+              </button>
+              <button class="btn-tag" id="btnDownloadCurrentScript">
+                <i class="ph-bold ph-code"></i> Tải Mã Nguồn (.gs)
+              </button>
+            </div>
+            <div class="action-group">
+              <span class="badge-level" id="exerciseLevel">Dành Cho Dân Văn Phòng</span>
+              <span class="badge-time" id="exerciseTime"><i class="ph ph-clock"></i> 15 phút</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interactive Workflow Visualizer -->
+        <section class="workflow-visualizer-card">
+          <div class="card-header">
+            <div class="header-title">
+              <i class="ph-bold ph-sparkle"></i>
+              <h3>Quy Trình Ra Lệnh Cho AI Agent Tự Động Hóa (AI Agent Workflow)</h3>
+            </div>
+            <span class="status-indicator live">Prompt AI Tự Động</span>
+          </div>
+          <div class="workflow-steps" id="workflowDiagram">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- Business Scenario Card (Mô tả tình huống thực tế) -->
+        <section class="scenario-card" id="scenarioCard">
+          <div class="scenario-header">
+            <i class="ph-bold ph-book-open-text"></i>
+            <h3>Tình Huống Doanh Nghiệp Thực Tế (Case Study Context)</h3>
+          </div>
+          <div class="scenario-story" id="scenarioStory">
+            <!-- Injected via JS -->
+          </div>
+          <div class="scenario-comparison-grid">
+            <div class="comparison-box pain">
+              <div class="comp-title"><i class="ph-bold ph-x-circle"></i> NỖI ĐAU KHI LÀM THỦ CÔNG (BEFORE)</div>
+              <div class="comp-desc" id="scenarioPain">Đang tải...</div>
+            </div>
+            <div class="comparison-box solution">
+              <div class="comp-title"><i class="ph-bold ph-check-circle"></i> GIẢI PHÁP AI TỰ ĐỘNG (AFTER)</div>
+              <div class="comp-desc" id="scenarioSolution">Đang tải...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tabbed Content Section -->
+        <section class="exercise-tabs-container">
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="tab-prompt">
+              <i class="ph-bold ph-chat-centered-text"></i> 1. Master Prompt Cho AI
+            </button>
+            <button class="tab-btn" data-tab="tab-steps">
+              <i class="ph-bold ph-steps"></i> 2. Các Bước Thực Hiện Với AI
+            </button>
+            <button class="tab-btn" data-tab="tab-script">
+              <i class="ph-bold ph-code-block"></i> 3. Mã Nguồn Apps Script Mẫu (.gs)
+            </button>
+            <button class="tab-btn" data-tab="tab-overview">
+              <i class="ph-bold ph-table"></i> 4. Dữ Liệu Thực Hành
+            </button>
+            <button class="tab-btn" data-tab="tab-verify">
+              <i class="ph-bold ph-seal-check"></i> 5. Nghiệm Thu & Cài Đặt Hẹn Giờ
+            </button>
+          </div>
+
+          <!-- Tab 1: Master Prompt Studio -->
+          <div class="tab-pane active" id="tab-prompt">
+            <div class="prompt-box-card">
+              <div class="prompt-box-header">
+                <div class="prompt-badge">
+                  <i class="ph-bold ph-magic-wand"></i> MASTER PROMPT (DÁN VÀO GEMINI / AI AGENT)
+                </div>
+                <button class="btn-copy-prompt" id="btnCopyPromptInside">
+                  <i class="ph-bold ph-copy"></i> Sao chép Prompt này
+                </button>
+              </div>
+              <div class="prompt-content-text" id="masterPromptText">
+                <!-- Prompt text inserted via JS -->
+              </div>
+            </div>
+
+            <!-- Prompt Breakdown Framework -->
+            <div class="section-card">
+              <h3 class="section-title"><i class="ph-bold ph-stack"></i> Giải Phẫu Cấu Trúc Prompt Chuẩn (Prompt Framework 5 Bước)</h3>
+              <div class="prompt-breakdown-grid" id="promptBreakdownGrid">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Step-by-Step Instructions with AI -->
+          <div class="tab-pane" id="tab-steps">
+            <div class="steps-timeline" id="stepsTimelineContainer">
+              <!-- Injected step items via JS -->
+            </div>
+          </div>
+
+          <!-- Tab 3: Complete Apps Script Code Preview -->
+          <div class="tab-pane" id="tab-script">
+            <div class="code-editor-card">
+              <div class="code-header">
+                <div class="file-name">
+                  <i class="ph-bold ph-file-js"></i>
+                  <span id="scriptFileName">Code.gs</span>
+                </div>
+                <button class="btn-copy-code" id="btnCopyCode">
+                  <i class="ph-bold ph-copy"></i> Sao chép toàn bộ code
+                </button>
+              </div>
+              <pre class="code-block"><code class="language-javascript" id="scriptCodeBlock">// Code will load here</code></pre>
+            </div>
+          </div>
+
+          <!-- Tab 4: Overview & Data Table Preview -->
+          <div class="tab-pane" id="tab-overview">
+            <div class="section-card">
+              <h3 class="section-title"><i class="ph-bold ph-target"></i> Yêu Cầu Nghiệp Vụ Cần Giải Quyết</h3>
+              <div class="business-req-box" id="businessRequirements">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="card-header-flex">
+                <h3 class="section-title"><i class="ph-bold ph-table"></i> Bảng Dữ Liệu Thực Hành Trên Google Sheets</h3>
+                <span class="table-rows-count" id="tableRowCount">Hiển thị dữ liệu mẫu</span>
+              </div>
+              <div class="table-responsive" id="dataTableContainer">
+                <!-- Injected table via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 5: Verification & Trigger Setup -->
+          <div class="tab-pane" id="tab-verify">
+            <div class="section-card" id="triggerGuideContainer">
+              <!-- Injected trigger guide -->
+            </div>
+
+            <div class="section-card checklist-card">
+              <h3 class="section-title"><i class="ph-bold ph-list-checks"></i> Danh Sách Kiểm Tra Nghiệm Thu (Acceptance Checklist)</h3>
+              <ul class="checklist-items" id="checklistContainer">
+                <!-- Injected checklist -->
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="ph-bold ph-check-circle toast-icon"></i>
+    <span class="toast-message" id="toastMessage">Thông báo</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
