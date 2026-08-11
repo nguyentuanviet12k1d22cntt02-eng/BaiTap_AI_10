@@ -42,43 +42,91 @@ with open(os.path.join(DATA_DIR, "bai_tap_1_doanh_thu_sparkline.csv"), "w", newl
 # 2. BÀI TẬP 2: Dữ liệu Đơn hàng đa sản phẩm (Line items sát thực tế)
 # -------------------------------------------------------------
 headers_bt2 = ["Mã Đơn", "Ngày Đặt", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ Giao Hàng", "Tên Sản Phẩm", "ĐVT", "Số Lượng", "Đơn Giá", "Thành Tiền", "Trạng Thái", "Link File PDF"]
-orders = [
-    # Đơn 1 (Nguyễn Văn An - 3 mặt hàng)
-    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Laptop Dell XPS 15 9530", "Chiếc", 1, 32000000, 32000000, "Chờ xuất", ""],
-    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Chuột không dây Logitech MX Master 3S", "Chiếc", 1, 2100000, 2100000, "Chờ xuất", ""],
-    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Balo chống sốc Targus 15.6 inch", "Chiếc", 1, 850000, 850000, "Chờ xuất", ""],
 
-    # Đơn 2 (Trần Thị Bích - 3 mặt hàng)
-    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Màn hình Dell UltraSharp U2723QE 4K", "Chiếc", 2, 8500000, 17000000, "Chờ xuất", ""],
-    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Giá treo màn hình Human Motion T6 Pro", "Bộ", 2, 890000, 1780000, "Chờ xuất", ""],
-    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Cáp HDMI 2.1 8K Baseus 2m", "Sợi", 2, 250000, 500000, "Chờ xuất", ""],
-
-    # Đơn 3 (Lê Hoàng Long - 2 mặt hàng)
-    ["DH-2026-003", "11/08/2026", "Lê Hoàng Long", "0912345678", "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "Bàn phím cơ Keychron K8 Pro RGB", "Chiếc", 2, 2300000, 4600000, "Chờ xuất", ""],
-    ["DH-2026-003", "11/08/2026", "Lê Hoàng Long", "0912345678", "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "Kê tay bàn phím gỗ óc chó Walnut", "Chiếc", 2, 350000, 700000, "Chờ xuất", ""],
-
-    # Đơn 4 (Phạm Minh Trang - 3 mặt hàng)
-    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Tai nghe chống ồn Sony WH-1000XM5", "Chiếc", 1, 6800000, 6800000, "Chờ xuất", ""],
-    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Hộp đựng tai nghe cao cấp chống sốc", "Chiếc", 1, 350000, 350000, "Chờ xuất", ""],
-    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Cáp âm thanh Aux 3.5mm Ugreen", "Sợi", 1, 120000, 120000, "Chờ xuất", ""],
-
-    # Đơn 5 (Đỗ Quang Hưng - 2 mặt hàng)
-    ["DH-2026-005", "11/08/2026", "Đỗ Quang Hưng", "0934567890", "56 Cầu Giấy, Hà Nội", "Ghế công thái học Ergonomic Sihoo M57", "Chiếc", 1, 4500000, 4500000, "Chờ xuất", ""],
-    ["DH-2026-005", "11/08/2026", "Đỗ Quang Hưng", "0934567890", "56 Cầu Giấy, Hà Nội", "Đệm kê chân công thái học điều chỉnh góc", "Chiếc", 1, 450000, 450000, "Chờ xuất", ""],
-
-    # Đơn 6 (Vũ Thị Ngọc Hà - Đã xuất)
-    ["DH-2026-006", "09/08/2026", "Vũ Thị Ngọc Hà", "0987112233", "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "Webcam Elgato Facecam 1080p60", "Chiếc", 1, 3600000, 3600000, "Đã xuất", "https://drive.google.com/file/d/demo_phieu_giao_hang/view"],
-    ["DH-2026-006", "09/08/2026", "Vũ Thị Ngọc Hà", "0987112233", "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "Đèn livestream Elgato Key Light Air", "Chiếc", 1, 2900000, 2900000, "Đã xuất", "https://drive.google.com/file/d/demo_phieu_giao_hang/view"],
-
-    # Đơn 7 (Ngô Thành Nam - 2 mặt hàng)
-    ["DH-2026-007", "11/08/2026", "Ngô Thành Nam", "0908889900", "89 Phan Xích Long, Phú Nhuận, TP.HCM", "Ổ cứng di động SSD Samsung T7 Shield 1TB", "Chiếc", 2, 2700000, 5400000, "Chờ xuất", ""],
-    ["DH-2026-007", "11/08/2026", "Ngô Thành Nam", "0908889900", "89 Phan Xích Long, Phú Nhuận, TP.HCM", "Hub chuyển đổi USB-C 8 in 1 HyperDrive", "Chiếc", 1, 1850000, 1850000, "Chờ xuất", ""]
+# Dữ liệu đầy đủ (dùng cho logic nhóm và Excel Merge Cells)
+orders_structured = [
+    {
+        "maDon": "DH-2026-001", "ngayDat": "10/08/2026", "tenKH": "Nguyễn Văn An", "sdt": "0988123456",
+        "diaChi": "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Laptop Dell XPS 15 9530", "Chiếc", 1, 32000000, 32000000],
+            ["Chuột không dây Logitech MX Master 3S", "Chiếc", 1, 2100000, 2100000],
+            ["Balo chống sốc Targus 15.6 inch", "Chiếc", 1, 850000, 850000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-002", "ngayDat": "10/08/2026", "tenKH": "Trần Thị Bích", "sdt": "0903987654",
+        "diaChi": "45 Lê Duẩn, Quận 1, TP.HCM", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Màn hình Dell UltraSharp U2723QE 4K", "Chiếc", 2, 8500000, 17000000],
+            ["Giá treo màn hình Human Motion T6 Pro", "Bộ", 2, 890000, 1780000],
+            ["Cáp HDMI 2.1 8K Baseus 2m", "Sợi", 2, 250000, 500000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-003", "ngayDat": "11/08/2026", "tenKH": "Lê Hoàng Long", "sdt": "0912345678",
+        "diaChi": "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Bàn phím cơ Keychron K8 Pro RGB", "Chiếc", 2, 2300000, 4600000],
+            ["Kê tay bàn phím gỗ óc chó Walnut", "Chiếc", 2, 350000, 700000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-004", "ngayDat": "11/08/2026", "tenKH": "Phạm Minh Trang", "sdt": "0977654321",
+        "diaChi": "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Tai nghe chống ồn Sony WH-1000XM5", "Chiếc", 1, 6800000, 6800000],
+            ["Hộp đựng tai nghe cao cấp chống sốc", "Chiếc", 1, 350000, 350000],
+            ["Cáp âm thanh Aux 3.5mm Ugreen", "Sợi", 1, 120000, 120000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-005", "ngayDat": "11/08/2026", "tenKH": "Đỗ Quang Hưng", "sdt": "0934567890",
+        "diaChi": "56 Cầu Giấy, Hà Nội", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Ghế công thái học Ergonomic Sihoo M57", "Chiếc", 1, 4500000, 4500000],
+            ["Đệm kê chân công thái học điều chỉnh góc", "Chiếc", 1, 450000, 450000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-006", "ngayDat": "09/08/2026", "tenKH": "Vũ Thị Ngọc Hà", "sdt": "0987112233",
+        "diaChi": "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "trangThai": "Đã xuất", "linkPDF": "https://drive.google.com/file/d/demo_phieu_giao_hang/view",
+        "items": [
+            ["Webcam Elgato Facecam 1080p60", "Chiếc", 1, 3600000, 3600000],
+            ["Đèn livestream Elgato Key Light Air", "Chiếc", 1, 2900000, 2900000]
+        ]
+    },
+    {
+        "maDon": "DH-2026-007", "ngayDat": "11/08/2026", "tenKH": "Ngô Thành Nam", "sdt": "0908889900",
+        "diaChi": "89 Phan Xích Long, Phú Nhuận, TP.HCM", "trangThai": "Chờ xuất", "linkPDF": "",
+        "items": [
+            ["Ổ cứng di động SSD Samsung T7 Shield 1TB", "Chiếc", 2, 2700000, 5400000],
+            ["Hub chuyển đổi USB-C 8 in 1 HyperDrive", "Chiếc", 1, 1850000, 1850000]
+        ]
+    }
 ]
+
+# Tạo dữ liệu CSV: Dòng đầu của mỗi đơn ghi đầy đủ thông tin, các dòng phụ bên dưới để trống các cột chung (chỉ 1 ô duy nhất)
+orders_csv_rows = []
+orders_flat_for_excel = []
+
+for order in orders_structured:
+    for idx, it in enumerate(order["items"]):
+        if idx == 0:
+            # Dòng đầu tiên của đơn: Có đầy đủ thông tin chung
+            row_csv = [order["maDon"], order["ngayDat"], order["tenKH"], order["sdt"], order["diaChi"], it[0], it[1], it[2], it[3], it[4], order["trangThai"], order["linkPDF"]]
+        else:
+            # Các dòng phụ tiếp theo: Để trống thông tin chung để chỉ 1 ô duy nhất hiển thị
+            row_csv = ["", "", "", "", "", it[0], it[1], it[2], it[3], it[4], "", ""]
+        orders_csv_rows.append(row_csv)
+        
+        # Dòng cho excel (trước khi merge)
+        orders_flat_for_excel.append([order["maDon"], order["ngayDat"], order["tenKH"], order["sdt"], order["diaChi"], it[0], it[1], it[2], it[3], it[4], order["trangThai"], order["linkPDF"]])
 
 with open(os.path.join(DATA_DIR, "bai_tap_2_xuat_hoa_don_pdf.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt2)
-    writer.writerows(orders)
+    writer.writerows(orders_csv_rows)
 
 # -------------------------------------------------------------
 # 3. BÀI TẬP 3: Dữ liệu Bảng lương gửi qua Gmail
@@ -127,44 +175,39 @@ raw_rows = []
 used_codes = []
 
 for i in range(1, 1001):
-    # Tạo mã đơn (có trường hợp lặp và rỗng)
     if i % 40 == 0:
-        ma_gd = "" # dòng lỗi rỗng
+        ma_gd = ""
     elif i % 25 == 0 and len(used_codes) > 0:
-        ma_gd = random.choice(used_codes) # trùng mã
+        ma_gd = random.choice(used_codes)
     else:
         ma_gd = f"TRX-2026-{i:05d}"
         used_codes.append(ma_gd)
 
-    # Tên khách hàng (có trường hợp viết thường, thừa khoảng trắng)
     name = f"{random.choice(first_names)} {random.choice(mid_names)} {random.choice(last_names)}"
     if i % 7 == 0:
         name = "   " + name.lower() + "  "
     elif i % 5 == 0:
         name = name.upper()
 
-    # Số điện thoại (có trường hợp dấu chấm, khoảng trắng, mất số 0 đầu)
     clean_phone = f"09{random.randint(10000000, 99999999)}"
     if i % 6 == 0:
-        phone = clean_phone[1:] # mất số 0 đầu
+        phone = clean_phone[1:]
     elif i % 8 == 0:
-        phone = f"{clean_phone[:4]}.{clean_phone[4:7]}.{clean_phone[7:]}" # có dấu chấm
+        phone = f"{clean_phone[:4]}.{clean_phone[4:7]}.{clean_phone[7:]}"
     elif i % 9 == 0:
-        phone = f"{clean_phone[:4]} {clean_phone[4:7]} {clean_phone[7:]}" # có khoảng trắng
+        phone = f"{clean_phone[:4]} {clean_phone[4:7]} {clean_phone[7:]}"
     else:
         phone = clean_phone
 
-    # Doanh thu (có trường hợp âm, 0, hoặc số hợp lệ)
     if i % 50 == 0:
         rev = 0
     elif i % 70 == 0:
-        rev = -500000 # số âm lỗi
+        rev = -500000
     else:
         rev = random.randint(150, 8500) * 1000
 
     channel = random.choice(channels)
     date_val = (datetime(2026, 8, 1) + timedelta(days=random.randint(0, 9))).strftime("%d/%m/%Y")
-
     raw_rows.append([ma_gd, name, phone, channel, rev, date_val])
 
 with open(os.path.join(DATA_DIR, "bai_tap_5_raw_data_1000_rows.csv"), "w", newline="", encoding="utf-8-sig") as f:
@@ -173,14 +216,14 @@ with open(os.path.join(DATA_DIR, "bai_tap_5_raw_data_1000_rows.csv"), "w", newli
     writer.writerows(raw_rows)
 
 # -------------------------------------------------------------
-# 6. TẠO FILE EXCEL TỔNG HỢP GỒM 5 SHEET ĐƯỢC FORMAT CHUYÊN NGHIỆP
+# 6. TẠO FILE EXCEL TỔNG HỢP GỒM 5 SHEET (HỖ TRỢ MERGE CELLS CHUYÊN NGHIỆP)
 # -------------------------------------------------------------
 wb = openpyxl.Workbook()
-wb.remove(wb.active) # xóa sheet mặc định
+wb.remove(wb.active)
 
 sheets_spec = [
     ("DoanhThu_BT1", headers_bt1, branches, "1B365D"),
-    ("DonHang_BT2", headers_bt2, orders, "005A9C"),
+    ("DonHang_BT2", headers_bt2, orders_flat_for_excel, "005A9C"),
     ("BangLuong_BT3", headers_bt3, payroll, "1B365D"),
     ("DonNghiPhep_BT4", headers_bt4, leaves, "005A9C"),
     ("RawData_BT5", headers_bt5, raw_rows, "4A5568")
@@ -235,6 +278,23 @@ for title, headers, rows_data, color_hex in sheets_spec:
             else:
                 cell.alignment = Alignment(horizontal="left", vertical="center")
         current_row += 1
+
+    # Nếu là sheet DonHang_BT2: Thực hiện Merge Cells cho các cột thông tin chung của từng đơn hàng
+    if title == "DonHang_BT2":
+        start_r = 4
+        for order in orders_structured:
+            num_items = len(order["items"])
+            end_r = start_r + num_items - 1
+            if num_items > 1:
+                # Merge các cột: A(Mã Đơn), B(Ngày Đặt), C(Tên KH), D(SĐT), E(Địa Chỉ), K(Trạng Thái), L(Link PDF)
+                cols_to_merge = [1, 2, 3, 4, 5, 11, 12]
+                for col_idx in cols_to_merge:
+                    ws.merge_cells(start_row=start_r, start_column=col_idx, end_row=end_r, end_column=col_idx)
+                    # Căn giữa theo chiều dọc
+                    merged_cell = ws.cell(row=start_r, column=col_idx)
+                    h_align = "center" if col_idx in [1, 2, 4, 11] else "left"
+                    merged_cell.alignment = Alignment(horizontal=h_align, vertical="center", wrap_text=True)
+            start_r = end_r + 1
 
     # Auto fit column widths
     for col in ws.columns:

@@ -2,14 +2,14 @@
  * ==============================================================================
  * BÀI TẬP 2: TỰ ĐỘNG ĐIỀN DỮ LIỆU ĐƠN HÀNG ĐA SẢN PHẨM & XUẤT HÓA ĐƠN PDF VÀO DRIVE
  * ==============================================================================
- * Mục tiêu nghiệp vụ thực tế:
- * 1. Đọc dữ liệu từ Sheet 'DonHang_BT2' (Mỗi dòng là 1 sản phẩm thuộc 1 Mã Đơn).
- * 2. Gom nhóm (Group by) các sản phẩm theo từng "Mã Đơn" có trạng thái "Chờ xuất".
+ * Mục tiêu nghiệp vụ thực tế (Hỗ trợ Ô Gộp / Merge Cells & Dòng Phụ):
+ * 1. Đọc dữ liệu từ Sheet 'DonHang_BT2' (Ô Mã Đơn, Khách Hàng, Trạng Thái chỉ hiển thị 1 ô gộp duy nhất).
+ * 2. Tự động nhận diện dòng phụ thuộc về đơn hàng phía trước (Kỹ thuật Forward Fill).
  * 3. Tự động nhân bản file Google Docs mẫu và điền thông tin chung (Khách hàng, Địa chỉ, Ngày đặt).
- * 4. Tự động chèn bảng danh sách nhiều sản phẩm kèm STT, ĐVT, Số lượng, Đơn giá và Thành tiền.
+ * 4. Tự động chèn bảng danh mục nhiều sản phẩm kèm STT, ĐVT, Số lượng, Đơn giá và Thành tiền.
  * 5. Tính Tổng tiền thanh toán cho toàn bộ đơn hàng.
  * 6. Chuyển đổi Google Docs thành file PDF lưu vào Google Drive.
- * 7. Cập nhật trạng thái "Đã xuất" và gắn Link PDF vào toàn bộ các dòng của đơn hàng đó.
+ * 7. Cập nhật trạng thái "Đã xuất" và gắn Link PDF vào ô trạng thái của đơn hàng đó.
  */
 
 const CONFIG_BT2 = {
@@ -121,37 +121,44 @@ function xuatHangLoatPhieuGiaoHangPDF() {
   const dataRange = sheet.getRange(4, 1, lastRow - 3, 12);
   const rows = dataRange.getValues();
   
-  // 1. Gom nhóm sản phẩm theo từng Mã Đơn
+  // 1. Gom nhóm sản phẩm theo từng Mã Đơn (Xử lý thông minh cho Ô Gộp / Ô Trống)
   const ordersMap = {};
+  let currentMaDon = "";
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const maDon = String(row[0]).trim();
-    const trangThai = String(row[10]).trim();
+    const cellMaDon = String(row[0]).trim();
     const sheetRowIndex = i + 4; // Dòng thực tế trên Sheet
 
-    if (!maDon) continue;
-
-    if (!ordersMap[maDon]) {
-      ordersMap[maDon] = {
-        maDon: maDon,
-        ngayDat: row[1] ? Utilities.formatDate(new Date(row[1]), "GMT+7", "dd/MM/yyyy") : "",
+    // Nếu ô Mã Đơn có giá trị -> Bắt đầu đơn hàng mới
+    if (cellMaDon !== "") {
+      currentMaDon = cellMaDon;
+      ordersMap[currentMaDon] = {
+        maDon: currentMaDon,
+        ngayDat: row[1] ? (row[1] instanceof Date ? Utilities.formatDate(row[1], "GMT+7", "dd/MM/yyyy") : String(row[1])) : "",
         tenKH: row[2],
         sdt: row[3],
         diaChi: row[4],
-        trangThai: trangThai,
-        items: [],
-        sheetRows: []
+        trangThai: String(row[10]).trim(),
+        headerSheetRow: sheetRowIndex,
+        sheetRows: [sheetRowIndex],
+        items: []
       };
+    } else if (currentMaDon !== "") {
+      // Dòng phụ (sản phẩm thứ 2, 3...) của đơn hàng hiện tại
+      ordersMap[currentMaDon].sheetRows.push(sheetRowIndex);
     }
 
-    ordersMap[maDon].sheetRows.push(sheetRowIndex);
-    ordersMap[maDon].items.push({
-      tenSP: row[5],
-      dvt: row[6],
-      soLuong: Number(row[7]) || 1,
-      donGia: Number(row[8]) || 0,
-      thanhTien: Number(row[9]) || (Number(row[7]) * Number(row[8]))
-    });
+    // Thêm sản phẩm nếu có tên sản phẩm (Cột F / index 5)
+    if (currentMaDon !== "" && row[5]) {
+      ordersMap[currentMaDon].items.push({
+        tenSP: row[5],
+        dvt: row[6],
+        soLuong: Number(row[7]) || 1,
+        donGia: Number(row[8]) || 0,
+        thanhTien: Number(row[9]) || (Number(row[7]) * Number(row[8]))
+      });
+    }
   }
 
   const templateDoc = DriveApp.getFileById(CONFIG_BT2.TEMPLATE_DOC_ID);
@@ -221,11 +228,9 @@ function xuatHangLoatPhieuGiaoHangPDF() {
       // 2.6. Xóa bản sao Docs tạm
       tempDocFile.setTrashed(true);
 
-      // 2.7. Cập nhật lại Google Sheet cho toàn bộ các dòng thuộc đơn này
-      order.sheetRows.forEach(rowIdx => {
-        sheet.getRange(rowIdx, 11).setValue("Đã xuất"); // Cột K: Trạng Thái
-        sheet.getRange(rowIdx, 12).setValue(pdfUrl);    // Cột L: Link File PDF
-      });
+      // 2.7. Cập nhật lại Google Sheet (ghi vào ô chính của đơn)
+      sheet.getRange(order.headerSheetRow, 11).setValue("Đã xuất"); // Cột K: Trạng Thái
+      sheet.getRange(order.headerSheetRow, 12).setValue(pdfUrl);    // Cột L: Link File PDF
 
       countOrdersExported++;
     }
