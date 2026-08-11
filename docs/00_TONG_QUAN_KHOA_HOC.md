@@ -28,13 +28,13 @@ Khóa học này chuyển giao phương pháp tiếp cận mới nhất: **Dân 
 
 ### 📚 Danh Mục 5 Bài Thực Hành Tự Động Hóa
 
-1. **[Bài 1: Báo Cáo Doanh Thu & Sparkline Động Gửi Email Lúc 08:00](file:///c:/Users/ADMIN/Desktop/demo/docs/01_HUONG_DAN_BAI_TAP_1.md)**
+1. **[Bài 1: Báo Cáo Doanh Thu & Sparkline Động Gửi Email Lúc 08:00](file:///d:/AI_10_Basic/docs/01_HUONG_DAN_BAI_TAP_1.md)**
    * *Kỹ năng:* Ra lệnh cho Gemini viết hàm `=SPARKLINE()` vẽ biểu đồ mini trong ô và tự tạo email báo cáo HTML kèm lịch gửi định kỳ.
-2. **[Bài 2: Tự Động Điền Dữ Liệu & Xuất Phiếu Giao Hàng PDF Lưu Drive](file:///c:/Users/ADMIN/Desktop/demo/docs/02_HUONG_DAN_BAI_TAP_2.md)**
-   * *Kỹ năng:* Prompt AI liên kết Google Docs mẫu `{{TAGS}}` với Google Sheet để xuất hàng loạt PDF chỉ với 1 click.
-3. **[Bài 3: Gửi Phiếu Lương Hàng Loạt Cá Nhân Hóa & Chống Gửi Trùng](file:///c:/Users/ADMIN/Desktop/demo/docs/03_HUONG_DAN_BAI_TAP_3.md)**
+2. **[Bài 2: Tự Động Gom Nhóm Đa Sản Phẩm & Xuất Phiếu Giao Hàng PDF Lưu Drive](file:///d:/AI_10_Basic/docs/02_HUONG_DAN_BAI_TAP_2.md)**
+   * *Kỹ năng:* Prompt AI gom nhóm đơn hàng đa sản phẩm, điền bảng động vào Google Docs mẫu `{{TAGS}}` và xuất hàng loạt PDF lưu Drive chỉ với 1 click.
+3. **[Bài 3: Gửi Phiếu Lương Hàng Loạt Cá Nhân Hóa & Chống Gửi Trùng](file:///d:/AI_10_Basic/docs/03_HUONG_DAN_BAI_TAP_3.md)**
    * *Kỹ năng:* Prompt AI xử lý nghiệp vụ Nhân sự (HR), bảo mật thông tin thu nhập và cơ chế khóa gửi lại.
-4. **[Bài 4: Phê Duyệt Đơn Nghỉ Phép Tự Động Với Form & Bot Telegram](file:///c:/Users/ADMIN/Desktop/demo/docs/04_HUONG_DAN_BAI_TAP_4.md)**
+4. **[Bài 4: Phê Duyệt Đơn Nghỉ Phép Tự Động Với Form & Bot Telegram](file:///d:/AI_10_Basic/docs/04_HUONG_DAN_BAI_TAP_4.md)**
    * *Kỹ năng:* Prompt AI bắt sự kiện `onFormSubmit`, tự sinh mã đơn `NP-2026-XXXX` và bắn tin nhắn báo sếp qua Telegram.
-5. **[Bài 5: Xử Lý & Làm Sạch 1.000 Dòng Dữ Liệu Lớn Trong 2 Giây](file:///c:/Users/ADMIN/Desktop/demo/docs/05_HUONG_DAN_BAI_TAP_5.md)**
+5. **[Bài 5: Xử Lý & Làm Sạch 1.000 Dòng Dữ Liệu Lớn Trong 2 Giây](file:///d:/AI_10_Basic/docs/05_HUONG_DAN_BAI_TAP_5.md)**
    * *Kỹ năng:* Prompt AI tối ưu hóa bộ nhớ RAM (In-memory Array) để xóa trùng, sửa số điện thoại mất số 0 và chuẩn hóa họ tên tốc độ cao.

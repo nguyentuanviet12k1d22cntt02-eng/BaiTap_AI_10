@@ -6,9 +6,15 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-os.makedirs("c:/Users/ADMIN/Desktop/demo/data", exist_ok=True)
-os.makedirs("c:/Users/ADMIN/Desktop/demo/scripts", exist_ok=True)
-os.makedirs("c:/Users/ADMIN/Desktop/demo/docs", exist_ok=True)
+# Đường dẫn thư mục chuẩn
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
+DOCS_DIR = os.path.join(BASE_DIR, "docs")
+
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(SCRIPTS_DIR, exist_ok=True)
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 # -------------------------------------------------------------
 # 1. BÀI TẬP 1: Dữ liệu Doanh thu các chi nhánh
@@ -27,27 +33,49 @@ branches = [
     ("CN010", "Chi nhánh Biên Hòa", "Đồng Nai", 13400000, 14800000, 14100000, 16200000, 19500000, 25200000, 27600000),
 ]
 
-with open("c:/Users/ADMIN/Desktop/demo/data/bai_tap_1_doanh_thu_sparkline.csv", "w", newline="", encoding="utf-8-sig") as f:
+with open(os.path.join(DATA_DIR, "bai_tap_1_doanh_thu_sparkline.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt1)
     writer.writerows(branches)
 
 # -------------------------------------------------------------
-# 2. BÀI TẬP 2: Dữ liệu Đơn hàng cần xuất PDF
+# 2. BÀI TẬP 2: Dữ liệu Đơn hàng đa sản phẩm (Line items sát thực tế)
 # -------------------------------------------------------------
-headers_bt2 = ["Mã Đơn", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ Giao Hàng", "Sản Phẩm", "Số Lượng", "Đơn Giá", "Tổng Tiền", "Trạng Thái", "Link File PDF"]
+headers_bt2 = ["Mã Đơn", "Ngày Đặt", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ Giao Hàng", "Tên Sản Phẩm", "ĐVT", "Số Lượng", "Đơn Giá", "Thành Tiền", "Trạng Thái", "Link File PDF"]
 orders = [
-    ["DH-2026-001", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Laptop Dell XPS 15", 1, 32000000, 32000000, "Chờ xuất", ""],
-    ["DH-2026-002", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Màn hình Dell UltraSharp 27 inch", 2, 8500000, 17000000, "Chờ xuất", ""],
-    ["DH-2026-003", "Lê Hoàng Long", "0912345678", "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "Bàn phím cơ Keychron K8 Pro", 3, 2300000, 6900000, "Chờ xuất", ""],
-    ["DH-2026-004", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Chuột không dây Logitech MX Master 3S", 2, 2100000, 4200000, "Chờ xuất", ""],
-    ["DH-2026-005", "Đỗ Quang Hưng", "0934567890", "56 Cầu Giấy, Hà Nội", "Tai nghe chống ồn Sony WH-1000XM5", 1, 6800000, 6800000, "Chờ xuất", ""],
-    ["DH-2026-006", "Vũ Thị Ngọc Hà", "0987112233", "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "Ghế công thái học Ergonomic Sihoo", 1, 4500000, 4500000, "Đã xuất", "https://drive.google.com/file/d/demo1/view"],
-    ["DH-2026-007", "Ngô Thành Nam", "0908889900", "89 Phan Xích Long, Phú Nhuận, TP.HCM", "Ổ cứng di động SSD Samsung T7 1TB", 2, 2700000, 5400000, "Chờ xuất", ""],
-    ["DH-2026-008", "Hoàng Kim Oanh", "0945678123", "15 Tràng Thi, Hoàn Kiếm, Hà Nội", "Webcam Elgato Facecam 1080p", 1, 3600000, 3600000, "Chờ xuất", ""],
+    # Đơn 1 (Nguyễn Văn An - 3 mặt hàng)
+    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Laptop Dell XPS 15 9530", "Chiếc", 1, 32000000, 32000000, "Chờ xuất", ""],
+    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Chuột không dây Logitech MX Master 3S", "Chiếc", 1, 2100000, 2100000, "Chờ xuất", ""],
+    ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, Ba Đình, Hà Nội", "Balo chống sốc Targus 15.6 inch", "Chiếc", 1, 850000, 850000, "Chờ xuất", ""],
+
+    # Đơn 2 (Trần Thị Bích - 3 mặt hàng)
+    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Màn hình Dell UltraSharp U2723QE 4K", "Chiếc", 2, 8500000, 17000000, "Chờ xuất", ""],
+    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Giá treo màn hình Human Motion T6 Pro", "Bộ", 2, 890000, 1780000, "Chờ xuất", ""],
+    ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, Quận 1, TP.HCM", "Cáp HDMI 2.1 8K Baseus 2m", "Sợi", 2, 250000, 500000, "Chờ xuất", ""],
+
+    # Đơn 3 (Lê Hoàng Long - 2 mặt hàng)
+    ["DH-2026-003", "11/08/2026", "Lê Hoàng Long", "0912345678", "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "Bàn phím cơ Keychron K8 Pro RGB", "Chiếc", 2, 2300000, 4600000, "Chờ xuất", ""],
+    ["DH-2026-003", "11/08/2026", "Lê Hoàng Long", "0912345678", "78 Nguyễn Huệ, Hải Châu, Đà Nẵng", "Kê tay bàn phím gỗ óc chó Walnut", "Chiếc", 2, 350000, 700000, "Chờ xuất", ""],
+
+    # Đơn 4 (Phạm Minh Trang - 3 mặt hàng)
+    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Tai nghe chống ồn Sony WH-1000XM5", "Chiếc", 1, 6800000, 6800000, "Chờ xuất", ""],
+    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Hộp đựng tai nghe cao cấp chống sốc", "Chiếc", 1, 350000, 350000, "Chờ xuất", ""],
+    ["DH-2026-004", "11/08/2026", "Phạm Minh Trang", "0977654321", "102 Cách Mạng Tháng 8, Quận 3, TP.HCM", "Cáp âm thanh Aux 3.5mm Ugreen", "Sợi", 1, 120000, 120000, "Chờ xuất", ""],
+
+    # Đơn 5 (Đỗ Quang Hưng - 2 mặt hàng)
+    ["DH-2026-005", "11/08/2026", "Đỗ Quang Hưng", "0934567890", "56 Cầu Giấy, Hà Nội", "Ghế công thái học Ergonomic Sihoo M57", "Chiếc", 1, 4500000, 4500000, "Chờ xuất", ""],
+    ["DH-2026-005", "11/08/2026", "Đỗ Quang Hưng", "0934567890", "56 Cầu Giấy, Hà Nội", "Đệm kê chân công thái học điều chỉnh góc", "Chiếc", 1, 450000, 450000, "Chờ xuất", ""],
+
+    # Đơn 6 (Vũ Thị Ngọc Hà - Đã xuất)
+    ["DH-2026-006", "09/08/2026", "Vũ Thị Ngọc Hà", "0987112233", "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "Webcam Elgato Facecam 1080p60", "Chiếc", 1, 3600000, 3600000, "Đã xuất", "https://drive.google.com/file/d/demo_phieu_giao_hang/view"],
+    ["DH-2026-006", "09/08/2026", "Vũ Thị Ngọc Hà", "0987112233", "22 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội", "Đèn livestream Elgato Key Light Air", "Chiếc", 1, 2900000, 2900000, "Đã xuất", "https://drive.google.com/file/d/demo_phieu_giao_hang/view"],
+
+    # Đơn 7 (Ngô Thành Nam - 2 mặt hàng)
+    ["DH-2026-007", "11/08/2026", "Ngô Thành Nam", "0908889900", "89 Phan Xích Long, Phú Nhuận, TP.HCM", "Ổ cứng di động SSD Samsung T7 Shield 1TB", "Chiếc", 2, 2700000, 5400000, "Chờ xuất", ""],
+    ["DH-2026-007", "11/08/2026", "Ngô Thành Nam", "0908889900", "89 Phan Xích Long, Phú Nhuận, TP.HCM", "Hub chuyển đổi USB-C 8 in 1 HyperDrive", "Chiếc", 1, 1850000, 1850000, "Chờ xuất", ""]
 ]
 
-with open("c:/Users/ADMIN/Desktop/demo/data/bai_tap_2_xuat_hoa_don_pdf.csv", "w", newline="", encoding="utf-8-sig") as f:
+with open(os.path.join(DATA_DIR, "bai_tap_2_xuat_hoa_don_pdf.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt2)
     writer.writerows(orders)
@@ -66,7 +94,7 @@ payroll = [
     ["NV007", "Phan Anh Tuấn", "Kinh Doanh", "tuan.phan.demo@gmail.com", 13500000, 2000000, 5000000, 800000, 19700000, "Chưa gửi", ""],
 ]
 
-with open("c:/Users/ADMIN/Desktop/demo/data/bai_tap_3_gui_phieu_luong.csv", "w", newline="", encoding="utf-8-sig") as f:
+with open(os.path.join(DATA_DIR, "bai_tap_3_gui_phieu_luong.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt3)
     writer.writerows(payroll)
@@ -81,7 +109,7 @@ leaves = [
     ["10/08/2026 10:45:00", "toan.tran.demo@gmail.com", "Trần Quốc Toản", "Kỹ Thuật", 3, "18/08/2026", "20/08/2026", "Nghỉ phép năm về quê", "NP-2026-0003", "Chờ Quản Lý Duyệt", ""],
 ]
 
-with open("c:/Users/ADMIN/Desktop/demo/data/bai_tap_4_don_nghi_phep_form.csv", "w", newline="", encoding="utf-8-sig") as f:
+with open(os.path.join(DATA_DIR, "bai_tap_4_don_nghi_phep_form.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt4)
     writer.writerows(leaves)
@@ -139,7 +167,7 @@ for i in range(1, 1001):
 
     raw_rows.append([ma_gd, name, phone, channel, rev, date_val])
 
-with open("c:/Users/ADMIN/Desktop/demo/data/bai_tap_5_raw_data_1000_rows.csv", "w", newline="", encoding="utf-8-sig") as f:
+with open(os.path.join(DATA_DIR, "bai_tap_5_raw_data_1000_rows.csv"), "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.writer(f)
     writer.writerow(headers_bt5)
     writer.writerows(raw_rows)
@@ -217,6 +245,6 @@ for title, headers, rows_data, color_hex in sheets_spec:
                 max_len = max(max_len, len(str(cell.value)))
         ws.column_dimensions[col_letter].width = max(max_len + 4, 13)
 
-excel_path = "c:/Users/ADMIN/Desktop/demo/data/Du_Lieu_Mau_Tong_Hop.xlsx"
+excel_path = os.path.join(DATA_DIR, "Du_Lieu_Mau_Tong_Hop.xlsx")
 wb.save(excel_path)
-print(f"Created all data files and Excel workbook at: {excel_path}")
+print(f"Created all data files and Excel workbook successfully at: {excel_path}")

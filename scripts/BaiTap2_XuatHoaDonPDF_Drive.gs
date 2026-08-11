@@ -1,64 +1,99 @@
 /**
  * ==============================================================================
- * BÀI TẬP 2: TỰ ĐỘNG ĐIỀN DỮ LIỆU GOOGLE DOCS & XUẤT HÓA ĐƠN PDF VÀO DRIVE
+ * BÀI TẬP 2: TỰ ĐỘNG ĐIỀN DỮ LIỆU ĐƠN HÀNG ĐA SẢN PHẨM & XUẤT HÓA ĐƠN PDF VÀO DRIVE
  * ==============================================================================
- * Mục tiêu:
- * 1. Đọc các đơn hàng có trạng thái "Chờ xuất" từ Sheet 'DonHang_BT2'.
- * 2. Tự động nhân bản file mẫu Google Docs có chứa tag {{MA_DON}}, {{TEN_KH}}...
- * 3. Thay thế toàn bộ dữ liệu thật vào tài liệu.
- * 4. Chuyển đổi Google Docs thành file PDF lưu vào thư mục Google Drive.
- * 5. Cập nhật lại đường dẫn xem file PDF và chuyển trạng thái đơn sang "Đã xuất".
+ * Mục tiêu nghiệp vụ thực tế:
+ * 1. Đọc dữ liệu từ Sheet 'DonHang_BT2' (Mỗi dòng là 1 sản phẩm thuộc 1 Mã Đơn).
+ * 2. Gom nhóm (Group by) các sản phẩm theo từng "Mã Đơn" có trạng thái "Chờ xuất".
+ * 3. Tự động nhân bản file Google Docs mẫu và điền thông tin chung (Khách hàng, Địa chỉ, Ngày đặt).
+ * 4. Tự động chèn bảng danh sách nhiều sản phẩm kèm STT, ĐVT, Số lượng, Đơn giá và Thành tiền.
+ * 5. Tính Tổng tiền thanh toán cho toàn bộ đơn hàng.
+ * 6. Chuyển đổi Google Docs thành file PDF lưu vào Google Drive.
+ * 7. Cập nhật trạng thái "Đã xuất" và gắn Link PDF vào toàn bộ các dòng của đơn hàng đó.
  */
 
 const CONFIG_BT2 = {
   SHEET_NAME: "DonHang_BT2",
-  TEMPLATE_DOC_ID: "DIEN_GOOGLE_DOCS_TEMPLATE_ID_O_DAY", // ID file Docs mẫu
+  TEMPLATE_DOC_ID: "DIEN_GOOGLE_DOCS_TEMPLATE_ID_O_DAY", // ID file Docs mẫu (hoặc chạy hàm taoFileDocsMauMoi để tạo tự động)
   DESTINATION_FOLDER_ID: "DIEN_DRIVE_FOLDER_ID_O_DAY"     // ID thư mục Drive lưu file PDF
 };
 
 /**
- * Hàm tự động tạo mẫu Google Docs nếu người dùng chưa có
+ * Hàm tự động tạo mẫu Google Docs chuẩn doanh nghiệp hỗ trợ bảng đa sản phẩm
  */
 function taoFileDocsMauMoi() {
-  const doc = DocumentApp.create("MAU_PHIEU_GIAO_HANG_CHUAN");
+  const doc = DocumentApp.create("MAU_PHIEU_GIAO_HANG_DA_SAN_PHAM");
   const body = doc.getBody();
+  body.clear();
   
-  // Thiết lập tiêu đề
-  const title = body.appendParagraph("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n-----------------------");
+  // 1. Quốc hiệu - Tiêu ngữ
+  const headerPara = body.appendParagraph("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n───────────────────────");
+  headerPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  headerPara.setFontSize(10);
+  
+  // 2. Tiêu đề Phiếu
+  const title = body.appendParagraph("\nPHIẾU GIAO HÀNG KIÊM XUẤT KHO");
+  title.setHeading(DocumentApp.ParagraphHeading.HEADING1);
   title.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  title.setFontSize(16);
+  title.setBold(true);
   
-  const mainHeading = body.appendParagraph("\nPHIẾU XUẤT KHO KIÊM GIAO HÀNG");
-  mainHeading.setHeading(DocumentApp.ParagraphHeading.HEADING1);
-  mainHeading.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  // 3. Thông tin chung
+  const metaPara = body.appendParagraph("Mã đơn hàng: {{MA_DON}} | Ngày đặt: {{NGAY_DAT}} | Ngày xuất: {{NGAY_XUAT}}\n");
+  metaPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  metaPara.setFontSize(10);
+  metaPara.setItalic(true);
   
-  body.appendParagraph("Mã đơn hàng: {{MA_DON}}");
-  body.appendParagraph("Ngày xuất phiếu: {{NGAY_XUAT}}\n");
+  const customerInfo = body.appendParagraph(
+    "THÔNG TIN KHÁCH HÀNG:\n" +
+    "• Khách hàng: {{TEN_KH}}\n" +
+    "• Số điện thoại: {{SDT}}\n" +
+    "• Địa chỉ giao hàng: {{DIA_CHI}}\n\n" +
+    "DANH SÁCH SẢN PHẨM GIAO HÀNG:"
+  );
+  customerInfo.setFontSize(11);
   
-  body.appendParagraph("THÔNG TIN KHÁCH HÀNG:");
-  body.appendParagraph("• Họ và tên: {{TEN_KH}}");
-  body.appendParagraph("• Số điện thoại: {{SDT}}");
-  body.appendParagraph("• Địa chỉ giao nhận: {{DIA_CHI}}\n");
+  // 4. Bảng danh mục sản phẩm (Table Template với 1 dòng Header)
+  const table = body.appendTable([
+    ["STT", "Tên Sản Phẩm", "ĐVT", "SL", "Đơn Giá (VNĐ)", "Thành Tiền (VNĐ)"]
+  ]);
   
-  body.appendParagraph("CHI TIẾT ĐƠN HÀNG:");
-  body.appendParagraph("• Tên sản phẩm: {{SAN_PHAM}}");
-  body.appendParagraph("• Số lượng: {{SO_LUONG}}");
-  body.appendParagraph("• Đơn giá: {{DON_GIA}} VNĐ");
-  body.appendParagraph("• TỔNG CỘNG THANH TOÁN: {{TONG_TIEN}} VNĐ\n");
+  // Định dạng dòng Header của bảng
+  const headerRow = table.getRow(0);
+  for (let c = 0; c < headerRow.getNumCells(); c++) {
+    const cell = headerRow.getCell(c);
+    cell.setBackgroundColor("#1e293b");
+    const p = cell.getChild(0).asParagraph();
+    p.setFontColor("#ffffff");
+    p.setBold(true);
+    p.setFontSize(10);
+    p.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  }
   
-  body.appendParagraph("\nNgười nhận hàng                     Người lập phiếu\n(Ký và ghi rõ họ tên)               (Ký và ghi rõ họ tên)");
+  // 5. Tổng cộng và chữ ký
+  const totalPara = body.appendParagraph("\nTỔNG CỘNG THANH TOÁN: {{TONG_TIEN}} VNĐ");
+  totalPara.setFontSize(12);
+  totalPara.setBold(true);
+  totalPara.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  
+  const signPara = body.appendParagraph(
+    "\n\nNGƯỜI NHẬN HÀNG                                                    NGƯỜI LẬP PHIẾU\n" +
+    "(Ký, ghi rõ họ tên)                                                (Ký, ghi rõ họ tên)"
+  );
+  signPara.setFontSize(10);
+  signPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
   
   doc.saveAndClose();
   
-  const fileUrl = doc.getUrl();
   const fileId = doc.getId();
-  
+  const fileUrl = doc.getUrl();
   Logger.log(`Đã tạo file mẫu thành công! ID: ${fileId} - URL: ${fileUrl}`);
-  SpreadsheetApp.getUi().alert(`Đã tạo file Docs mẫu!\nID: ${fileId}\n\nHãy copy ID này vào biến CONFIG_BT2.TEMPLATE_DOC_ID.`);
+  SpreadsheetApp.getUi().alert(`Đã tạo file Google Docs mẫu!\n\nID: ${fileId}\n\nHãy copy ID này và điền vào biến CONFIG_BT2.TEMPLATE_DOC_ID.`);
   return fileId;
 }
 
 /**
- * Hàm chính: Duyệt đơn hàng và xuất hàng loạt file PDF
+ * Hàm chính: Gom nhóm đơn hàng đa sản phẩm và xuất hàng loạt PDF
  */
 function xuatHangLoatPhieuGiaoHangPDF() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -70,7 +105,7 @@ function xuatHangLoatPhieuGiaoHangPDF() {
   }
   
   if (CONFIG_BT2.TEMPLATE_DOC_ID.includes("DIEN_")) {
-    SpreadsheetApp.getUi().alert("Vui lòng điền TEMPLATE_DOC_ID vào phần CONFIG_BT2 trước khi chạy!");
+    SpreadsheetApp.getUi().alert("Vui lòng điền TEMPLATE_DOC_ID vào phần cấu hình CONFIG_BT2 trước khi chạy!");
     return;
   }
 
@@ -80,65 +115,133 @@ function xuatHangLoatPhieuGiaoHangPDF() {
     return;
   }
 
-  // Đọc dữ liệu từ dòng 4
-  const dataRange = sheet.getRange(4, 1, lastRow - 3, 10);
+  // Đọc dữ liệu từ dòng 4 (Cột 1 đến 12)
+  // Cấu trúc cột: 
+  // 0: Mã Đơn | 1: Ngày Đặt | 2: Tên KH | 3: SDT | 4: Địa Chỉ | 5: Tên SP | 6: ĐVT | 7: SL | 8: Đơn Giá | 9: Thành Tiền | 10: Trạng Thái | 11: Link PDF
+  const dataRange = sheet.getRange(4, 1, lastRow - 3, 12);
   const rows = dataRange.getValues();
   
+  // 1. Gom nhóm sản phẩm theo từng Mã Đơn
+  const ordersMap = {};
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const maDon = String(row[0]).trim();
+    const trangThai = String(row[10]).trim();
+    const sheetRowIndex = i + 4; // Dòng thực tế trên Sheet
+
+    if (!maDon) continue;
+
+    if (!ordersMap[maDon]) {
+      ordersMap[maDon] = {
+        maDon: maDon,
+        ngayDat: row[1] ? Utilities.formatDate(new Date(row[1]), "GMT+7", "dd/MM/yyyy") : "",
+        tenKH: row[2],
+        sdt: row[3],
+        diaChi: row[4],
+        trangThai: trangThai,
+        items: [],
+        sheetRows: []
+      };
+    }
+
+    ordersMap[maDon].sheetRows.push(sheetRowIndex);
+    ordersMap[maDon].items.push({
+      tenSP: row[5],
+      dvt: row[6],
+      soLuong: Number(row[7]) || 1,
+      donGia: Number(row[8]) || 0,
+      thanhTien: Number(row[9]) || (Number(row[7]) * Number(row[8]))
+    });
+  }
+
   const templateDoc = DriveApp.getFileById(CONFIG_BT2.TEMPLATE_DOC_ID);
   const targetFolder = CONFIG_BT2.DESTINATION_FOLDER_ID.includes("DIEN_") 
     ? DriveApp.getRootFolder() 
     : DriveApp.getFolderById(CONFIG_BT2.DESTINATION_FOLDER_ID);
     
   const ngayXuat = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy");
-  let countSuccess = 0;
+  let countOrdersExported = 0;
 
-  for (let i = 0; i < rows.length; i++) {
-    const maDon = rows[i][0];
-    const tenKH = rows[i][1];
-    const sdt = rows[i][2];
-    const diaChi = rows[i][3];
-    const sanPham = rows[i][4];
-    const soLuong = rows[i][5];
-    const donGia = Number(rows[i][6]).toLocaleString('vi-VN');
-    const tongTien = Number(rows[i][7]).toLocaleString('vi-VN');
-    const trangThai = rows[i][8];
+  // 2. Xử lý xuất PDF cho từng Đơn hàng
+  for (const maDon in ordersMap) {
+    const order = ordersMap[maDon];
 
     // Chỉ xuất các đơn có trạng thái "Chờ xuất"
-    if (trangThai === "Chờ xuất") {
-      // 1. Tạo file Doc tạm từ mẫu
-      const tempDocFile = templateDoc.makeCopy(`Temp_${maDon}`, targetFolder);
+    if (order.trangThai === "Chờ xuất") {
+      // 2.1. Tính tổng tiền của toàn đơn
+      let tongTienDonHang = 0;
+      order.items.forEach(item => {
+        tongTienDonHang += item.thanhTien;
+      });
+
+      // 2.2. Tạo bản sao tạm thời từ file Docs mẫu
+      const tempDocFile = templateDoc.makeCopy(`Temp_${order.maDon}`, targetFolder);
       const tempDoc = DocumentApp.openById(tempDocFile.getId());
       const body = tempDoc.getBody();
 
-      // 2. Điền dữ liệu vào tag
-      body.replaceText("{{MA_DON}}", String(maDon));
-      body.replaceText("{{TEN_KH}}", String(tenKH));
-      body.replaceText("{{SDT}}", String(sdt));
-      body.replaceText("{{DIA_CHI}}", String(diaChi));
-      body.replaceText("{{SAN_PHAM}}", String(sanPham));
-      body.replaceText("{{SO_LUONG}}", String(soLuong));
-      body.replaceText("{{DON_GIA}}", donGia);
-      body.replaceText("{{TONG_TIEN}}", tongTien);
+      // 2.3. Thay thế các biến thông tin chung
+      body.replaceText("{{MA_DON}}", String(order.maDon));
+      body.replaceText("{{NGAY_DAT}}", String(order.ngayDat));
       body.replaceText("{{NGAY_XUAT}}", ngayXuat);
-      
+      body.replaceText("{{TEN_KH}}", String(order.tenKH));
+      body.replaceText("{{SDT}}", String(order.sdt));
+      body.replaceText("{{DIA_CHI}}", String(order.diaChi));
+      body.replaceText("{{TONG_TIEN}}", Number(tongTienDonHang).toLocaleString('vi-VN'));
+
+      // 2.4. Điền danh sách nhiều sản phẩm vào Bảng
+      const tables = body.getTables();
+      if (tables.length > 0) {
+        const itemTable = tables[0]; // Bảng sản phẩm đầu tiên
+        
+        // Thêm từng dòng sản phẩm vào bảng
+        order.items.forEach((item, idx) => {
+          const row = itemTable.appendTableRow();
+          row.appendTableCell(String(idx + 1)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(String(item.tenSP));
+          row.appendTableCell(String(item.dvt)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(String(item.soLuong)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(Number(item.donGia).toLocaleString('vi-VN')).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+          row.appendTableCell(Number(item.thanhTien).toLocaleString('vi-VN')).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+          
+          // Định dạng kích thước chữ cho dòng dữ liệu
+          for (let c = 0; c < row.getNumCells(); c++) {
+            row.getCell(c).setFontSize(9.5);
+          }
+        });
+      }
+
       tempDoc.saveAndClose();
 
-      // 3. Chuyển Docs tạm sang PDF
-      const pdfBlob = tempDocFile.getAs(MimeType.PDF).setName(`PhieuGiaoHang_${maDon}.pdf`);
+      // 2.5. Xuất thành file PDF và lưu vào Drive
+      const pdfBlob = tempDocFile.getAs(MimeType.PDF).setName(`PhieuGiaoHang_${order.maDon}.pdf`);
       const pdfFile = targetFolder.createFile(pdfBlob);
       pdfFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      const pdfUrl = pdfFile.getUrl();
 
-      // 4. Xóa file Doc tạm
+      // 2.6. Xóa bản sao Docs tạm
       tempDocFile.setTrashed(true);
 
-      // 5. Cập nhật lại vào Sheet (Dòng thực tế = i + 4)
-      const currentSheetRow = i + 4;
-      sheet.getRange(currentSheetRow, 9).setValue("Đã xuất"); // Cột I: Trạng Thái
-      sheet.getRange(currentSheetRow, 10).setValue(pdfFile.getUrl()); // Cột J: Link PDF
-      
-      countSuccess++;
+      // 2.7. Cập nhật lại Google Sheet cho toàn bộ các dòng thuộc đơn này
+      order.sheetRows.forEach(rowIdx => {
+        sheet.getRange(rowIdx, 11).setValue("Đã xuất"); // Cột K: Trạng Thái
+        sheet.getRange(rowIdx, 12).setValue(pdfUrl);    // Cột L: Link File PDF
+      });
+
+      countOrdersExported++;
     }
   }
 
-  SpreadsheetApp.getUi().alert(`✅ Thành công! Đã xuất và lưu trữ ${countSuccess} file PDF vào Google Drive.`);
+  SpreadsheetApp.getUi().alert(`✅ Thành công!\nĐã xuất và tạo ${countOrdersExported} hóa đơn PDF đa sản phẩm vào Google Drive.`);
+}
+
+/**
+ * Menu tùy chỉnh trên Google Sheets
+ */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("🚀 TỰ ĐỘNG HÓA")
+    .addItem("📄 Xuất Phiếu Giao Hàng PDF (Đa Sản Phẩm)", "xuatHangLoatPhieuGiaoHangPDF")
+    .addSeparator()
+    .addItem("🛠️ Tạo Mẫu Google Docs Mới", "taoFileDocsMauMoi")
+    .addToUi();
 }

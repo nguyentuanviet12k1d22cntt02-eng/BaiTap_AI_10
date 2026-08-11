@@ -366,17 +366,17 @@ function createDailyTrigger() {
   {
     id: "bt2",
     index: 2,
-    title: "Bài 2: Prompt Tự Động Điền Dữ Liệu & Xuất Phiếu Giao Hàng PDF Lưu Drive",
+    title: "Bài 2: Prompt Tự Động Điền Dữ Liệu & Xuất Phiếu Giao Hàng PDF Đa Sản Phẩm Lưu Drive",
     shortTitle: "Xuất Phiếu Giao Hàng PDF",
-    subtitle: "Prompting cho Google Docs, Drive & Xuất PDF",
+    subtitle: "Prompting cho Google Docs, Drive & Xuất PDF Đa Mặt Hàng",
     level: "Dành Cho Dân Văn Phòng",
     time: "20 phút",
-    tags: ["Google Docs Template", "PDF Export", "Google Drive", "No-Code Workflow"],
-    desc: "Cách viết Prompt ra lệnh cho AI Agent tự động đọc các đơn hàng 'Chờ xuất', nhân bản file mẫu Docs, điền thông tin khách hàng và xuất file PDF lưu vào Google Drive.",
+    tags: ["Google Docs Template", "PDF Export", "Multi-Item Invoice", "Google Drive", "No-Code Workflow"],
+    desc: "Cách viết Prompt ra lệnh cho AI Agent tự động gom nhóm các đơn hàng 'Chờ xuất' có nhiều sản phẩm, tự động chèn bảng danh mục hàng hóa vào mẫu Docs và xuất file PDF lưu vào Google Drive.",
     csvFile: "bai_tap_2_xuat_hoa_don_pdf.csv",
     scriptFile: "BaiTap2_XuatHoaDonPDF_Drive.gs",
     scriptContent: `/**
- * BÀI TẬP 2: TỰ ĐỘNG XUẤT HÓA ĐƠN PDF TỪ GOOGLE DOCS MẪU
+ * BÀI TẬP 2: TỰ ĐỘNG XUẤT HÓA ĐƠN PDF ĐA SẢN PHẨM TỪ GOOGLE DOCS MẪU
  */
 const CONFIG_BT2 = {
   SHEET_NAME: "DonHang_BT2",
@@ -392,46 +392,85 @@ function xuatHangLoatPhieuGiaoHangPDF() {
   const lastRow = sheet.getLastRow();
   if (lastRow < 4) return;
 
-  const rows = sheet.getRange(4, 1, lastRow - 3, 10).getValues();
+  const rows = sheet.getRange(4, 1, lastRow - 3, 12).getValues();
+  
+  // 1. Gom nhóm sản phẩm theo từng Mã Đơn
+  const ordersMap = {};
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const maDon = String(row[0]).trim();
+    if (!maDon) continue;
+
+    if (!ordersMap[maDon]) {
+      ordersMap[maDon] = {
+        maDon: maDon,
+        ngayDat: row[1] ? Utilities.formatDate(new Date(row[1]), "GMT+7", "dd/MM/yyyy") : "",
+        tenKH: row[2],
+        sdt: row[3],
+        diaChi: row[4],
+        trangThai: String(row[10]).trim(),
+        items: [],
+        sheetRows: []
+      };
+    }
+    ordersMap[maDon].sheetRows.push(i + 4);
+    ordersMap[maDon].items.push({
+      tenSP: row[5],
+      dvt: row[6],
+      soLuong: Number(row[7]) || 1,
+      donGia: Number(row[8]) || 0,
+      thanhTien: Number(row[9]) || (Number(row[7]) * Number(row[8]))
+    });
+  }
+
   const templateDoc = DriveApp.getFileById(CONFIG_BT2.TEMPLATE_DOC_ID);
   const targetFolder = DriveApp.getFolderById(CONFIG_BT2.DESTINATION_FOLDER_ID);
   const ngayXuat = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy");
 
-  for (let i = 0; i < rows.length; i++) {
-    const maDon = rows[i][0];
-    const tenKH = rows[i][1];
-    const sdt = rows[i][2];
-    const diaChi = rows[i][3];
-    const sanPham = rows[i][4];
-    const soLuong = rows[i][5];
-    const donGia = Number(rows[i][6]).toLocaleString('vi-VN');
-    const tongTien = Number(rows[i][7]).toLocaleString('vi-VN');
-    const trangThai = rows[i][8];
+  for (const maDon in ordersMap) {
+    const order = ordersMap[maDon];
+    if (order.trangThai === "Chờ xuất") {
+      let tongTien = 0;
+      order.items.forEach(item => tongTien += item.thanhTien);
 
-    if (trangThai === "Chờ xuất") {
-      const tempDocFile = templateDoc.makeCopy("Temp_" + maDon, targetFolder);
+      const tempDocFile = templateDoc.makeCopy("Temp_" + order.maDon, targetFolder);
       const tempDoc = DocumentApp.openById(tempDocFile.getId());
       const body = tempDoc.getBody();
 
-      body.replaceText("{{MA_DON}}", String(maDon));
-      body.replaceText("{{TEN_KH}}", String(tenKH));
-      body.replaceText("{{SDT}}", String(sdt));
-      body.replaceText("{{DIA_CHI}}", String(diaChi));
-      body.replaceText("{{SAN_PHAM}}", String(sanPham));
-      body.replaceText("{{SO_LUONG}}", String(soLuong));
-      body.replaceText("{{DON_GIA}}", donGia);
-      body.replaceText("{{TONG_TIEN}}", tongTien);
+      body.replaceText("{{MA_DON}}", String(order.maDon));
+      body.replaceText("{{NGAY_DAT}}", String(order.ngayDat));
       body.replaceText("{{NGAY_XUAT}}", ngayXuat);
+      body.replaceText("{{TEN_KH}}", String(order.tenKH));
+      body.replaceText("{{SDT}}", String(order.sdt));
+      body.replaceText("{{DIA_CHI}}", String(order.diaChi));
+      body.replaceText("{{TONG_TIEN}}", Number(tongTien).toLocaleString('vi-VN'));
+
+      const tables = body.getTables();
+      if (tables.length > 0) {
+        const itemTable = tables[0];
+        order.items.forEach((item, idx) => {
+          const row = itemTable.appendTableRow();
+          row.appendTableCell(String(idx + 1)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(String(item.tenSP));
+          row.appendTableCell(String(item.dvt)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(String(item.soLuong)).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+          row.appendTableCell(Number(item.donGia).toLocaleString('vi-VN')).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+          row.appendTableCell(Number(item.thanhTien).toLocaleString('vi-VN')).getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+        });
+      }
+
       tempDoc.saveAndClose();
 
-      const pdfBlob = tempDocFile.getAs(MimeType.PDF).setName("PhieuGiaoHang_" + maDon + ".pdf");
+      const pdfBlob = tempDocFile.getAs(MimeType.PDF).setName("PhieuGiaoHang_" + order.maDon + ".pdf");
       const pdfFile = targetFolder.createFile(pdfBlob);
       pdfFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       tempDocFile.setTrashed(true);
 
-      const currentRow = i + 4;
-      sheet.getRange(currentRow, 9).setValue("Đã xuất");
-      sheet.getRange(currentRow, 10).setValue(pdfFile.getUrl());
+      const pdfUrl = pdfFile.getUrl();
+      order.sheetRows.forEach(rowIdx => {
+        sheet.getRange(rowIdx, 11).setValue("Đã xuất");
+        sheet.getRange(rowIdx, 12).setValue(pdfUrl);
+      });
     }
   }
 }
@@ -444,8 +483,8 @@ function onOpen() {
 }`,
     
     workflow: [
-      { icon: "ph-file-doc", title: "1. Mẫu Docs", desc: "Tạo file mẫu chứa tag {{...}}" },
-      { icon: "ph-chat-circle-text", title: "2. Ra Lệnh Cho AI", desc: "Mô tả quy trình duyệt đơn & điền dữ liệu" },
+      { icon: "ph-file-doc", title: "1. Mẫu Docs & Bảng", desc: "Tạo file mẫu chứa tag {{...}} và bảng sản phẩm" },
+      { icon: "ph-chat-circle-text", title: "2. Ra Lệnh Cho AI", desc: "Mô tả quy trình gom nhóm đa sản phẩm & điền bảng" },
       { icon: "ph-file-pdf", title: "3. Tự Xuất PDF", desc: "AI chuyển đổi Docs sang PDF" },
       { icon: "ph-google-drive-logo", title: "4. Lưu Drive & Cập Nhật", desc: "Lưu vào thư mục & ghi link vào Sheet" }
     ],
@@ -453,84 +492,93 @@ function onOpen() {
     masterPrompt: `Bạn là một Chuyên viên Tự động hóa Quy trình Văn phòng (Office Automation Specialist).
 
 Tôi có:
-1. Một Google Sheet tên "DonHang_BT2" chứa danh sách đơn hàng từ dòng 4 gồm:
-   - Cột A: Mã Đơn (vd: DH-2026-001)
-   - Cột B: Tên Khách Hàng
-   - Cột C: Số Điện Thoại
-   - Cột D: Địa Chỉ Giao Hàng
-   - Cột E: Sản Phẩm
-   - Cột F: Số Lượng
-   - Cột G: Đơn Giá
-   - Cột H: Tổng Tiền
-   - Cột I: Trạng Thái ("Chờ xuất" hoặc "Đã xuất")
-   - Cột J: Link File PDF
-2. Một file mẫu Google Docs có chứa các biến: {{MA_DON}}, {{TEN_KH}}, {{SDT}}, {{DIA_CHI}}, {{SAN_PHAM}}, {{SO_LUONG}}, {{DON_GIA}}, {{TONG_TIEN}}, {{NGAY_XUAT}}.
+1. Một Google Sheet tên "DonHang_BT2" chứa danh sách đơn hàng từ dòng 4 gồm 12 cột:
+   - Cột A: Mã Đơn (vd: DH-2026-001 - một mã đơn có thể xuất hiện trên nhiều dòng do có nhiều sản phẩm)
+   - Cột B: Ngày Đặt (dd/MM/yyyy)
+   - Cột C: Tên Khách Hàng
+   - Cột D: Số Điện Thoại
+   - Cột E: Địa Chỉ Giao Hàng
+   - Cột F: Tên Sản Phẩm
+   - Cột G: ĐVT (Đơn vị tính: Chiếc, Bộ, Cái...)
+   - Cột H: Số Lượng
+   - Cột I: Đơn Giá (VNĐ)
+   - Cột J: Thành Tiền (VNĐ)
+   - Cột K: Trạng Thái ("Chờ xuất" hoặc "Đã xuất")
+   - Cột L: Link File PDF
+2. Một file mẫu Google Docs có chứa các biến thông tin chung: {{MA_DON}}, {{NGAY_DAT}}, {{NGAY_XUAT}}, {{TEN_KH}}, {{SDT}}, {{DIA_CHI}}, {{TONG_TIEN}} và một Bảng mẫu có sẵn dòng tiêu đề để điền danh mục sản phẩm.
 3. Một thư mục Google Drive để lưu các file PDF xuất ra.
 
 HÃY XÂY DỰNG QUY TRÌNH TỰ ĐỘNG HOÀN TOÀN:
-- Tự động duyệt qua các đơn hàng có Trạng Thái là "Chờ xuất".
-- Với mỗi đơn, tạo 1 bản sao từ file Docs mẫu, thay thế toàn bộ các biến {{...}} bằng dữ liệu tương ứng của khách hàng.
-- Xuất file đó thành định dạng PDF với tên "PhieuGiaoHang_[MãĐơn].pdf" và lưu vào thư mục Drive chỉ định.
-- Cập nhật lại Google Sheet: Đổi Trạng Thái thành "Đã xuất" và ghi đường dẫn link file PDF vào cột J.
-- Tạo một nút bấm tiện lợi trên menu Google Sheet để nhân viên có thể bấm "Xuất PDF Hàng Loạt" với 1 click.`,
+- Duyệt qua Sheet và gom nhóm (group by) các dòng có cùng "Mã Đơn" mà có Trạng Thái là "Chờ xuất".
+- Với mỗi đơn hàng:
+  1. Tạo 1 bản sao từ file Docs mẫu và thay thế các biến {{...}} bằng thông tin khách hàng.
+  2. Tự động chèn các dòng sản phẩm của đơn hàng đó vào Bảng (gồm: STT, Tên Sản Phẩm, ĐVT, Số Lượng, Đơn Giá và Thành Tiền có định dạng VNĐ).
+  3. Tính Tổng tiền đơn hàng và điền vào thẻ {{TONG_TIEN}}.
+  4. Xuất file đó thành định dạng PDF với tên "PhieuGiaoHang_[MãĐơn].pdf" và lưu vào thư mục Drive chỉ định.
+  5. Cập nhật lại Google Sheet: Đổi Trạng Thái thành "Đã xuất" và ghi đường dẫn link file PDF vào cột L cho tất cả các dòng thuộc đơn đó.
+- Tạo một menu tùy chỉnh tiện lợi trên Google Sheet để nhân viên có thể bấm "Xuất Phiếu Giao Hàng PDF" với 1 click.`,
 
     businessScenario: {
-      story: "Bạn là Nhân viên Quản lý Kho vận hoặc Kế toán Bán hàng tại công ty phân phối thiết bị công nghệ. Mỗi ngày công ty phát sinh từ 50 đến 100 đơn hàng cần xuất phiếu giao kho giao cho tài xế và khách hàng.",
-      pain: "Nhân viên phải mở từng dòng trên Sheet, sao chép họ tên, SĐT, địa chỉ, sản phẩm, số tiền rồi dán thủ công vào mẫu Word, bấm Save As PDF, đặt tên file rồi upload vào Google Drive. Mất 2-3 tiếng mỗi ngày và rất dễ gõ nhầm số tiền hoặc sai địa chỉ.",
-      solution: "Ra lệnh cho AI Agent tạo sẵn nút bấm '🚀 Xuất Phiếu Giao Hàng PDF' trên Google Sheets. Bấm 1 click là toàn bộ đơn hàng tự động điền vào mẫu Docs, xuất thành PDF lưu thẳng vào Drive và cập nhật link vào bảng tính trong 30 giây."
+      story: "Bạn là Nhân viên Quản lý Kho vận hoặc Kế toán Bán hàng tại công ty phân phối thiết bị công nghệ. Mỗi ngày công ty phát sinh từ 50 đến 100 đơn hàng. Trong thực tế, một đơn hàng thường bao gồm nhiều sản phẩm khác nhau (ví dụ: 1 máy Laptop + 1 Chuột + 1 Balo chống sốc).",
+      pain: "Nhân viên phải mở từng dòng trên Sheet, dò tìm các sản phẩm cùng mã đơn, kẻ bảng trong Word, copy họ tên, sản phẩm, tính tổng tiền rồi dán thủ công, bấm Save As PDF rồi upload vào Drive. Mất 2-3 tiếng mỗi ngày và rất dễ gõ nhầm số tiền hoặc bỏ sót sản phẩm.",
+      solution: "Ra lệnh cho AI Agent tạo sẵn nút bấm '🚀 Xuất Phiếu Giao Hàng PDF' trên Google Sheets. Bấm 1 click là hệ thống tự gom nhóm sản phẩm theo mã đơn, tự chèn bảng hàng hóa vào mẫu Docs, xuất thành PDF lưu thẳng vào Drive và cập nhật link vào bảng tính trong 30 giây."
     },
 
     promptBreakdown: [
-      { tag: "1. VẬT LIỆU ĐẦU VÀO", title: "Định nghĩa rõ 3 tài nguyên", desc: "Nêu rõ: Bảng tính Google Sheet + File Docs mẫu + Thư mục Drive lưu trữ." },
-      { tag: "2. QUY TẮC LỌC", title: "Chỉ xử lý đơn 'Chờ xuất'", desc: "Quy định rõ ràng để AI không xuất lại các đơn đã tạo trước đó." },
-      { tag: "3. CƠ CHẾ ĐIỀN DỮ LIỆU", title: "Mapping biến {{TAGS}}", desc: "Chỉ rõ danh sách các tag {{MA_DON}}, {{TEN_KH}}... để AI khớp chính xác." },
-      { tag: "4. ĐẦU RA DRIVE", title: "Định dạng PDF & Tên file chuẩn", desc: "Quy định tên file PDF chuẩn hóa: PhieuGiaoHang_[MãĐơn].pdf." },
-      { tag: "5. TRẢI NGHIỆM NGƯỜI DÙNG", title: "Tạo Menu 1-Click", desc: "Yêu cầu AI tạo menu nút bấm trên giao diện để nhân viên văn phòng không cần nhìn thấy code." }
+      { tag: "1. VẬT LIỆU ĐẦU VÀO", title: "Cấu trúc đa sản phẩm", desc: "Nêu rõ cấu trúc 12 cột: Mã đơn lặp lại nhiều dòng cho các mặt hàng khác nhau trong cùng đơn." },
+      { tag: "2. GOM NHÓM DỮ LIỆU", title: "Group By theo Mã Đơn", desc: "Yêu cầu AI gom nhóm các dòng cùng Mã Đơn để xuất ra duy nhất 1 hóa đơn PDF hoàn chỉnh." },
+      { tag: "3. CHÈN BẢNG ĐỘNG", title: "Dynamic Table trong Docs", desc: "Chỉ rõ việc chèn động từng dòng mặt hàng vào bảng biểu trong Google Docs." },
+      { tag: "4. TÍNH TỔNG & ĐỊNH DẠNG", title: "Tính Tổng Tiền & VNĐ", desc: "Tự động tính tổng tiền các món và định dạng phân cách hàng nghìn chuẩn VNĐ." },
+      { tag: "5. CẬP NHẬT ĐỒNG BỘ", title: "Đổi trạng thái toàn bộ dòng", desc: "Ghi nhận link PDF và chuyển trạng thái 'Đã xuất' cho toàn bộ các dòng thuộc đơn." }
     ],
 
     businessRequirements: `
-      <p><b>Bài toán thực tế:</b> Thay vì phải sao chép từng dòng thông tin khách hàng rồi dán thủ công vào mẫu Word/Docs rồi bấm Save As PDF, AI Agent sẽ thay bạn làm 100 đơn hàng chỉ trong 30 giây.</p>
+      <p><b>Bài toán thực tế:</b> Đơn hàng thực tế luôn có <b>nhiều sản phẩm</b>. Thay vì sao chép từng sản phẩm vào bảng Word/Docs bằng tay, AI Agent tự động gom nhóm theo Mã Đơn, vẽ bảng chi tiết sản phẩm và xuất 1 file PDF trọn vẹn.</p>
     `,
 
-    tableHeaders: ["Mã Đơn", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ", "Sản Phẩm", "Số Lượng", "Đơn Giá", "Tổng Tiền", "Trạng Thái", "Link File PDF"],
+    tableHeaders: ["Mã Đơn", "Ngày Đặt", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ", "Sản Phẩm", "ĐVT", "SL", "Đơn Giá", "Thành Tiền", "Trạng Thái", "Link PDF"],
     tableRows: [
-      ["DH-2026-001", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, HN", "Laptop Dell XPS 15", 1, "32,000,000", "32,000,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
-      ["DH-2026-002", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, TP.HCM", "Màn hình Dell 27 inch", 2, "8,500,000", "17,000,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"]
+      ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, HN", "Laptop Dell XPS 15", "Chiếc", 1, "32,000,000", "32,000,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
+      ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, HN", "Chuột không dây Logitech MX", "Chiếc", 1, "2,100,000", "2,100,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
+      ["DH-2026-001", "10/08/2026", "Nguyễn Văn An", "0988123456", "12 Hoàng Hoa Thám, HN", "Balo chống sốc Targus 15.6\"", "Chiếc", 1, "850,000", "850,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
+      ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, TP.HCM", "Màn hình Dell UltraSharp 27\"", "Chiếc", 2, "8,500,000", "17,000,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
+      ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, TP.HCM", "Giá treo màn hình Human Motion", "Bộ", 2, "890,000", "1,780,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"],
+      ["DH-2026-002", "10/08/2026", "Trần Thị Bích", "0903987654", "45 Lê Duẩn, TP.HCM", "Cáp HDMI 2.1 8K Baseus", "Sợi", 2, "250,000", "500,000", "<span style='color: #f59e0b; font-weight: bold;'>Chờ xuất</span>", "—"]
     ],
 
     steps: [
       {
         badge: "01",
-        title: "Tạo File Google Docs Mẫu",
-        desc: "Tạo 1 file Google Docs mới và gõ nội dung mẫu có chứa các thẻ: <code>{{MA_DON}}</code>, <code>{{TEN_KH}}</code>, <code>{{TONG_TIEN}}</code>... Lấy ID file từ thanh địa chỉ URL."
+        title: "Tạo File Google Docs Mẫu Có Bảng Sản Phẩm",
+        desc: "Tạo 1 file Google Docs mẫu với các tag chung <code>{{MA_DON}}</code>, <code>{{TEN_KH}}</code>, <code>{{TONG_TIEN}}</code>... và tạo 1 Bảng (Table) có sẵn dòng tiêu đề để AI chèn danh mục mặt hàng."
       },
       {
         badge: "02",
         title: "Gửi Master Prompt Cho AI Agent",
-        desc: "Dán câu Master Prompt từ Tab 1 vào Gemini. AI sẽ tự động sinh giải pháp tích hợp giữa Docs, Drive và Sheets.",
+        desc: "Dán câu Master Prompt Bài 2 vào Gemini / AI Agent. AI sẽ tự động sinh mã Apps Script xử lý gom nhóm đa sản phẩm và chèn bảng tự động.",
         promptBox: "Dán Master Prompt Bài 2 từ Tab 1 vào Gemini / AI Agent"
       },
       {
         badge: "03",
-        title: "Prompt Tinh Chỉnh: Thêm Tính Năng Đính Kèm Email",
-        desc: "Nếu muốn sau khi tạo PDF thì gửi email kèm file PDF luôn cho khách, hãy gửi prompt phụ sau:",
-        promptBox: "Hãy nâng cấp quy trình: Sau khi tạo file PDF xong, tự động gửi email cho khách hàng đính kèm file PDF phiếu giao hàng này luôn."
+        title: "Prompt Tinh Chỉnh: Thêm Tính Năng Gửi Email Kèm Hóa Đơn",
+        desc: "Nếu muốn sau khi tạo PDF thì tự động gửi email kèm file hóa đơn cho khách hàng, hãy gửi thêm prompt phụ:",
+        promptBox: "Hãy nâng cấp quy trình: Sau khi tạo file PDF xong, tự động gửi email cho khách hàng kèm link xem hóa đơn và đính kèm trực tiếp file PDF này."
       }
     ],
 
     triggerGuide: `
       <h3 class="section-title"><i class="ph-bold ph-cursor-click"></i> Cách Sử Dụng Nút Bấm 1-Click</h3>
       <p style="color: var(--text-secondary); line-height: 1.7;">
-        Sau khi AI cài đặt xong, mỗi khi mở Google Sheet bạn sẽ thấy xuất hiện menu mới: <b>🚀 TỰ ĐỘNG HÓA ➔ 📄 Xuất Phiếu Giao Hàng PDF</b>. Chỉ cần bấm vào nút này là toàn bộ đơn chờ xuất sẽ tự động tạo thành file PDF!
+        Sau khi AI cài đặt xong, mỗi khi mở Google Sheet bạn sẽ thấy xuất hiện menu mới: <b>🚀 TỰ ĐỘNG HÓA ➔ 📄 Xuất Phiếu Giao Hàng PDF</b>. Hệ thống sẽ tự động lọc các đơn chưa xuất, gom toàn bộ sản phẩm cùng mã đơn và xuất thành 1 file PDF duy nhất trong Google Drive!
       </p>
     `,
 
     checklist: [
-      "Đã tạo mẫu Google Docs với các thẻ {{...}}",
-      "Đã gửi Master Prompt cho AI Agent và nhận phản hồi",
+      "Đã tạo mẫu Google Docs với các thẻ {{...}} và Bảng sản phẩm mẫu",
+      "Đã gửi Master Prompt cho AI Agent và nhận phản hồi mã Apps Script",
       "Menu 'Tự Động Hóa' xuất hiện trên thanh công cụ Google Sheet",
-      "Bấm nút và kiểm tra file PDF xuất hiện trong Google Drive",
-      "Cột Trạng Thái chuyển sang 'Đã xuất' và cột Link PDF có thể click mở"
+      "Bấm nút và kiểm tra file PDF xuất hiện trong Google Drive đầy đủ danh mục mặt hàng",
+      "Toàn bộ các dòng thuộc đơn hàng được cập nhật trạng thái 'Đã xuất' và link PDF"
     ]
   },
 
