@@ -41,10 +41,10 @@
           <i class="ph-fill ph-file-xls"></i>
           <div>
             <strong>Gói Dữ Liệu Thực Hành</strong>
-            <small>File Excel 5 Sheet + CSV Dữ Liệu</small>
+            <small>File Excel 7 Sheet + CSV Dữ Liệu</small>
           </div>
         </div>
-        <button class="btn-download-all" id="btnDownloadAllExcel" title="Tải xuống file Excel 5 Sheet tổng hợp">
+        <button class="btn-download-all" id="btnDownloadAllExcel" title="Tải xuống file Excel 7 Sheet tổng hợp">
           <i class="ph-bold ph-download-simple"></i> Tải File Excel Mẫu Thực Hành
         </button>
       </div>
@@ -53,7 +53,7 @@
       <nav class="sidebar-nav">
         <div class="nav-section-title">
           <span>LỘ TRÌNH PROMPT TỰ ĐỘNG HÓA</span>
-          <span class="badge-count" id="completedCounter">0/5 bài hoàn thành</span>
+          <span class="badge-count" id="completedCounter">0/7 bài hoàn thành</span>
         </div>
 
         <ul class="nav-list" id="exerciseNavList">
@@ -215,75 +215,8 @@
 
           <!-- Tab 2: Step-by-Step Instructions with AI -->
           <div class="tab-pane" id="tab-steps">
-            <!-- Mode Selection Notice Card -->
-            <div class="sheet-mode-card">
-              <div class="sheet-mode-header">
-                <div class="mode-header-icon">
-                  <i class="ph-fill ph-warning-circle"></i>
-                </div>
-                <div>
-                  <h3 class="mode-header-title">LƯU Ý QUAN TRỌNG: CHỌN ĐÚNG CHẾ ĐỘ GOOGLE SHEETS TRƯỚC KHI LÀM</h3>
-                  <p class="mode-header-sub">Phân biệt 2 chế độ hiển thị khi mở file Excel trên Google Drive và chế độ bắt buộc để chạy tự động hóa:</p>
-                </div>
-              </div>
-
-              <!-- Visual Comparison Image Showcase -->
-              <div class="mode-image-showcase">
-                <div class="mode-image-header">
-                  <span class="image-label"><i class="ph-bold ph-image"></i> Ảnh Chụp So Sánh Thực Tế Trên Google Drive</span>
-                  <span class="image-sublabel">Quan sát góc trên bên trái thanh tiêu đề tệp</span>
-                </div>
-                <div class="mode-image-frame">
-                  <img src="assets/image.png" alt="So sánh chế độ Google Sheets gốc và chế độ tương thích Excel .XLSX" class="mode-preview-img">
-                  <div class="image-annotation-overlay">
-                    <div class="overlay-badge left">
-                      <i class="ph-bold ph-check-circle"></i> BÊN TRÁI: Không có badge ➔ NÊN CHỌN
-                    </div>
-                    <div class="overlay-badge right">
-                      <i class="ph-bold ph-warning-circle"></i> BÊN PHẢI: Có badge xanh [.XLSX] ➔ CẦN ĐỔI
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mode-compare-grid">
-                <!-- Recommended Mode -->
-                <div class="mode-card recommended">
-                  <div class="mode-card-badge"><i class="ph-bold ph-check-circle"></i> NÊN CHỌN (BẮT BUỘC)</div>
-                  <div class="mode-preview-bar">
-                    <i class="ph-fill ph-file-text sheet-green-icon"></i>
-                    <span class="file-title-mockup">Du_Lieu_Mau_Tong_Hop</span>
-                    <span class="native-tag">Google Sheets Chuẩn</span>
-                  </div>
-                  <div class="mode-badge-status">
-                    <span class="status-pill green"><i class="ph-bold ph-sparkle"></i> KHÔNG CÓ BADGE .XLSX</span>
-                  </div>
-                  <ul class="mode-feature-list">
-                    <li><i class="ph-bold ph-check"></i> Hỗ trợ 100% <b>Tiện ích mở rộng ➔ Apps Script</b></li>
-                    <li><i class="ph-bold ph-check"></i> Tự động chạy Trigger hẹn giờ gửi email 08h00</li>
-                    <li><i class="ph-bold ph-check"></i> Tương thích hoàn toàn với hàm <code>=SPARKLINE()</code> và AI</li>
-                  </ul>
-                </div>
-
-                <!-- Not Recommended Mode -->
-                <div class="mode-card not-recommended">
-                  <div class="mode-card-badge warning"><i class="ph-bold ph-x-circle"></i> KHÔNG NÊN DÙNG</div>
-                  <div class="mode-preview-bar">
-                    <i class="ph-fill ph-file-xls excel-green-icon"></i>
-                    <span class="file-title-mockup">Du_Lieu_Mau_Tong_Hop</span>
-                    <span class="xlsx-tag-badge">.XLSX</span>
-                  </div>
-                  <div class="mode-badge-status">
-                    <span class="status-pill amber"><i class="ph-bold ph-warning"></i> CÓ BADGE XANH [.XLSX]</span>
-                  </div>
-                  <ul class="mode-feature-list">
-                    <li><i class="ph-bold ph-x"></i> Đây chỉ là <b>Chế độ xem trước file Excel (Office View)</b></li>
-                    <li><i class="ph-bold ph-x"></i> Bị giới hạn hoặc không chạy được <b>Apps Script / Trigger</b></li>
-                    <li><i class="ph-bold ph-arrow-circle-right"></i> <b>Cách khắc phục:</b> Vào menu <b>Tệp (File)</b> ➔ Chọn <b>Lưu dưới dạng Google Trang tính</b></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <!-- Dynamic Mode Notice Container (rendered per exercise) -->
+            <div id="customModeNoticeContainer"></div>
 
             <div class="steps-timeline" id="stepsTimelineContainer">
               <!-- Injected step items via JS -->

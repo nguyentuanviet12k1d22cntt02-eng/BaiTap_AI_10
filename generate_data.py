@@ -216,7 +216,136 @@ with open(os.path.join(DATA_DIR, "bai_tap_5_raw_data_1000_rows.csv"), "w", newli
     writer.writerows(raw_rows)
 
 # -------------------------------------------------------------
-# 6. TẠO FILE EXCEL TỔNG HỢP GỒM 5 SHEET (HỖ TRỢ MERGE CELLS CHUYÊN NGHIỆP)
+# 6. BÀI TẬP 6: Dữ liệu lịch sử giao dịch phân tích RFM
+# -------------------------------------------------------------
+headers_bt6 = ["Mã Đơn Hàng", "Mã Khách Hàng", "Tên Khách Hàng", "Ngày Mua Hàng", "Doanh Thu Đơn"]
+customers_list = [
+    ("KH001", "Nguyễn Văn An"),
+    ("KH002", "Trần Thị Bích"),
+    ("KH003", "Lê Hoàng Long"),
+    ("KH004", "Phạm Minh Trang"),
+    ("KH005", "Đỗ Quang Hưng"),
+    ("KH006", "Vũ Thị Ngọc Hà"),
+    ("KH007", "Ngô Thành Nam"),
+    ("KH008", "Hoàng Văn Dũng"),
+    ("KH009", "Lê Thị Mai"),
+    ("KH010", "Trần Quốc Toản"),
+    ("KH011", "Nguyễn Hồng Hạnh"),
+    ("KH012", "Bùi Thanh Tùng"),
+    ("KH013", "Đặng Thùy Dương"),
+    ("KH014", "Phan Anh Tuấn"),
+    ("KH015", "Võ Hoàng Yến"),
+    ("KH016", "Đỗ Mỹ Linh"),
+    ("KH017", "Nguyễn Cao Kỳ"),
+    ("KH018", "Trần Đức Anh"),
+    ("KH019", "Lê Minh Triết"),
+    ("KH020", "Phạm Thùy Chi"),
+]
+
+random.seed(42)
+rfm_rows = []
+order_id_counter = 1
+
+for ma_kh, ten_kh in customers_list:
+    if ma_kh in ["KH001", "KH002", "KH003"]:
+        num_orders = random.randint(10, 15)
+    elif ma_kh in ["KH004", "KH005", "KH006", "KH007"]:
+        num_orders = random.randint(4, 7)
+    elif ma_kh in ["KH008", "KH009", "KH010", "KH011"]:
+        num_orders = random.randint(2, 3)
+    else:
+        num_orders = 1
+        
+    for _ in range(num_orders):
+        ma_don = f"DH-RFM-{order_id_counter:04d}"
+        order_id_counter += 1
+        
+        if ma_kh in ["KH001", "KH002", "KH003", "KH004"]:
+            days_ago = random.randint(1, 45)
+        elif ma_kh in ["KH005", "KH006", "KH007", "KH008"]:
+            days_ago = random.randint(46, 120)
+        else:
+            days_ago = random.randint(121, 240)
+            
+        purchase_date = (datetime(2026, 8, 31) - timedelta(days=days_ago)).strftime("%d/%m/%Y")
+        
+        if ma_kh in ["KH001", "KH004", "KH012"]:
+            doanh_thu = random.randint(3000, 12000) * 1000
+        else:
+            doanh_thu = random.randint(300, 4500) * 1000
+            
+        rfm_rows.append([ma_don, ma_kh, ten_kh, purchase_date, doanh_thu])
+
+rfm_rows.sort(key=lambda x: x[0])
+
+with open(os.path.join(DATA_DIR, "bai_tap_6_rfm_analysis.csv"), "w", newline="", encoding="utf-8-sig") as f:
+    writer = csv.writer(f)
+    writer.writerow(headers_bt6)
+    writer.writerows(rfm_rows)
+
+# -------------------------------------------------------------
+# 7. BÀI TẬP 7: Dữ liệu giao dịch quản lý bán hàng (Menu UI & Biểu Đồ Thống Kê Xanh Dương)
+# -------------------------------------------------------------
+headers_bt7 = ["Ngày Giao Dịch", "Loại Giao Dịch", "Nội Dung", "Số Lượng", "Đơn Giá", "Thành Tiền", "Kênh/Phân Loại"]
+transaction_types = ["Bán Hàng", "Nhập Hàng", "Chi Phí"]
+sales_items = [
+    ("Laptop Acer Aspire", 12500000),
+    ("Bàn Phím Keychron K2", 1850000),
+    ("Chuột Logitech G102", 450000),
+    ("Màn Hình LG 24 inch", 3500000),
+    ("Tai Nghe Sony H900N", 2500000)
+]
+purchase_items = [
+    ("Lô Laptop Acer Aspire (Nhập sỉ)", 9500000),
+    ("Lô Bàn Phím Keychron (Nhập sỉ)", 1300000),
+    ("Lô Chuột Logitech (Nhập sỉ)", 300000)
+]
+expense_items = [
+    "Chi phí thuê mặt bằng tháng",
+    "Chi phí chạy quảng cáo Facebook Ads",
+    "Chi phí chạy quảng cáo Google Ads",
+    "Chi phí văn phòng phẩm"
+]
+
+sales_rows = []
+random.seed(100)
+
+for i in range(1, 51):
+    day = random.randint(1, 30)
+    date_str = f"{day:02d}/08/2026"
+    
+    rand_val = random.random()
+    if rand_val < 0.7:
+        loai_gd = "Bán Hàng"
+        item, price = random.choice(sales_items)
+        qty = random.randint(1, 3)
+        total = qty * price
+        channel = random.choice(["Shopee", "Lazada", "Website", "Cửa Hàng"])
+    elif rand_val < 0.85:
+        loai_gd = "Nhập Hàng"
+        item, price = random.choice(purchase_items)
+        qty = random.randint(5, 10)
+        total = qty * price
+        channel = "Nhập Kho"
+    else:
+        loai_gd = "Chi Phí"
+        item = random.choice(expense_items)
+        qty = 1
+        price = random.randint(500, 5000) * 1000
+        total = qty * price
+        channel = random.choice(["Chi Phí Vận Hành", "Chi Phí Marketing"])
+        
+    sales_rows.append([date_str, loai_gd, item, qty, price, total, channel])
+
+sales_rows.sort(key=lambda x: int(x[0].split("/")[0]))
+
+with open(os.path.join(DATA_DIR, "bai_tap_7_quan_ly_ban_hang.csv"), "w", newline="", encoding="utf-8-sig") as f:
+    writer = csv.writer(f)
+    writer.writerow(headers_bt7)
+    writer.writerows(sales_rows)
+
+# -------------------------------------------------------------
+# 8. TẠO FILE EXCEL TỔNG HỢP GỒM 7 SHEET (HỖ TRỢ MERGE CELLS CHUYÊN NGHIỆP)
 # -------------------------------------------------------------
 wb = openpyxl.Workbook()
 wb.remove(wb.active)
@@ -226,7 +355,9 @@ sheets_spec = [
     ("DonHang_BT2", headers_bt2, orders_flat_for_excel, "005A9C"),
     ("BangLuong_BT3", headers_bt3, payroll, "1B365D"),
     ("DonNghiPhep_BT4", headers_bt4, leaves, "005A9C"),
-    ("RawData_BT5", headers_bt5, raw_rows, "4A5568")
+    ("RawData_BT5", headers_bt5, raw_rows, "4A5568"),
+    ("DonHang_BT6", headers_bt6, rfm_rows, "1B365D"),
+    ("BanHang_BT7", headers_bt7, sales_rows, "005A9C")
 ]
 
 thin_border = Border(

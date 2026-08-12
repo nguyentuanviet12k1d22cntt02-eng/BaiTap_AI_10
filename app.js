@@ -1039,7 +1039,983 @@ HÃY XÂY DỰNG QUY TRÌNH LÀM SẠCH VÀ CHUẨN HÓA DỮ LIỆU TỐC ĐỘ
       "Số điện thoại được đưa về đúng 10 số có số 0 đầu",
       "Thời gian thực thi hoàn thành dưới 3 giây"
     ]
+  },
+
+  {
+    id: "bt6",
+    index: 6,
+    title: "Bài 6: Phân Tích Nhóm Khách Hàng RFM, Vẽ Biểu Đồ & Xuất Báo Cáo Tự Động",
+    shortTitle: "Phân Tích RFM & Biểu Đồ",
+    subtitle: "Apps Script vẽ biểu đồ cột, tròn & xuất báo cáo",
+    level: "Dành Cho Dân Văn Phòng",
+    time: "20 phút",
+    tags: ["RFM Segmentation", "Pie & Column Chart", "Google Docs Report", "PDF Export"],
+    desc: "Quy trình ra lệnh cho AI Agent tự động tính toán các chỉ số RFM để phân nhóm khách hàng, vẽ biểu đồ tròn tỷ lệ và biểu đồ cột doanh thu đóng góp, sau đó điền dữ liệu xuất file báo cáo Word/PDF chuyên nghiệp.",
+    csvFile: "bai_tap_6_rfm_analysis.csv",
+    scriptFile: "BaiTap6_PhanTichKhachHang_RFM.gs",
+    scriptContent: `/**
+ * BÀI TẬP 6: PHÂN TÍCH PHÂN KHÚC KHÁCH HÀNG THEO MÔ HÌNH RFM, VẼ BIỂU ĐỒ & XUẤT BÁO CÁO
+ */
+const CONFIG_BT6 = {
+  SOURCE_SHEET: "DonHang_BT6",
+  REPORT_SHEET: "BaoCao_RFM_BT6",
+  REPORT_DATE: new Date("2026-08-31"), // Ngày chốt báo cáo cố định
+  FOLDER_PDF_NAME: "BaoCao_RFM_PDF"
+};
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("📊 PHÂN TÍCH")
+    .addItem("Chạy Phân Tích RFM Khách Hàng", "runRFMAnalysis")
+    .addToUi();
+}
+
+function runRFMAnalysis() {
+  const startTime = new Date().getTime();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sourceSheet = ss.getSheetByName(CONFIG_BT6.SOURCE_SHEET);
+  
+  if (!sourceSheet) {
+    SpreadsheetApp.getUi().alert(\`Lỗi: Không tìm thấy sheet nguồn "\${CONFIG_BT6.SOURCE_SHEET}"!\`);
+    return;
   }
+  
+  const lastRow = sourceSheet.getLastRow();
+  if (lastRow < 4) {
+    SpreadsheetApp.getUi().alert("Lỗi: Không có dữ liệu giao dịch!");
+    return;
+  }
+  
+  const rawData = sourceSheet.getRange(4, 1, lastRow - 3, 5).getValues();
+  const customerMap = {};
+  
+  for (let i = 0; i < rawData.length; i++) {
+    const maKH = String(rawData[i][1]).trim();
+    const tenKH = String(rawData[i][2]).trim();
+    const ngayMua = rawData[i][3];
+    const doanhThu = Number(rawData[i][4]) || 0;
+    
+    if (maKH === "") continue;
+    
+    let ngayMuaDate;
+    if (ngayMua instanceof Date) {
+      ngayMuaDate = ngayMua;
+    } else {
+      const parts = String(ngayMua).split("/");
+      if (parts.length === 3) {
+        ngayMuaDate = new Date(parts[2], parts[1] - 1, parts[0]);
+      } else {
+        ngayMuaDate = new Date();
+      }
+    }
+    
+    if (!customerMap[maKH]) {
+      customerMap[maKH] = {
+        maKH: maKH,
+        tenKH: tenKH,
+        lastPurchase: ngayMuaDate,
+        frequency: 0,
+        monetary: 0
+      };
+    }
+    
+    customerMap[maKH].frequency += 1;
+    customerMap[maKH].monetary += doanhThu;
+    
+    if (ngayMuaDate > customerMap[maKH].lastPurchase) {
+      customerMap[maKH].lastPurchase = ngayMuaDate;
+    }
+  }
+  
+  const rfmReportRows = [];
+  let vipCount = 0;
+  
+  for (const maKH in customerMap) {
+    const cust = customerMap[maKH];
+    const diffTime = CONFIG_BT6.REPORT_DATE.getTime() - cust.lastPurchase.getTime();
+    let recencyDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (recencyDays < 0) recencyDays = 0;
+    
+    const f = cust.frequency;
+    const m = cust.monetary;
+    
+    let rScore = 1;
+    if (recencyDays <= 15) rScore = 5;
+    else if (recencyDays <= 45) rScore = 4;
+    else if (recencyDays <= 90) rScore = 3;
+    else if (recencyDays <= 180) rScore = 2;
+    
+    let fScore = 1;
+    if (f >= 10) fScore = 5;
+    else if (f >= 5) fScore = 4;
+    else if (f >= 3) fScore = 3;
+    else if (f >= 2) fScore = 2;
+    
+    let mScore = 1;
+    if (m >= 50000000) mScore = 5;
+    else if (m >= 20000000) mScore = 4;
+    else if (m >= 10000000) mScore = 3;
+    else if (m >= 5000000) mScore = 2;
+    
+    const totalScore = rScore + fScore + mScore;
+    
+    let classification = "Khách Hàng Nguy Cơ Rời Bỏ";
+    if (totalScore >= 13) {
+      classification = "VIP";
+      vipCount++;
+    } else if (totalScore >= 10) {
+      classification = "Khách Hàng Trung Thành";
+    } else if (totalScore >= 7) {
+      classification = "Khách Hàng Tiềm Năng";
+    } else if (totalScore >= 5) {
+      classification = "Khách Mới";
+    }
+    
+    const formattedLastDate = Utilities.formatDate(cust.lastPurchase, "GMT+7", "dd/MM/yyyy");
+    
+    rfmReportRows.push([
+      cust.maKH,
+      cust.tenKH,
+      formattedLastDate,
+      recencyDays,
+      f,
+      m,
+      rScore,
+      fScore,
+      mScore,
+      totalScore,
+      classification
+    ]);
+  }
+  
+  // Sắp xếp báo cáo theo mã khách hàng tăng dần
+  rfmReportRows.sort(function(a, b) {
+    return a[0].localeCompare(b[0]);
+  });
+  
+  // Ghi kết quả ra sheet BaoCao_RFM_BT6
+  var reportSheet = ss.getSheetByName(CONFIG_BT6.REPORT_SHEET);
+  if (!reportSheet) {
+    reportSheet = ss.insertSheet(CONFIG_BT6.REPORT_SHEET);
+  } else {
+    reportSheet.clear();
+    var oldCharts = reportSheet.getCharts();
+    for (var c = 0; c < oldCharts.length; c++) {
+      reportSheet.removeChart(oldCharts[c]);
+    }
+  }
+  
+  // Thiết lập đường lưới hiển thị
+  reportSheet.setHiddenGridlines(false);
+  
+  // Ghi Banner dòng 1
+  reportSheet.getRange("A1:K1").merge().setValue("BÁO CÁO PHÂN TÍCH PHÂN KHÚC KHÁCH HÀNG RFM")
+    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold").setFontSize(13)
+    .setHorizontalAlignment("center").setVerticalAlignment("center");
+  reportSheet.setRowHeight(1, 35);
+  
+  // Tiêu đề bảng
+  var headers = [
+    "Mã Khách Hàng", "Tên Khách Hàng", "Ngày Mua Cuối", "Recency (ngày)", 
+    "Frequency (lượt)", "Monetary (VNĐ)", "R-Score", "F-Score", "M-Score", 
+    "Tổng Điểm", "Phân Phân Khúc"
+  ];
+  
+  reportSheet.getRange("A3:K3").setValues([headers])
+    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold")
+    .setHorizontalAlignment("center").setVerticalAlignment("center");
+  reportSheet.setRowHeight(3, 24);
+  
+  // Ghi dữ liệu chi tiết
+  if (rfmReportRows.length > 0) {
+    var dataRange = reportSheet.getRange(4, 1, rfmReportRows.length, 11);
+    dataRange.setValues(rfmReportRows);
+    
+    // Định dạng dữ liệu
+    dataRange.setFontFamily("Arial").setFontSize(10);
+    reportSheet.getRange(4, 3, rfmReportRows.length, 1).setNumberFormat("dd/mm/yyyy").setHorizontalAlignment("center");
+    reportSheet.getRange(4, 4, rfmReportRows.length, 2).setNumberFormat("#,##0").setHorizontalAlignment("right");
+    reportSheet.getRange(4, 6, rfmReportRows.length, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
+    reportSheet.getRange(4, 7, rfmReportRows.length, 4).setHorizontalAlignment("center");
+    reportSheet.getRange(4, 11, rfmReportRows.length, 1).setFontWeight("bold");
+    
+    // Kẻ viền mảnh
+    dataRange.setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
+  }
+  
+  // Tự động căn chỉnh cột rộng vừa chữ
+  for (var col = 1; col <= 11; col++) {
+    reportSheet.autoResizeColumn(col);
+  }
+  
+  // --------------------------------------------------------------------------
+  // 4. TẠO BẢNG TỔNG HỢP PHÂN KHÚC (CỘT M - O)
+  // --------------------------------------------------------------------------
+  var summaryHeaders = ["Phân Khúc Khách Hàng", "Số Lượng KH", "Doanh Thu Đóng Góp (VNĐ)"];
+  reportSheet.getRange("M3:O3").setValues([summaryHeaders])
+    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold").setHorizontalAlignment("center");
+  
+  var segments = [
+    "VIP",
+    "Khách Hàng Trung Thành",
+    "Khách Hàng Tiềm Năng",
+    "Khách Mới",
+    "Khách Hàng Nguy Cơ Rời Bỏ"
+  ];
+  
+  var endRowIndex = rfmReportRows.length + 3;
+  
+  const summaryFormulas = [];
+  for (let s = 0; s < segments.length; s++) {
+    const seg = segments[s];
+    const countFormula = '=COUNTIF(K4:K' + endRowIndex + '; "' + seg + '")';
+    const sumFormula = '=SUMIF(K4:K' + endRowIndex + '; "' + seg + '"; F4:F' + endRowIndex + ')';
+    summaryFormulas.push([seg, countFormula, sumFormula]);
+  }
+  
+  reportSheet.getRange("M4:O8").setFormulasLocal(summaryFormulas);
+  reportSheet.getRange("N4:N8").setNumberFormat("#,##0").setHorizontalAlignment("center");
+  reportSheet.getRange("O4:O8").setNumberFormat("#,##0");
+  reportSheet.getRange("M3:O8").setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
+  
+  // VẼ BIỂU ĐỒ TRÒN (PIE CHART) - PHÂN PHỐI SỐ LƯỢNG
+  var pieChart = reportSheet.newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(reportSheet.getRange("M3:N8"))
+    .setPosition(10, 13, 0, 0)
+    .setOption("title", "TỶ LỆ PHÂN BỔ KHÁCH HÀNG THEO PHÂN KHÚC")
+    .setOption("width", 400)
+    .setOption("height", 280)
+    .setOption("is3D", true)
+    .build();
+  reportSheet.insertChart(pieChart);
+  
+  // VẼ BIỂU ĐỒ CỘT (COLUMN CHART) - DOANH THU ĐÓNG GÓP
+  var columnChart = reportSheet.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(reportSheet.getRange("M3:M8"))
+    .addRange(reportSheet.getRange("O3:O8"))
+    .setPosition(25, 13, 0, 0)
+    .setOption("title", "DOANH THU ĐÓNG GÓP THEO PHÂN KHÚC KHÁCH HÀNG")
+    .setOption("width", 400)
+    .setOption("height", 280)
+    .setOption("legend", {position: "none"})
+    .setOption("colors", ["#005A9C"])
+    .setOption("vAxis", {format: "#,##0"})
+    .build();
+  reportSheet.insertChart(columnChart);
+}`,
+    workflow: [
+      { icon: "ph-link", title: "1. Đọc Dữ Liệu", desc: "Xác nhận AI đọc chính xác sheet DonHang_BT6" },
+      { icon: "ph-table", title: "2. Phân Tích Cột", desc: "AI phân tích cấu trúc cột & công thức RFM" },
+      { icon: "ph-chart-pie", title: "3. Sinh Code Biểu Đồ", desc: "Apps Script tính toán và vẽ Combo/Pie charts" },
+      { icon: "ph-file-doc", title: "4. Tạo Mẫu Docs", desc: "Thiết kế biểu mẫu Word báo cáo RFM" },
+      { icon: "ph-file-pdf", title: "5. Xuất Báo Cáo PDF", desc: "Apps Script điền số liệu & lưu Drive" }
+    ],
+    masterPrompt: `/**
+ * Trình tự tự động hóa Phân tích & Báo cáo RFM Khách Hàng
+ * Tích hợp tính năng xuất PDF từ Google Docs Template
+ */
+
+// 1. Tạo Custom Menu trên thanh công cụ Google Sheets
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('📊 PHÂN TÍCH')
+    .addItem('Chạy Phân Tích RFM & Xuất PDF', 'runRFMAnalysis')
+    .addToUi();
+}
+
+// 2. Hàm chính thực hiện phân tích RFM
+function runRFMAnalysis() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sourceSheet = ss.getSheetByName("DonHang_BT6");
+  
+  if (!sourceSheet) {
+    SpreadsheetApp.getUi().alert('⚠️ Không tìm thấy sheet "DonHang_BT6". Vui lòng kiểm tra lại!');
+    return;
+  }
+  
+  // Đọc dữ liệu từ dòng 4 (A4:E)
+  var lastRow = sourceSheet.getLastRow();
+  if (lastRow < 4) {
+    SpreadsheetApp.getUi().alert('⚠️ Sheet "DonHang_BT6" không có dữ liệu từ dòng 4 trở đi.');
+    return;
+  }
+  
+  var data = sourceSheet.getRange(4, 1, lastRow - 3, 5).getValues();
+  var reportDate = new Date(2026, 7, 31); // Mốc ngày chốt báo cáo 31/08/2026
+  
+  // Tổng hợp dữ liệu theo từng Mã Khách Hàng
+  var customers = {};
+  
+  for (var i = 0; i < data.length; i++) {
+    var orderId = data[i][0];
+    var custId = data[i][1];
+    var custName = data[i][2];
+    var dateVal = parseDate_(data[i][3]);
+    var revenueVal = parseNumber_(data[i][4]);
+    
+    if (!custId) continue; // Bỏ qua dòng trống
+    
+    if (!customers[custId]) {
+      customers[custId] = {
+        id: custId,
+        name: custName,
+        lastDate: dateVal,
+        frequency: 1,
+        monetary: revenueVal
+      };
+    } else {
+      customers[custId].frequency += 1;
+      customers[custId].monetary += revenueVal;
+      if (dateVal && (!customers[custId].lastDate || dateVal > customers[custId].lastDate)) {
+        customers[custId].lastDate = dateVal;
+        if (custName) customers[custId].name = custName;
+      }
+    }
+  }
+  
+  // Tính chỉ số R, F, M, chấm điểm và phân hạng
+  var outputRows = [];
+  for (var id in customers) {
+    var c = customers[id];
+    
+    var recency = 0;
+    if (c.lastDate) {
+      var diffTime = reportDate.getTime() - c.lastDate.getTime();
+      recency = Math.max(0, Math.round(diffTime / (1000 * 3600 * 24)));
+    }
+    
+    var rScore = 1;
+    if (recency <= 15) rScore = 5;
+    else if (recency <= 45) rScore = 4;
+    else if (recency <= 90) rScore = 3;
+    else if (recency <= 180) rScore = 2;
+    else rScore = 1;
+    
+    var fScore = 1;
+    if (c.frequency >= 10) fScore = 5;
+    else if (c.frequency >= 5) fScore = 4;
+    else if (c.frequency >= 3) fScore = 3;
+    else if (c.frequency >= 2) fScore = 2;
+    else fScore = 1;
+    
+    var mScore = 1;
+    if (c.monetary >= 50000000) mScore = 5;
+    else if (c.monetary >= 20000000) mScore = 4;
+    else if (c.monetary >= 10000000) mScore = 3;
+    else if (c.monetary >= 5000000) mScore = 2;
+    else mScore = 1;
+    
+    var totalScore = rScore + fScore + mScore;
+    
+    var segment = "";
+    if (totalScore >= 13) segment = "VIP";
+    else if (totalScore >= 10) segment = "Trung thành";
+    else if (totalScore >= 7) segment = "Tiềm năng";
+    else if (totalScore >= 5) segment = "Khách mới";
+    else segment = "Nguy cơ rời bỏ";
+    
+    outputRows.push([
+      c.id, c.name, c.lastDate, recency, c.frequency, c.monetary,
+      rScore, fScore, mScore, totalScore, segment
+    ]);
+  }
+  
+  outputRows.sort(function(a, b) {
+    return a[0].localeCompare(b[0]);
+  });
+  
+  var targetSheet = ss.getSheetByName("BaoCao_RFM_BT6");
+  if (!targetSheet) {
+    targetSheet = ss.insertSheet("BaoCao_RFM_BT6");
+  } else {
+    targetSheet.clearContents();
+    targetSheet.clearFormats();
+    var existingCharts = targetSheet.getCharts();
+    for (var k = 0; k < existingCharts.length; k++) {
+      targetSheet.removeChart(existingCharts[k]);
+    }
+  }
+  
+  targetSheet.setHiddenGridlines(false);
+  
+  var headers = [
+    "Mã Khách Hàng", "Tên Khách Hàng", "Ngày Mua Gần Nhất", 
+    "Recency (Ngày)", "Frequency (Số đơn)", "Monetary (VNĐ)", 
+    "Điểm R", "Điểm F", "Điểm M", "Tổng Điểm", "Phân Hạng"
+  ];
+  
+  targetSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  
+  if (outputRows.length > 0) {
+    targetSheet.getRange(2, 1, outputRows.length, headers.length).setValues(outputRows);
+  }
+  
+  var numRows = outputRows.length;
+  var lastDataRow = numRows + 1;
+  
+  var navyColor = "#1B365D";
+  targetSheet.getRange(1, 1, 1, headers.length)
+             .setBackground(navyColor)
+             .setFontColor("#FFFFFF")
+             .setFontWeight("bold")
+             .setHorizontalAlignment("center")
+             .setVerticalAlignment("middle");
+  targetSheet.setRowHeight(1, 35);
+  
+  if (numRows > 0) {
+    var dataRange = targetSheet.getRange(2, 1, numRows, headers.length);
+    dataRange.setFontFamily("Roboto")
+             .setFontSize(10)
+             .setVerticalAlignment("middle");
+    
+    for (var r = 2; r <= lastDataRow; r++) {
+      targetSheet.getRange(r, 1, 1, headers.length)
+                 .setBackground(r % 2 === 0 ? "#F4F6F9" : "#FFFFFF");
+    }
+    
+    targetSheet.getRange(2, 1, numRows, 1).setHorizontalAlignment("center");
+    targetSheet.getRange(2, 2, numRows, 1).setHorizontalAlignment("left");
+    targetSheet.getRange(2, 3, numRows, 1).setNumberFormat("dd/mm/yyyy").setHorizontalAlignment("center");
+    targetSheet.getRange(2, 4, numRows, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
+    targetSheet.getRange(2, 5, numRows, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
+    targetSheet.getRange(2, 6, numRows, 1).setNumberFormat("#,##0 \"VNĐ\"").setHorizontalAlignment("right");
+    targetSheet.getRange(2, 7, numRows, 4).setNumberFormat("0").setHorizontalAlignment("center");
+    targetSheet.getRange(2, 11, numRows, 1).setHorizontalAlignment("center").setFontWeight("bold");
+    
+    dataRange.setBorder(true, true, true, true, true, true, "#D3D3D3", SpreadsheetApp.BorderStyle.SOLID);
+  }
+  
+  // Bảng Tổng Hợp Phân Khúc
+  var summaryHeaders = ["Phân Hạng", "Số Lượng Khách", "Tổng Doanh Thu"];
+  targetSheet.getRange(1, 13, 1, 3).setValues([summaryHeaders])
+             .setBackground(navyColor)
+             .setFontColor("#FFFFFF")
+             .setFontWeight("bold")
+             .setHorizontalAlignment("center")
+             .setVerticalAlignment("middle");
+             
+  var segments = ["VIP", "Trung thành", "Tiềm năng", "Khách mới", "Nguy cơ rời bỏ"];
+  var summaryNames = [];
+  var summaryFormulas = [];
+  
+  for (var s = 0; s < segments.length; s++) {
+    var rowIdx = s + 2;
+    summaryNames.push([segments[s]]);
+    summaryFormulas.push([
+      '=COUNTIF(K$2:K$' + lastDataRow + '; M' + rowIdx + ')',
+      '=SUMIF(K$2:K$' + lastDataRow + '; M' + rowIdx + '; F$2:F$' + lastDataRow + ')'
+    ]);
+  }
+  
+  summaryNames.push(["Tổng cộng"]);
+  summaryFormulas.push([
+    '=SUM(N2:N6)',
+    '=SUM(O2:O6)'
+  ]);
+  
+  targetSheet.getRange(2, 13, summaryNames.length, 1).setValues(summaryNames);
+  targetSheet.getRange(2, 14, summaryFormulas.length, 2).setValues(summaryFormulas);
+
+  targetSheet.getRange(2, 13, 6, 3).setBorder(true, true, true, true, true, true, "#D3D3D3", SpreadsheetApp.BorderStyle.SOLID);
+  targetSheet.getRange("M2:M6").setHorizontalAlignment("left").setFontWeight("bold");
+  targetSheet.getRange("N2:N7").setNumberFormat("#,##0").setHorizontalAlignment("right");
+  targetSheet.getRange("O2:O7").setNumberFormat("#,##0 \"VNĐ\"").setHorizontalAlignment("right");
+  targetSheet.getRange("M7:O7")
+             .setBackground("#E8EEF5")
+             .setFontWeight("bold")
+             .setBorder(true, true, true, true, true, true, navyColor, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // Tạo Biểu Đồ
+  var pieChart = targetSheet.newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(targetSheet.getRange("M1:N6"))
+    .setPosition(2, 17, 0, 0)
+    .setOption('title', 'Tỷ Lệ Khách Hàng Theo Phân Khúc')
+    .setOption('is3D', true)
+    .setOption('width', 480)
+    .setOption('height', 300)
+    .build();
+  targetSheet.insertChart(pieChart);
+  
+  var columnChart = targetSheet.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(targetSheet.getRange("M1:M6"))
+    .addRange(targetSheet.getRange("O1:O6"))
+    .setPosition(18, 17, 0, 0)
+    .setOption('title', 'Doanh Số Đóng Góp Theo Phân Khúc')
+    .setOption('legend', {position: 'none'})
+    .setOption('width', 480)
+    .setOption('height', 300)
+    .setOption('colors', [navyColor])
+    .setOption('vAxis', {title: 'Doanh thu (VNĐ)', format: 'short'})
+    .build();
+  targetSheet.insertChart(columnChart);
+  
+  for (var col = 1; col <= 15; col++) {
+    if (col === 12) {
+      targetSheet.setColumnWidth(12, 30);
+    } else {
+      targetSheet.autoResizeColumn(col);
+    }
+  }
+
+  // =========================================================================
+  // PHẦN NÂNG CẤP: TẠO BÁO CÁO PDF TỪ GOOGLE DOCS TEMPLATE
+  // =========================================================================
+  try {
+    // 1. Lấy dữ liệu từ bảng tổng hợp (Cần ép tính toán để lấy value thực tế)
+    SpreadsheetApp.flush(); 
+    
+    var vipCount = targetSheet.getRange("N2").getValue();
+    var loyalCount = targetSheet.getRange("N3").getValue();
+    var potentialCount = targetSheet.getRange("N4").getValue();
+    var newCount = targetSheet.getRange("N5").getValue();
+    var churnCount = targetSheet.getRange("N6").getValue();
+    
+    // ID của file template "BaoCao_RFM_Template"
+    var templateId = "1DQ857s2uv0U1fS1MdaIAztf7wxwuvrJvMxFzt7430yc"; 
+    
+    // 2. Tìm hoặc tạo thư mục "BaoCao_RFM_PDF"
+    var folderName = "BaoCao_RFM_PDF";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+    
+    // 3. Tạo bản sao tạm thời của template
+    var templateFile = DriveApp.getFileById(templateId);
+    var tempFile = templateFile.makeCopy("Temp_BaoCao_RFM", folder);
+    var tempDoc = DocumentApp.openById(tempFile.getId());
+    var body = tempDoc.getBody();
+    
+    // 4. Thay thế từ khóa bằng số liệu thật
+    body.replaceText("{{VIP_Count}}", vipCount);
+    body.replaceText("{{Loyal_Count}}", loyalCount);
+    body.replaceText("{{Potential_Count}}", potentialCount);
+    body.replaceText("{{New_Count}}", newCount);
+    body.replaceText("{{Churn_Count}}", churnCount);
+    
+    // Thêm nhận định tự động
+    var insightText = "Phân khúc VIP (" + vipCount + " KH) và Trung thành (" + loyalCount + " KH) đang là nhóm nòng cốt. Cần đặc biệt chú ý chiến dịch giữ chân nhóm Nguy cơ rời bỏ (" + churnCount + " KH).";
+    body.replaceText("{{Insights}}", insightText);
+    
+    // Lưu và đóng file tạm để đảm bảo nội dung được ghi lại
+    tempDoc.saveAndClose();
+    
+    // 5. Xuất ra định dạng PDF
+    var pdfBlob = tempFile.getAs(MimeType.PDF);
+    var timeString = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "ddMMyyyy_HHmmss");
+    var pdfFile = folder.createFile(pdfBlob).setName("BaoCao_RFM_" + timeString + ".pdf");
+    var pdfUrl = pdfFile.getUrl();
+    
+    // 6. Xóa file Doc tạm để dọn rác
+    tempFile.setTrashed(true);
+    
+    // 7. Ghi link PDF vào ô H1 dưới dạng RichText Hyperlink
+    var richText = SpreadsheetApp.newRichTextValue()
+      .setText("📥 XEM BÁO CÁO PDF")
+      .setLinkUrl(pdfUrl)
+      .build();
+    
+    targetSheet.getRange("M10").setRichTextValue(richText)
+               .setBackground("#28a745")
+               .setFontColor("#FFFFFF")
+               .setFontWeight("bold")
+               .setHorizontalAlignment("center")
+               .setVerticalAlignment("middle");
+               
+    SpreadsheetApp.getUi().alert('✅ Đã phân tích RFM và xuất báo cáo PDF thành công!\nLink PDF đã được gắn tại ô H1.');
+    
+  } catch (e) {
+    SpreadsheetApp.getUi().alert("⚠️ Đã phân tích xong dữ liệu, nhưng có lỗi khi tạo PDF: " + e.message);
+  }
+}
+
+// Hàm hỗ trợ ép kiểu Ngày
+function parseDate_(val) {
+  if (!val) return null;
+  if (val instanceof Date) return val;
+  if (typeof val === 'string' && val.trim() !== '') {
+    var parts = val.trim().split('/');
+    if (parts.length === 3) {
+      return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+    }
+    var d = new Date(val);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
+// Hàm hỗ trợ ép kiểu Số
+function parseNumber_(val) {
+  if (typeof val === 'number') return val;
+  if (typeof val === 'string' && val.trim() !== '') {
+    var clean = val.replace(/\./g, '').replace(/,/g, '').trim();
+    var n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+  return 0;
+}`,
+    businessScenario: {
+      story: "Bạn là Chuyên viên Phân tích Dữ liệu hoặc Trưởng bộ phận Chăm sóc khách hàng. Công ty chuẩn bị cho chiến dịch Tri ân cuối năm và cần gửi ưu đãi riêng cho từng nhóm khách hàng.",
+      pain: "Bạn có danh sách hàng nghìn giao dịch thô. Để tính ra được ai là VIP hay ai sắp rời bỏ, bạn phải viết hàng loạt cột phụ, tính toán đếm số đơn bằng COUNTIFS, cộng tiền bằng SUMIFS, rồi lồng các hàm IF cực kỳ dễ sai sót và mỏi mắt.",
+      solution: "Apps Script tự động quét toàn bộ đơn hàng, tính toán RFM, phân nhóm khách hàng VIP/Trung thành/Nguy cơ rời bỏ, vẽ biểu đồ phân phối và đóng góp doanh số, sau đó xuất báo cáo chuyên nghiệp chỉ trong 3 giây!"
+    },
+    promptBreakdown: [
+      { tag: "1. VAI TRÒ & DỮ LIỆU", title: "Phân tích RFM từ DonHang_BT6", desc: "AI nhận diện sheet DonHang_BT6 và tập trung phân tích 3 chỉ số Recency, Frequency, Monetary." },
+      { tag: "2. LUẬT CHẤM ĐIỂM", title: "Quy tắc điểm 1-5 & Phân nhóm", desc: "Chấm điểm từng chỉ số và tính tổng điểm (tối đa 15đ) để xếp hạng khách hàng chính xác." },
+      { tag: "3. TỔNG HỢP & BIỂU ĐỒ", title: "Pie & Column Chart", desc: "Tự lập bảng tổng hợp phân khúc bằng COUNTIF/SUMIF, vẽ 1 biểu đồ tròn và 1 biểu đồ cột song song." },
+      { tag: "4. DOCUMENT REPORT", title: "Docs & PDF Export", desc: "(Nâng cao) Tự động điền dữ liệu phân khúc vào biểu mẫu báo cáo Docs và xuất PDF lưu Drive." }
+    ],
+    businessRequirements: `
+      <p><b>Bài toán thực tế:</b> Phân loại nhóm khách hàng dựa trên lịch sử mua sắm để tối ưu hóa hiệu quả chăm sóc khách hàng. Tự động hóa hoàn toàn quy trình xử lý, tính toán điểm RFM, vẽ biểu đồ tròn tỷ lệ, biểu đồ cột doanh số và xuất file báo cáo văn bản.</p>
+      <ul>
+        <li><b>Mục tiêu:</b> Chạy thuật toán in-memory xử lý 100+ dòng giao dịch, vẽ 2 biểu đồ trực quan hóa và xuất kết quả báo cáo.</li>
+        <li><b>Kỹ năng đạt được:</b> Làm chủ mô hình phân tích RFM, vẽ biểu đồ nâng cao qua Apps Script, xuất file in ấn sang PDF/Google Drive.</li>
+      </ul>
+    `,
+    tableHeaders: ["Mã Đơn", "Mã KH", "Tên Khách Hàng", "Ngày Mua", "Doanh Thu Đơn"],
+    tableRows: [
+      ["DH-RFM-0001", "KH001", "Nguyễn Văn An", "28/08/2026", "5,200,000"],
+      ["DH-RFM-0002", "KH002", "Trần Thị Bích", "25/08/2026", "12,800,000"],
+      ["DH-RFM-0003", "KH001", "Nguyễn Văn An", "15/07/2026", "3,500,000"],
+      ["DH-RFM-0004", "KH003", "Lê Hoàng Long", "10/06/2026", "2,400,000"],
+      ["DH-RFM-0005", "KH002", "Trần Thị Bích", "05/05/2026", "8,500,000"]
+    ],
+    steps: [
+      {
+        badge: "01",
+        title: "Bước 1: Kiểm Tra Xem AI Có Thực Sự Đang Đọc Được File Hay Không",
+        desc: "Trước khi thực hiện phân tích hay lập trình, hãy gửi đường link Google Sheets của bạn và kiểm tra xem AI (Spark / Gemini) có truy cập đọc được trang dữ liệu <code>DonHang_BT6</code> không.",
+        promptBox: `https://docs.google.com/spreadsheets/d/19jPP-MwIMPjeDfViicF1jTQBxx-0lTP8HAwR6IqArPI/edit
+ 
+bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong link này chứ? Hãy liệt kê 3 dòng dữ liệu đầu tiên để xác nhận.`,
+        note: "<b>💡 Mẹo:</b> Hãy đảm bảo file Google Sheets đã được bật chế độ chia sẻ là <i>'Bất kỳ ai có đường liên kết đều có thể xem'</i>."
+      },
+      {
+        badge: "02",
+        title: "Bước 2: Yêu Cầu AI Phân Tích Cấu Trúc Bảng & Chỉ Số Phân Phối",
+        desc: "Ra lệnh cho AI phân tích cấu trúc cột, xác định tọa độ và phương pháp tính các chỉ số RFM trước khi viết code.",
+        promptBox: `Hãy phân tích cấu trúc cột của sheet "DonHang_BT6" và đề xuất thuật toán tính 3 chỉ số RFM cho từng khách hàng duy nhất:
+1. R (Recency): Khoảng cách số ngày từ lần mua cuối của khách hàng đó đến ngày chốt báo cáo 31/08/2026.
+2. F (Frequency): Tổng số đơn hàng của khách hàng.
+3. M (Monetary): Tổng doanh thu mua sắm của khách hàng đó.`
+      },
+      {
+        badge: "03",
+        title: "Bước 3: Ra Lệnh AI Viết Apps Script Tính Toán RFM & Vẽ Biểu Đồ (Cột & Tròn)",
+        desc: "Sử dụng Siêu Prompt chi tiết để AI viết mã nguồn tự động tạo bảng phân khúc và chèn biểu đồ cột + tròn song song trên Sheet.",
+        promptBox: `Bạn là Lập trình viên Google Apps Script. Viết 1 đoạn code Apps Script (.gs) hoàn chỉnh cho sheet "DonHang_BT6":
+1. Đọc dữ liệu từ dòng 4 (A4:E) và tính toán R (so với ngày 31/08/2026), F, M cho mỗi khách hàng.
+2. Chấm điểm RFM từ 1-5 theo quy tắc:
+   - R: <=15 ngày: 5đ; <=45 ngày: 4đ; <=90 ngày: 3đ; <=180 ngày: 2đ; còn lại: 1đ.
+   - F: >=10 lần: 5đ; >=5 lần: 4đ; >=3 lần: 3đ; >=2 lần: 2đ; còn lại: 1đ.
+   - M: >=50.000.000: 5đ; >=20.000.000: 4đ; <=10.000.000: 3đ; >=5.000.000: 2đ; còn lại: 1đ.
+3. Phân hạng dựa trên tổng điểm RFM (tối đa 15đ): VIP (>=13), Trung thành (10-12), Tiềm năng (7-9), Khách mới (5-6), Nguy cơ rời bỏ (<=4).
+4. Ghi kết quả sang sheet mới tên là "BaoCao_RFM_BT6". Định dạng bảng chuyên nghiệp màu Navy.
+5. Tạo bảng tổng hợp phân khúc ở cột M-O bằng công thức COUNTIF & SUMIF. [BẮT BUỘC CHUẨN LOCALE VIỆT NAM]: Các đối số trong công thức phải được phân cách bằng dấu chấm phẩy (;) (ví dụ: =COUNTIF(K4:K8; "VIP")). Trong Apps Script, bắt buộc sử dụng phương thức .setFormulasLocal() thay vì .setFormulas() để phù hợp với cài đặt Locale Việt Nam của bảng tính.
+6. Vẽ tự động 1 Biểu đồ tròn (Pie Chart) thể hiện tỷ lệ % khách hàng của mỗi phân khúc và 1 Biểu đồ cột (Column Chart) thể hiện doanh số đóng góp của từng phân khúc. Đặt 2 biểu đồ cạnh bảng tổng hợp ở cột Q.
+7. Thêm menu "📊 PHÂN TÍCH" > "Chạy Phân Tích RFM Khách Hàng".`
+      },
+      {
+        badge: "04",
+        title: "Bước 4: Ra Lệnh Cho AI Thiết Lập Biểu Mẫu Word (Google Docs) Thô",
+        desc: "Hướng dẫn AI tạo ra biểu mẫu Docs mẫu đại diện cho một báo cáo phân tích khách hàng chính thức trên Word, chứa các thẻ placeholder <code>{VIP_Count}</code>, <code>{Loyal_Count}</code>... để sau này điền dữ liệu tự động.",
+        promptBox: `Hãy tạo một file Google Docs template đặt tên là "BaoCao_RFM_Template" với cấu trúc sau:
+1. Tiêu đề: "BÁO CÁO PHÂN TÍCH CHẤT LƯỢNG KHÁCH HÀNG DOANH NGHIỆP".
+2. Bảng thống kê phân khúc khách hàng gồm các dòng:
+   - Số lượng khách hàng VIP: {VIP_Count}
+   - Số lượng khách hàng Trung thành: {Loyal_Count}
+   - Số lượng khách hàng Tiềm năng: {Potential_Count}
+   - Số lượng khách hàng Mới: {New_Count}
+   - Số lượng khách hàng Nguy cơ rời bỏ: {Churn_Count}
+3. Phần nhận định chung: "{Insights}".`
+      },
+      {
+        badge: "05",
+        title: "Bước 5: Ra Lệnh Cho AI Apps Script Điền Dữ Liệu & Xuất Báo Cáo PDF",
+        desc: "Tích hợp quy trình tự động hóa khép kín: Nhân bản biểu mẫu Docs mẫu, điền dữ liệu thực tế tính toán từ Sheet và xuất PDF lưu Drive.",
+        promptBox: `Hãy nâng cấp mã nguồn Apps Script của bạn để thực hiện:
+1. Mở file Google Docs "BaoCao_RFM_Template" bằng ID hoặc tên và tạo một bản sao tạm.
+2. Tìm và thay thế các từ khóa mẫu {VIP_Count}, {Loyal_Count}... bằng số liệu phân tích thật từ bảng tổng hợp.
+3. Xuất file Doc tạm đó thành định dạng PDF chất lượng cao lưu vào thư mục Drive "BaoCao_RFM_PDF".
+4. Xóa file Doc tạm để dọn rác Drive, và trả liên kết file PDF về ô H1 của sheet báo cáo.`
+      }
+    ],
+    checklist: [
+      "Đã tạo sheet dữ liệu giao dịch DonHang_BT6 thành công",
+      "Đã gửi link Sheet và xác nhận AI Agent đọc chính xác dữ liệu",
+      "AI phân tích chi tiết cấu trúc cột và đề xuất thuật toán tính RFM",
+      "Đã copy Master Prompt gửi AI để sinh mã nguồn Apps Script",
+      "Mã Apps Script thực thi không lỗi, tạo thành công sheet BaoCao_RFM_BT6",
+      "Tự động tạo bảng tổng hợp (COUNTIF/SUMIF) và vẽ biểu đồ Tròn & Cột cạnh nhau",
+      "(Nâng cao) Bản sao Docs mẫu được điền số liệu và xuất thành công file PDF lên Drive"
+    ],
+    triggerGuide: `
+      <h3 class="section-title"><i class="ph-bold ph-calendar-blank"></i> Kích Hoạt Tự Động Đầu Tháng</h3>
+      <p style="color: var(--text-secondary); line-height: 1.7;">
+        Bạn có thể yêu cầu AI: <i>"Hãy hướng dẫn tôi thiết lập Trigger tự động chạy báo cáo phân tích RFM này vào ngày 1 hàng tháng lúc 00:00"</i> để ban giám đốc luôn có báo cáo phân khúc mới nhất ngay khi bước vào tháng mới.
+      </p>
+    `
+  },
+
+  {
+    id: "bt7",
+    index: 7,
+    title: "Bài 7: Xây Dựng Menu UI Quản Lý Bán Hàng & Vẽ Biểu Đồ Thống Kê Xanh Dương",
+    shortTitle: "Quản Lý Bán Hàng & Menu UI",
+    subtitle: "Apps Script lập trình menu UI và vẽ biểu đồ xanh dương",
+    level: "Dành Cho Dân Văn Phòng",
+    time: "20 phút",
+    tags: ["Menu UI Design", "Google Apps Script", "Column Chart", "Semicolon Localized"],
+    desc: "Quy trình thiết lập menu chức năng tùy chỉnh trên thanh công cụ và viết mã Apps Script tính toán doanh thu/chi phí quảng cáo và vẽ biểu đồ cột đôi màu xanh dương.",
+    csvFile: "bai_tap_7_quan_ly_ban_hang.csv",
+    scriptFile: "BaiTap7_QuanLyBanHang_MenuUI.gs",
+    scriptContent: `/**
+ * BÀI TẬP 7: MENU UI QUẢN LÝ BÁN HÀNG & VẼ BIỂU ĐỒ THỐNG KÊ XANH DƯƠNG
+ */
+const CONFIG_BT7 = {
+  SHEET_NAME: "BanHang_BT7",
+  BLUE_PRIMARY: "#1B365D", // Xanh dương đậm tiêu đề
+  BLUE_NAVY: "#1D4ED8",    // Xanh dương vẽ cột doanh thu
+  BLUE_LIGHT: "#93C5FD"    // Xanh lam nhạt vẽ cột chi phí
+};
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("🌸 Quản Lý Bán Hàng")
+    .addItem("➕ Thêm đơn hàng", "themDonHang")
+    .addItem("📦 Nhập hàng", "nhapHang")
+    .addItem("💸 Nhập chi phí", "nhapChiPhi")
+    .addSeparator()
+    .addItem("📊 Xem Thống Kê", "xemThongKe")
+    .addSeparator()
+    .addItem("⚙️ Khởi tạo Sheets", "khoiTaoSheets")
+    .addToUi();
+}
+
+function themDonHang() {
+  SpreadsheetApp.getUi().alert("Chức năng: ➕ Thêm đơn hàng", "Hệ thống đang mở form nhập đơn hàng trực tuyến. Vui lòng kiểm tra!", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function nhapHang() {
+  SpreadsheetApp.getUi().alert("Chức năng: 📦 Nhập hàng", "Yêu cầu nhập kho sỉ đã được kích hoạt!", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function nhapChiPhi() {
+  SpreadsheetApp.getUi().alert("Chức năng: 💸 Nhập chi phí", "Form cập nhật chi phí vận hành cửa hàng đã mở!", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function xemThongKe() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(CONFIG_BT7.SHEET_NAME);
+  
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Lỗi: Không tìm thấy sheet 'BanHang_BT7'!");
+    return;
+  }
+  
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 4) {
+    SpreadsheetApp.getUi().alert("Chưa có đủ dữ liệu giao dịch từ dòng 4 để làm thống kê!");
+    return;
+  }
+  
+  var existingCharts = sheet.getCharts();
+  for (var i = 0; i < existingCharts.length; i++) {
+    sheet.removeChart(existingCharts[i]);
+  }
+  
+  sheet.getRange("I3:K3").setValues([["Kênh/Phân Loại", "Doanh Thu", "Chi Phí"]])
+    .setBackground(CONFIG_BT7.BLUE_PRIMARY).setFontColor("#FFFFFF").setFontWeight("bold").setHorizontalAlignment("center");
+  
+  var channels = [
+    ["Shopee"],
+    ["Lazada"],
+    ["Website"],
+    ["Cửa Hàng"],
+    ["Chi Phí Marketing"],
+    ["Chi Phí Vận Hành"]
+  ];
+  sheet.getRange("I4:I9").setValues(channels);
+  
+  var summaryFormulas = [];
+  for (var r = 4; r <= 9; r++) {
+    var itemLabelCell = "I" + r;
+    var salesFormula = '=SUMIFS(F$4:F$' + lastRow + '; B$4:B$' + lastRow + '; "Bán Hàng"; G$4:G$' + lastRow + '; ' + itemLabelCell + ')';
+    var costFormula = '=SUMIFS(F$4:F$' + lastRow + '; B$4:B$' + lastRow + '; "Chi Phí"; G$4:G$' + lastRow + '; ' + itemLabelCell + ')';
+    summaryFormulas.push([salesFormula, costFormula]);
+  }
+  
+  sheet.getRange("J4:K9").setFormulasLocal(summaryFormulas);
+  sheet.getRange("J4:K9").setNumberFormat("#,##0");
+  sheet.getRange("I3:K9").setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
+  
+  SpreadsheetApp.flush();
+  
+  var chartBuilder = sheet.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(sheet.getRange("I3:K9"))
+    .setPosition(11, 9, 0, 0)
+    .setOption("title", "THỐNG KÊ DOANH THU & CHI PHÍ BÁN HÀNG")
+    .setOption("width", 500)
+    .setOption("height", 320)
+    .setOption("colors", [CONFIG_BT7.BLUE_NAVY, CONFIG_BT7.BLUE_LIGHT])
+    .setOption("vAxis", {title: "Số Tiền (VNĐ)", format: "#,##0"})
+    .setOption("hAxis", {title: "Kênh Phân Phối"})
+    .build();
+    
+  sheet.insertChart(chartBuilder);
+  
+  SpreadsheetApp.getUi().alert("Thành công!", "Đã lập bảng phân tích nhanh và vẽ biểu đồ doanh số tông màu Xanh Dương thành công!", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function khoiTaoSheets() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(CONFIG_BT7.SHEET_NAME) || ss.getActiveSheet();
+  
+  sheet.clear();
+  var charts = sheet.getCharts();
+  for (var i = 0; i < charts.length; i++) {
+    sheet.removeChart(charts[i]);
+  }
+  
+  sheet.getRange("A1:G1").merge().setValue("SỔ NHẬT KÝ BÁN HÀNG & CHI PHÍ")
+    .setBackground(CONFIG_BT7.BLUE_PRIMARY).setFontColor("#FFFFFF").setFontWeight("bold").setFontSize(13)
+    .setHorizontalAlignment("center").setVerticalAlignment("center");
+  sheet.setRowHeight(1, 35);
+  
+  var headers = ["Ngày Giao Dịch", "Loại Giao Dịch", "Nội Dung", "Số Lượng", "Đơn Giá", "Thành Tiền", "Kênh/Phân Loại"];
+  sheet.getRange(3, 1, 1, headers.length).setValues([headers])
+    .setBackground(CONFIG_BT7.BLUE_PRIMARY).setFontColor("#FFFFFF").setFontWeight("bold")
+    .setHorizontalAlignment("center");
+  sheet.setRowHeight(3, 24);
+  
+  sheet.getRange("A4:G20").setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
+  sheet.autoResizeColumns(1, headers.length);
+  
+  SpreadsheetApp.getUi().alert("Khởi tạo thành công!", "Bảng nhật ký bán hàng sạch đã sẵn sàng nhập liệu!", SpreadsheetApp.getUi().ButtonSet.OK);
+}`,
+    workflow: [
+      { icon: "ph-link", title: "1. Đọc Dữ Liệu", desc: "Xác nhận AI đọc chính xác sheet BanHang_BT7" },
+      { icon: "ph-table", title: "2. Phân Tích Cột", desc: "AI phân tích cấu trúc cột & phân khúc giao dịch" },
+      { icon: "ph-list-bullets", title: "3. Tạo Menu UI", desc: "Apps Script hàm onOpen() tạo menu tùy chỉnh" },
+      { icon: "ph-chart-bar", title: "4. Vẽ Biểu Đồ", desc: "Hàm Xem Thống Kê vẽ biểu đồ tông xanh dương" },
+      { icon: "ph-gear", title: "5. Khởi Tạo Sheet", desc: "Hàm Khởi tạo sheet mẫu trống định dạng chuẩn" }
+    ],
+    masterPrompt: `[VAI TRÒ]: Bạn là Chuyên gia Tự động hóa và Lập trình viên Google Apps Script chuyên nghiệp.
+[NHIỆM VỤ]: Viết một đoạn code Apps Script (.gs) hoàn chỉnh cho sheet "BanHang_BT7" để tạo một menu UI và vẽ biểu đồ cột thống kê tông màu xanh dương. Không giải thích, chỉ xuất khối mã code duy nhất.
+
+[THÔNG TIN DỮ LIỆU ĐẦU VÀO]:
+- Tên Sheet nguồn: "BanHang_BT7"
+- Dữ liệu bắt đầu từ dòng 4 gồm các cột: Ngày Giao Dịch, Loại Giao Dịch, Nội Dung, Số Lượng, Đơn Giá, Thành Tiền, Kênh/Phân Loại.
+
+[LUẬT NGHIỆP VỤ & MENU UI]:
+1. Tạo một menu tên là "🌸 Quản Lý Bán Hàng" thả xuống ngay khi mở file (hàm onOpen()):
+   - "➕ Thêm đơn hàng" (hàm themDonHang)
+   - "📦 Nhập hàng" (hàm nhapHang)
+   - "💸 Nhập chi phí" (hàm nhapChiPhi)
+   - (Dòng ngăn cách)
+   - "📊 Xem Thống Kê" (hàm xemThongKe)
+   - (Dòng ngăn cách)
+   - "⚙️ Khởi tạo Sheets" (hàm khoiTaoSheets)
+2. Lập trình cho hàm xemThongKe():
+   - Tạo bảng tổng hợp doanh số/chi phí theo kênh tại cột I-K.
+   - [BẮT BUỘC CHUẨN LOCALE VIỆT NAM]: Các đối số trong công thức SUMIFS phải dùng dấu chấm phẩy (;) (ví dụ: =SUMIFS(F$4:F$53; B$4:B$53; "Bán Hàng"; G$4:G$53; I4)). Trong Apps Script, dùng hàm .setFormulasLocal() thay vì .setFormulas() để không báo lỗi cú pháp.
+   - Vẽ một biểu đồ cột (Column Chart) hiển thị doanh thu và chi phí, đặt màu cột chủ đạo tông màu Xanh Dương (Xanh Navy đậm cho Doanh thu và Xanh Lam nhạt cho Chi phí).
+3. Lập trình cho hàm khoiTaoSheets():
+   - Xóa sạch dữ liệu cũ và định dạng khung bảng trống định dạng tiêu đề màu xanh dương đậm (#1B365D), chữ trắng in đậm chuẩn đẹp.`,
+    businessScenario: {
+      story: "Bạn là Quản lý cửa hàng bán lẻ thiết bị công nghệ. Hàng ngày có nhiều giao dịch bán hàng, nhập kho và chi phí phát sinh lộn xộn. Bạn muốn tự động hóa tạo menu thao tác nhanh cho nhân viên.",
+      pain: "Mỗi ngày nhân viên phải lọc tay số liệu, tự lập bảng so sánh doanh số/chi phí và vẽ biểu đồ báo cáo gửi bạn, rất dễ sai lệch và mất thời gian tổng hợp mỗi tối.",
+      solution: "Tạo menu tiện ích trực tiếp trên Sheets. Nhân viên chỉ cần nhấp chọn, hệ thống tự lập bảng và tự vẽ biểu đồ cột màu xanh dương chủ đạo trực quan trong tích tắc!"
+    },
+    promptBreakdown: [
+      { tag: "1. VAI TRÒ & DATA", title: "Lập trình viên Apps Script", desc: "AI nhận diện sheet BanHang_BT7 làm sheet nguồn." },
+      { tag: "2. GIAO DIỆN MENU", title: "Thanh Menu 🌸 Quản Lý Bán Hàng", desc: "Hàm onOpen() tự khởi tạo menu gồm các nút chức năng nhập liệu và thống kê." },
+      { tag: "3. THỐNG KÊ LOCALE VN", title: "SUMIFS và setFormulasLocal()", desc: "Bắt buộc công thức sử dụng dấu chấm phẩy (;) và setFormulasLocal() để không bị lỗi trên Sheets tiếng Việt." },
+      { tag: "4. BIỂU ĐỒ XANH DƯƠNG", title: "Biểu đồ cột Blue theme", desc: "Vẽ biểu đồ cột đôi so sánh doanh số/chi phí với tông màu xanh dương chủ đạo sắc nét." }
+    ],
+    businessRequirements: `
+      <p><b>Bài toán thực tế:</b> Xây dựng một quy trình làm việc chuẩn cho nhân viên bán hàng bằng thanh công cụ tiện ích. Tự động hóa tính toán doanh số/chi phí và vẽ biểu đồ cột tông màu xanh dương chủ đạo.</p>
+      <ul>
+        <li><b>Mục tiêu:</b> Lập trình menu UI, viết công thức SUMIFS local, và vẽ biểu đồ cột đôi.</li>
+        <li><b>Kỹ năng đạt được:</b> Tạo Custom Menu trong Sheets, thiết lập biểu đồ qua Apps Script, sử dụng công thức Localized Việt Nam.</li>
+      </ul>
+    `,
+    tableHeaders: ["Ngày Giao Dịch", "Loại Giao Dịch", "Nội Dung", "Số Lượng", "Đơn Giá", "Thành Tiền", "Kênh/Phân Loại"],
+    tableRows: [
+      ["02/08/2026", "Bán Hàng", "Laptop Acer Aspire", "1", "12,500,000", "12,500,000", "Shopee"],
+      ["05/08/2026", "Nhập Hàng", "Lô Chuột Logitech (Nhập sỉ)", "10", "300,000", "3,000,000", "Nhập Kho"],
+      ["12/08/2026", "Bán Hàng", "Chuột Logitech G102", "2", "450,000", "900,000", "Lazada"],
+      ["15/08/2026", "Chi Phí", "Chi phí chạy quảng cáo Facebook Ads", "1", "2,000,000", "2,000,000", "Chi Phí Marketing"]
+    ],
+    steps: [
+      {
+        badge: "01",
+        title: "Bước 1: Kiểm Tra AI Nhận Diện Sheet Bán Hàng Mới",
+        desc: "Gửi link Google Sheet chứa trang dữ liệu mới <code>BanHang_BT7</code> để xác nhận AI đã đọc chính xác thông tin giao dịch.",
+        promptBox: `https://docs.google.com/spreadsheets/d/19jPP-MwIMPjeDfViicF1jTQBxx-0lTP8HAwR6IqArPI/edit
+ 
+bạn có thể đọc được nội dung của sheet mới "BanHang_BT7" trong link này chứ? Hãy liệt kê 3 dòng dữ liệu giao dịch đầu tiên để xác nhận.`
+      },
+      {
+        badge: "02",
+        title: "Bước 2: Yêu Cầu AI Phân Tích Bố Cục Nhật Ký Giao Dịch",
+        desc: "Yêu cầu AI phân tích các cột dữ liệu để lập kế hoạch tính toán doanh thu/chi phí và vẽ biểu đồ cột.",
+        promptBox: `Hãy phân tích dữ liệu trong sheet "BanHang_BT7". Làm sao để dùng Apps Script lọc ra tổng Doanh thu của các kênh bán hàng (Shopee, Lazada, Website, Cửa Hàng) và tổng Chi phí của các kênh marketing (Chi Phí Marketing, Chi Phí Vận Hành)?`
+      },
+      {
+        badge: "03",
+        title: "Bước 3: Tạo Giao Diện Menu Tiện Ích 'Quản Lý Bán Hàng'",
+        desc: "AI viết mã Apps Script hàm <code>onOpen()</code> tự tạo thanh Menu thả xuống <code>🌸 Quản Lý Bán Hàng</code> với các emojis tương ứng.",
+        promptBox: `Viết hàm onOpen() trong Google Apps Script để tạo một menu tùy chỉnh tên là "🌸 Quản Lý Bán Hàng" hiển thị trên thanh công cụ của Google Sheets với danh sách các nút bấm sau:
+1. "➕ Thêm đơn hàng" (gọi hàm themDonHang)
+2. "📦 Nhập hàng" (gọi hàm nhapHang)
+3. "💸 Nhập chi phí" (gọi hàm nhapChiPhi)
+(Thêm 1 dòng gạch ngang phân cách)
+4. "📊 Xem Thống Kê" (gọi hàm xemThongKe)
+(Thêm 1 dòng gạch ngang phân cách)
+5. "⚙️ Khởi tạo Sheets" (gọi hàm khoiTaoSheets)`
+      },
+      {
+        badge: "04",
+        title: "Bước 4: Lập Trình Chức Năng Vẽ Biểu Đồ Thống Kê Tông Màu Xanh Dương",
+        desc: "AI viết code hàm <code>xemThongKe()</code> để tự chèn bảng tổng hợp bằng công thức <code>SUMIFS</code> local (dấu <code>;</code>) và vẽ biểu đồ cột đôi màu xanh dương cạnh bảng dữ liệu.",
+        promptBox: `Hãy viết code cho hàm xemThongKe() thực hiện các yêu cầu sau:
+1. Đọc dữ liệu từ dòng 4 sheet "BanHang_BT7" (A4:G).
+2. Tạo bảng tổng hợp phân tích từ cột I đến K:
+   - Dòng 3: Tiêu đề "Kênh/Phân Loại", "Doanh Thu", "Chi Phí".
+   - Dòng 4-7 liệt kê các kênh bán: Shopee, Lazada, Website, Cửa Hàng. Điền công thức SUMIFS chuẩn tiếng Việt (dùng dấu ;) để cộng tiền Doanh thu bán hàng tương ứng.
+   - Dòng 8-9 liệt kê chi phí: Chi Phí Marketing, Chi Phí Vận Hành. Điền công thức SUMIFS tương tự để cộng tiền Chi phí tương ứng.
+   - Sử dụng .setFormulasLocal() để chèn công thức chuẩn xác.
+3. Tự động vẽ 1 biểu đồ cột (Column Chart) so sánh Doanh thu và Chi phí của các kênh dựa trên bảng tổng hợp trên.
+4. Đặt màu chủ đạo của biểu đồ là tông màu Xanh Dương (Xanh Navy đậm cho Doanh thu và Xanh Lam nhạt cho Chi phí). Đặt biểu đồ bên dưới bảng tổng hợp ở cột M.`
+      },
+      {
+        badge: "05",
+        title: "Bước 5: Thiết Lập Chức Năng Khởi Tạo Bảng Trống Định Dạng",
+        desc: "AI viết code hàm <code>khoiTaoSheets()</code> để dọn dẹp trang tính và định dạng trước bảng dữ liệu trống tông màu xanh dương sẵn sàng nhập liệu mới.",
+        promptBox: `Hãy viết code cho hàm khoiTaoSheets() để xóa sạch dữ liệu cũ trên sheet "BanHang_BT7", chèn lại dòng tiêu đề header (Ngày Giao Dịch, Loại Giao Dịch, Nội Dung, Số Lượng, Đơn Giá, Thành Tiền, Kênh/Phân Loại), tô nền tiêu đề màu xanh dương đậm (#1B365D), chữ trắng in đậm và kẻ viền bảng trống sẵn sàng nhập liệu.`
+      }
+    ],
+    checklist: [
+      "Đã tạo sheet dữ liệu giao dịch BanHang_BT7 thành công",
+      "Đã gửi link Sheet và xác nhận AI Agent đọc chính xác 3 dòng đầu",
+      "AI đề xuất thành công giải thuật phân tách doanh thu/chi phí",
+      "Hàm onOpen() tự động khởi tạo menu 🌸 Quản Lý Bán Hàng có emojis",
+      "Hàm Xem Thống Kê tự động điền bảng SUMIFS chuẩn tiếng Việt (dấu ;)",
+      "Vẽ thành công biểu đồ cột đôi Doanh thu/Chi phí màu xanh dương chủ đạo",
+      "Hàm Khởi Tạo Sheet dọn sạch và vẽ khung bảng trống màu xanh dương đậm"
+    ],
+    triggerGuide: `
+      <h3 class="section-title"><i class="ph-bold ph-lightning"></i> Cập Nhật Hàng Đêm</h3>
+      <p style="color: var(--text-secondary); line-height: 1.7;">
+        Bạn có thể thiết lập Trigger chạy hàm <code>xemThongKe</code> lúc 23:59 mỗi đêm để biểu đồ thống kê luôn cập nhật số liệu chốt ngày mới nhất cho bạn xem vào sáng hôm sau.
+      </p>
+    `
+  }
+
 ];
 
 // Application State
@@ -1212,7 +2188,46 @@ function switchExercise(id) {
       <div class="step-content">
         <h4 class="step-title">${step.title}</h4>
         <p class="step-description">${step.desc}</p>
-        ${step.promptBox ? `<div class="step-prompt-box">💬 <b>Prompt mẫu:</b> "${step.promptBox}"</div>` : ''}
+        ${step.promptBox ? `
+          <div class="step-prompt-card">
+            <div class="step-prompt-card-header">
+              <span class="prompt-card-label"><i class="ph-bold ph-chat-circle-dots"></i> Câu Lệnh Prompt Gửi AI</span>
+              <button class="btn-copy-step-prompt" onclick="copyStepPrompt(this)">
+                <i class="ph-bold ph-copy"></i> Sao chép
+              </button>
+            </div>
+            <pre class="step-prompt-pre">${escapeHtml(step.promptBox)}</pre>
+          </div>
+        ` : ''}
+        ${step.note ? `
+          <div class="step-note-box">
+            <i class="ph-bold ph-info"></i>
+            <div>${step.note}</div>
+          </div>
+        ` : ''}
+        ${step.expectedResult ? `
+          <div class="step-result-card">
+            <div class="step-result-header">
+              <i class="ph-bold ph-check-circle" style="color: #10b981;"></i>
+              <span>Kết quả đối chiếu chuẩn xác</span>
+            </div>
+            <div class="step-image-gallery">
+              ${step.expectedResult.image ? `
+                <div class="step-image-box">
+                  <div class="step-image-title">${step.expectedResult.imageTitle || 'Hình ảnh minh họa'}</div>
+                  <div class="step-image-frame">
+                    <img src="${step.expectedResult.image}" alt="${step.expectedResult.imageTitle || 'Kết quả'}" class="step-result-img">
+                  </div>
+                </div>
+              ` : ''}
+              ${step.expectedResult.htmlText ? `
+                <div class="step-result-text">
+                  ${step.expectedResult.htmlText}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        ` : ''}
       </div>
     </div>
   `).join("");
@@ -1353,3 +2368,25 @@ document.addEventListener("DOMContentLoaded", () => {
   renderNav();
   switchExercise("bt1");
 });
+
+
+// Helper function to escape HTML
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Copy Step Prompt Helper
+window.copyStepPrompt = function(btn) {
+  const card = btn.closest('.step-prompt-card');
+  if (card) {
+    const pre = card.querySelector('.step-prompt-pre');
+    if (pre) {
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        showToast("Đã sao chép câu lệnh Prompt!");
+      }).catch(() => {
+        showToast("Đã sao chép câu lệnh Prompt!");
+      });
+    }
+  }
+};

@@ -1,0 +1,62 @@
+[VAI TRÒ]: Bạn là Chuyên gia Tự động hóa và Lập trình viên Google Apps Script / HTML-CSS UI chuyên nghiệp.
+[NHIỆM VỤ]: Viết một đoạn code Google Apps Script (.gs) hoàn chỉnh phục vụ hệ thống quản lý bán hàng cho sheet "BanHang_BT7". Yêu cầu mã code bao gồm cả phần backend điều hướng dữ liệu lẫn giao diện HTML Dialog hiện đại.
+[YÊU CẦU VỀ OUTPUT]: Chỉ xuất duy nhất khối mã code Apps Script (.gs) hoàn chỉnh trong block code markdown. Không giải thích, không thêm bất kỳ văn bản dẫn dắt nào.
+
+---
+
+### 1. CẤU TRÚC MENU UI (hàm onOpen)
+Tạo menu thanh công cụ tên: "🌸 Quản Lý Bán Hàng" ngay khi mở file bao gồm:
+- "➕ Thêm đơn hàng" -> gọi hàm `themDonHang`
+- "📦 Nhập hàng" -> gọi hàm `nhapHang`
+- "💸 Nhập chi phí" -> gọi hàm `nhapChiPhi`
+- (Đường ngăn cách)
+- "📊 Xem Thống Kê" -> gọi hàm `xemThongKe`
+- (Đường ngăn cách)
+- "⚙️ Khởi tạo Sheets" -> gọi hàm `khoiTaoSheets`
+
+---
+
+### 2. YÊU CẦU GIAO DIỆN FORM HTML (HTML Dialogs)
+Tất cả các Form (Thêm đơn hàng, Nhập hàng, Nhập chi phí) đều phải dùng `HtmlService.createHtmlOutput` với thiết kế Aesthetic Blue Theme, kích thước Dialog rộng **780px x 520px**:
+- **Font chữ**: 'Quicksand', sans-serif (Google Fonts).
+- **Màu nền (Body background)**: Linear gradient màu xanh lá/xanh dương nhạt `linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #bfdbfe 100%)`.
+- **Card container**: Nền `rgba(255, 255, 255, 0.95)`, bo góc `20px`, hiệu ứng `backdrop-filter: blur(10px)`, đổ bóng `0 10px 30px rgba(37, 99, 235, 0.15)`, viền `#bfdbfe`.
+- **Màu sắc chủ đạo**: Tiêu đề xanh đậm `#1e3a8a`, nhãn hiệu (label) xanh blue đậm `#1e40af`, nút bấm chính (btn-save) gradient `#1e3a8a` sang `#2563eb`.
+- **Form `themDonHang`**:
+  - Gồm Ngày bán, Nền tảng (Instagram, Shopee, Lazada, TikTok Shop, Website, Cửa Hàng).
+  - Khung danh sách sản phẩm `#f0f9ff` hiển thị Dropdown sản phẩm kèm thuộc tính `data-price` chứa thông tin giá & tồn kho mẫu (Cáo, Cừu trắng, Chuột Logitech G102, Laptop Acer, Màn hình LG, v.v.). Có hàm JS `updatePrice()` tự điền đơn giá khi chọn sản phẩm.
+  - Gọi hàm server `google.script.run...luuDonHang(data)` khi lưu thành công thì tự đóng modal.
+- **Form `nhapHang` và `nhapChiPhi`**: Sử dụng hàm chung `createFormHtml(title, type, channels, serverHandler)` để tái sử dụng layout giao diện màu xanh dương rộng 780px. Gọi lần lượt `luuNhapHang` và `luuChiPhi`.
+
+---
+
+### 3. CÁC HÀM XỬ LÝ DỮ LIỆU BACKEND
+- **`getTargetSheet()`**: Kiểm tra và lấy sheet `BanHang_BT7`, nếu chưa có thì tự tạo.
+- **`formatDate(dateStr)`**: Chuyển định dạng `YYYY-MM-DD` sang `DD/MM/YYYY`.
+- **`appendToSheet(rowValues)`**: Chèn dòng mới từ dòng 5 trở đi (nếu chưa có dữ liệu). Tự động định dạng số tiền `#,##0 "VNĐ"`, căn giữa ngày/loại/kênh.
+- **`luuDonHang` / `luuNhapHang` / `luuChiPhi`**:
+  - Tính `Thành Tiền = Số Lượng * Đơn Giá`.
+  - Ghi chuẩn các cột: [Ngày Giao Dịch, Loại Giao Dịch, Nội Dung, Số Lượng, Đơn Giá, Thành Tiền, Kênh/Phân Loại].
+
+---
+
+### 4. HÀM THỐNG KÊ & VẼ BIỂU ĐỒ (`xemThongKe`)
+- **Tạo bảng tổng hợp**:
+  - Đặt Tiêu đề cột `I3:K3` là `['Kênh / Phân Loại', 'Doanh Thu', 'Chi Phí']`, nền `#1E3A8A`, chữ trắng in đậm.
+  - Danh mục tại `I4:I9`: `['Shopee', 'Lazada', 'Website', 'Cửa Hàng', 'Chi Phí Marketing', 'Chi Phí Vận Hành']`.
+  - **Dùng công thức Locale Việt Nam**: Sử dụng `.setFormulasLocal()` với công thức `SUMIFS` dùng dấu chấm phẩy `;` làm phân cách:
+    - Doanh thu (Cột J): `=SUMIFS(F$4:F; B$4:B; "Bán Hàng"; G$4:G; I4)` đến `I9`.
+    - Chi phí (Cột K): `=SUMIFS(F$4:F; B$4:B; "Chi Phí"; G$4:G; I4)` đến `I9`.
+- **Vẽ Biểu đồ cột (Column Chart)**:
+  - Lấy dữ liệu vùng `I3:K9`, đặt tại vị trí `(dòng 3, cột 13)`.
+  - Kích thước: `700px x 430px`.
+  - Tông màu biểu đồ: Màu `#1E3A8A` (cho Doanh Thu) và `#3B82F6` (cho Chi Phí).
+  - Định dạng vAxis: 'Số tiền (VNĐ)', format 'short'. Tiêu đề màu `#1E3A8A` chữ in đậm size 14.
+
+---
+
+### 5. HÀM KHỞI TẠO SHEETS (`khoiTaoSheets`)
+- `sheet.clear()` toàn bộ dữ liệu.
+- Tạo tiêu đề gộp ô `A1:G1` với nội dung "QUẢN LÝ BÁN HÀNG & THỐNG KÊ (BT7)", chữ xanh đậm `#1E3A8A`, font size 16.
+- Tạo Header tại `A4:G4` gồm 7 cột dữ liệu. Nền `#1E3A8A`, chữ trắng in đậm, độ cao dòng 35px, căn giữa.
+- Đặt độ rộng các cột (Column Widths): A(120), B(130), C(220), D(90), E(120), F(140), G(160).
