@@ -549,20 +549,94 @@ HÃY XÂY DỰNG QUY TRÌNH TỰ ĐỘNG HOÀN TOÀN:
     steps: [
       {
         badge: "01",
-        title: "Tạo File Google Docs Mẫu Có Bảng Sản Phẩm",
-        desc: "Tạo 1 file Google Docs mẫu với các tag chung <code>{{MA_DON}}</code>, <code>{{TEN_KH}}</code>, <code>{{TONG_TIEN}}</code>... và tạo 1 Bảng (Table) có sẵn dòng tiêu đề để AI chèn danh mục mặt hàng."
+        title: "Kiểm Tra Kết Nối Dữ Liệu Với AI",
+        desc: "Đảm bảo file Google Sheets của bạn đã được bật chế độ chia sẻ (Share) là <b>'Bất kỳ ai có đường liên kết đều có thể xem'</b>. Gửi link Google Sheet cho AI (SPARK / Gemini) và kiểm tra xem AI có thể đọc được đầy đủ dữ liệu hay không.",
+        promptBox: `https://docs.google.com/spreadsheets/d/19jPP-MwIMPjeDfViicF1jTQBxx-0ITP8HAwR6IqArPI/edit?gid=1426817910#gid=1426817910
+
+bạn có thể đọc được nội dung của link này chứ`
       },
       {
         badge: "02",
-        title: "Gửi Master Prompt Cho AI Agent",
-        desc: "Dán câu Master Prompt Bài 2 vào Gemini / AI Agent. AI sẽ tự động sinh mã Apps Script xử lý gom nhóm đa sản phẩm và chèn bảng tự động.",
-        promptBox: "Dán Master Prompt Bài 2 từ Tab 1 vào Gemini / AI Agent"
+        title: "Yêu Cầu AI Phân Tích Cấu Trúc Bảng Dữ Liệu",
+        desc: "Ra lệnh cho AI phân tích các cột và tọa độ dữ liệu trong sheet <code>DonHang_BT2</code> (Mã đơn, Ngày đặt, Khách hàng, Sản phẩm, v.v.) và cơ chế gom nhóm sản phẩm.",
+        promptBox: `hãy phân tích nội dung trong DonHang_BT2 bao gồm những giá trị nào, hàng nào cột nào trong trang`
       },
       {
         badge: "03",
-        title: "Prompt Tinh Chỉnh: Thêm Tính Năng Gửi Email Kèm Hóa Đơn",
-        desc: "Nếu muốn sau khi tạo PDF thì tự động gửi email kèm file hóa đơn cho khách hàng, hãy gửi thêm prompt phụ:",
-        promptBox: "Hãy nâng cấp quy trình: Sau khi tạo file PDF xong, tự động gửi email cho khách hàng kèm link xem hóa đơn và đính kèm trực tiếp file PDF này."
+        title: "Tạo Biểu Mẫu Google Docs Template Bằng AI",
+        desc: "Sử dụng Siêu Prompt thiết kế để yêu cầu AI tự động tạo một tệp Google Docs mẫu mang tên <code>PHIẾU XUẤT KHO KIÊM GIAO HÀNG - Template</code> có sẵn các thẻ placeholder <code>{{...}}</code> và bảng sản phẩm để Apps Script nhận diện và điền tự động.",
+        promptBox: `Hãy tạo một Google Docs template theo đúng cấu trúc của mẫu phiếu xuất kho trong hình tham chiếu.
+
+Mục tiêu: tạo một biểu mẫu "PHIẾU XUẤT KHO KIÊM GIAO HÀNG" có bố cục gọn, chuyên nghiệp, dễ in trên 1 trang A4.
+
+Yêu cầu bố cục:
+
+1. PHẦN ĐẦU TRANG
+- Căn giữa.
+- Dòng 1: "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", in đậm.
+- Dòng 2: "Độc lập - Tự do - Hạnh phúc", in đậm.
+- Bên dưới có một đường gạch ngang ngắn, căn giữa.
+- Cách một khoảng nhỏ rồi đến tiêu đề:
+  "PHIẾU XUẤT KHO KIÊM GIAO HÀNG"
+- Tiêu đề lớn, in đậm, căn giữa.
+
+2. THÔNG TIN KHÁCH HÀNG:
+- Tiêu đề "THÔNG TIN KHÁCH HÀNG:" in đậm.
+- Bên dưới gồm 5 dòng:
+  • Mã đơn hàng: {{Mã Đơn}}
+  • Ngày đặt: {{Ngày Đặt}}
+  • Tên khách hàng: {{Tên Khách Hàng}}
+  • Số điện thoại: {{Số Điện Thoại}}
+  • Địa chỉ giao hàng: {{Địa Chỉ Giao Hàng}}
+
+- Các placeholder {{...}} phải được giữ nguyên để sau này Google Apps Script có thể thay thế tự động.
+
+3. BẢNG CHI TIẾT SẢN PHẨM (Tạo một bảng 6 cột):
+STT | Tên Sản Phẩm | ĐVT | Số Lượng | Đơn Giá (VNĐ) | Thành Tiền (VNĐ)
+Ngay bên dưới là một dòng mẫu:
+{{STT}} | {{Tên Sản Phẩm}} | {{ĐVT}} | {{Số Lượng}} | {{Đơn Giá}} | {{Thành Tiền}}
+
+Yêu cầu bảng:
+- Có đường viền mảnh.
+- Hàng tiêu đề có nền xám rất nhạt, in đậm.
+- STT, ĐVT, Số Lượng căn giữa.
+- Tên sản phẩm căn trái.
+- Đơn giá và Thành tiền căn phải.
+- Chiều rộng các cột cân đối để vừa trang A4.
+
+4. PHẦN THANH TOÁN
+- Dòng: "TỔNG CỘNG THANH TOÁN: {{Tổng Tiền}} VNĐ" (căn phải, in đậm)
+- Dòng: "Số tiền bằng chữ: ........................................................................................................" (căn trái, chữ nghiêng nhẹ)
+
+5. PHẦN CHỮ KÝ
+Ở cuối trang tạo khu vực chữ ký gồm 2 cột bằng nhau (không hiển thị đường viền):
+NGƯỜI NHẬN HÀNG                    NGƯỜI LẬP PHIẾU
+(Ký, ghi rõ họ tên)                    (Ký, ghi rõ họ tên)
+
+6. PHONG CÁCH TOÀN BỘ TÀI LIỆU
+- Khổ giấy A4 dọc, font Arial, chữ đen tối giản, nằm gọn trên 1 trang.`
+      },
+      {
+        badge: "04",
+        title: "Viết Mã Apps Script Tự Động Hóa Xuất PDF",
+        desc: "Dán Siêu Prompt kỹ thuật 5 thành tố vào AI Agent để sinh mã Apps Script hoàn chỉnh: tự gom nhóm sản phẩm theo mã đơn (xử lý gộp ô), điền thông tin vào mẫu Docs, xuất PDF lưu Drive, cập nhật trạng thái 'Đã xuất' và link PDF vào Sheet.",
+        promptBox: `Bạn là một Chuyên gia Lập trình Google Apps Script và Tự động hóa Google Workspace.
+
+DỰ ÁN: TỰ ĐỘNG XUẤT PHIẾU XUẤT KHO KIÊM GIAO HÀNG PDF ĐA SẢN PHẨM TỪ GOOGLE SHEETS
+
+Tôi đã có:
+1. Google Sheet: Trang tính tên "DonHang_BT2" chứa dữ liệu từ dòng 4 gồm 12 cột: Mã Đơn (gộp ô), Ngày Đặt, Tên Khách Hàng, Số Điện Thoại, Địa Chỉ, Sản Phẩm, ĐVT, Số Lượng, Đơn Giá, Thành Tiền, Trạng Thái, Link File PDF.
+2. Google Docs Template: File mẫu tên "PHIẾU XUẤT KHO KIÊM GIAO HÀNG - Template" chứa các biến thông tin chung và bảng sản phẩm.
+
+HÃY VIẾT MÃ GOOGLE APPS SCRIPT HOÀN CHỈNH THỰC HIỆN CÁC YÊU CẦU SAU:
+1. THUẬT TOÁN GOM NHÓM & LỌC DỮ LIỆU: Đọc dữ liệu từ dòng 4. Tự động nhận diện các dòng con thuộc cùng đơn (kế thừa mã đơn gần nhất khi ô bị trống). Chỉ xử lý đơn hàng "Chờ xuất".
+2. QUY TRÌNH XUẤT TỪNG PHIẾU: Sao bản tạm template Docs; thay thế biến chung; chèn dòng sản phẩm vào bảng với STT tự tăng, định dạng tiền tệ VNĐ; điền {{Tổng Tiền}}; xuất PDF đặt tên PhieuXuatKho_[Mã Đơn]_[Tên Khách Hàng].pdf; lưu vào thư mục Drive "HoaDon_PDF"; xóa Docs tạm; cập nhật cột K thành "Đã xuất" và dán link PDF vào cột L.
+3. GIAO DIỆN & TRẢI NGHIỆM: Hàm onOpen() tự động thêm Menu '🚀 Tự Động Hóa Kho' > '📄 Xuất Phiếu Giao Hàng PDF'. Hiển thị Alert thông báo số lượng đơn đã xuất thành công.`
+      },
+      {
+        badge: "05",
+        title: "Thiết Lập ID Và Chạy Quy Trình Trên Sheets",
+        desc: "Tạo một thư mục Google Drive tên <code>HoaDon_PDF</code>, sao chép ID thư mục và ID file Google Docs Template vừa tạo dán vào mã nguồn Apps Script. Mở <b>Tiện ích mở rộng ➔ Apps Script</b>, dán mã code, chọn hàm <code>exportPDF</code> hoặc sử dụng Menu <b>🚀 Tự Động Hóa Kho ➔ 📄 Xuất Phiếu Giao Hàng PDF</b> để chạy thử."
       }
     ],
 
