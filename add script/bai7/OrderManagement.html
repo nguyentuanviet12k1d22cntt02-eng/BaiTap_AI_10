@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8fafc;
+            padding: 15px;
+        }
+
+        .card-custom {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card-custom p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="m-0 text-primary fw-bold"><i class="fa-solid fa-cart-shopping me-2"></i>Quản Lý Đơn Hàng</h5>
+            <button class="btn btn-success btn-sm fw-bold" onclick="openCreateOrderModal()">
+                <i class="fa-solid fa-plus me-1"></i>Tạo Đơn Hàng Mới
+            </button>
+        </div>
+
+        <table class="table table-hover border align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã Đơn</th>
+                    <th>Mã KH</th>
+                    <th>Ngày Đặt</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end">Tổng Tiền</th>
+                    <th class="text-center">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                <tr>
+                    <td colspan="6" class="text-center py-3 text-muted">Đang tải danh sách đơn hàng...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Tạo Đơn Hàng -->
+    <div class="modal fade" id="createOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">🛒 Tạo Đơn Hàng Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Chọn Khách Hàng</label>
+                        <select id="orderCustSelect" class="form-select form-select-sm">
+                            <option value="">-- Đang tải danh sách KH --</option>
+                        </select>
+                    </div>
+
+                    <hr>
+                    <label class="form-label fw-bold">2. Thêm Sản Phẩm Vào Đơn</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <select id="orderProdSelect" class="form-select form-select-sm"
+                                onchange="onProdSelectChange()">
+                                <option value="">-- Chọn Sản Phẩm --</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input type="number" id="orderProdQty" class="form-control form-control-sm" value="1"
+                                min="1" placeholder="Số lượng">
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-primary btn-sm w-100" onclick="addItemToOrder()">➕ Thêm SP</button>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm border mt-2">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên SP</th>
+                                <th class="text-end">Đơn Giá</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Thành Tiền</th>
+                                <th class="text-center">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderItemsTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Chưa chọn sản phẩm nào</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="text-end fw-bold fs-5 text-danger me-2">
+                        Tổng Đơn: <span id="grandTotalText">0 đ</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="submitCreateOrder()">💾 Hoàn Tất Đơn
+                        Hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let orderModal = null;
+        let selectedItems = [];
+        let allProducts = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            orderModal = new bootstrap.Modal(document.getElementById('createOrderModal'));
+            loadOrders();
+            loadCustomersAndProducts();
+        });
+
+        function loadOrders() {
+            google.script.run.withSuccessHandler(res => {
+                let tbody = document.getElementById('orderTableBody');
+                if (!res.items || res.items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Chưa có đơn hàng nào</td></tr>';
+                    return;
+                }
+                let html = '';
+                res.items.forEach(o => {
+                    html += `<tr>
+            <td class="fw-bold">${o.id}</td>
+            <td>${o.customerCode}</td>
+            <td>${o.date}</td>
+            <td><span class="badge bg-info">${o.status}</span></td>
+            <td class="text-end fw-bold text-danger">${Number(o.total).toLocaleString('vi-VN')} đ</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteOrder('${o.id}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>`;
+                });
+                tbody.innerHTML = html;
+            }).getOrders(1, "");
+        }
+
+        function loadCustomersAndProducts() {
+            google.script.run.withSuccessHandler(res => {
+                let sel = document.getElementById('orderCustSelect');
+                sel.innerHTML = '<option value="">-- Chọn khách hàng --</option>';
+                res.items.forEach(c => {
+                    sel.innerHTML += `<option value="${c.code}">${c.name} (${c.code})</option>`;
+                });
+            }).getCustomers(1, "");
+
+            google.script.run.withSuccessHandler(res => {
+                allProducts = res.items;
+                let sel = document.getElementById('orderProdSelect');
+                sel.innerHTML = '<option value="">-- Chọn Sản Phẩm --</option>';
+                res.items.forEach(p => {
+                    sel.innerHTML += `<option value="${p.code}">${p.name} - ${Number(p.price).toLocaleString('vi-VN')}đ (Tồn: ${p.stock})</option>`;
+                });
+            }).getProducts(1, "");
+        }
+
+        function openCreateOrderModal() {
+            selectedItems = [];
+            renderSelectedItems();
+            orderModal.show();
+        }
+
+        function addItemToOrder() {
+            let pCode = document.getElementById('orderProdSelect').value;
+            let qty = Number(document.getElementById('orderProdQty').value);
+            if (!pCode || qty <= 0) return;
+
+            let prod = allProducts.find(p => p.code === pCode);
+            if (!prod) return;
+
+            let exist = selectedItems.find(i => i.productCode === pCode);
+            if (exist) {
+                exist.qty += qty;
+            } else {
+                selectedItems.push({
+                    productCode: prod.code,
+                    productName: prod.name,
+                    price: prod.price,
+                    qty: qty
+                });
+            }
+            renderSelectedItems();
+        }
+
+        function renderSelectedItems() {
+            let tbody = document.getElementById('orderItemsTable');
+            if (selectedItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Chưa chọn sản phẩm nào</td></tr>';
+                document.getElementById('grandTotalText').innerText = "0 đ";
+                return;
+            }
+            let html = '';
+            let grandTotal = 0;
+            selectedItems.forEach((it, idx) => {
+                let lineTotal = it.price * it.qty;
+                grandTotal += lineTotal;
+                html += `<tr>
+          <td>${it.productName}</td>
+          <td class="text-end">${Number(it.price).toLocaleString('vi-VN')} đ</td>
+          <td class="text-center">${it.qty}</td>
+          <td class="text-end fw-bold">${Number(lineTotal).toLocaleString('vi-VN')} đ</td>
+          <td class="text-center"><button class="btn btn-sm btn-link text-danger" onclick="removeItem(${idx})">Xóa</button></td>
+        </tr>`;
+            });
+            tbody.innerHTML = html;
+            document.getElementById('grandTotalText').innerText = Number(grandTotal).toLocaleString('vi-VN') + " đ";
+        }
+
+        function removeItem(idx) {
+            selectedItems.splice(idx, 1);
+            renderSelectedItems();
+        }
+
+        function submitCreateOrder() {
+            let custCode = document.getElementById('orderCustSelect').value;
+            if (!custCode) { alert("Vui lòng chọn khách hàng!"); return; }
+            if (selectedItems.length === 0) { alert("Vui lòng thêm sản phẩm vào đơn!"); return; }
+
+            google.script.run.withSuccessHandler(orderId => {
+                alert("✅ Đã tạo thành công đơn hàng " + orderId);
+                orderModal.hide();
+                loadOrders();
+            }).createOrder({ customerCode: custCode, status: "Hoàn Thành" }, selectedItems);
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm(`Xóa đơn hàng ${orderId}?`)) {
+                google.script.run.withSuccessHandler(() => loadOrders()).deleteOrder(orderId);
+            }
+        }
+    </script>
+</body>
+
+</html>

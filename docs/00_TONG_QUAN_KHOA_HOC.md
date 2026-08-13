@@ -26,7 +26,7 @@ Khóa học này chuyển giao phương pháp tiếp cận mới nhất: **Dân 
 
 ---
 
-### 📚 Danh Mục 5 Bài Thực Hành Tự Động Hóa
+### 📚 Danh Mục 7 Bài Thực Hành Tự Động Hóa
 
 1. **[Bài 1: Báo Cáo Doanh Thu & Sparkline Động Gửi Email Lúc 08:00](file:///d:/AI_10_Basic/docs/01_HUONG_DAN_BAI_TAP_1.md)**
    * *Kỹ năng:* Ra lệnh cho Gemini viết hàm `=SPARKLINE()` vẽ biểu đồ mini trong ô và tự tạo email báo cáo HTML kèm lịch gửi định kỳ.
@@ -38,3 +38,7 @@ Khóa học này chuyển giao phương pháp tiếp cận mới nhất: **Dân 
    * *Kỹ năng:* Prompt AI bắt sự kiện `onFormSubmit`, tự sinh mã đơn `NP-2026-XXXX` và bắn tin nhắn báo sếp qua Telegram.
 5. **[Bài 5: Xử Lý & Làm Sạch 1.000 Dòng Dữ Liệu Lớn Trong 2 Giây](file:///d:/AI_10_Basic/docs/05_HUONG_DAN_BAI_TAP_5.md)**
    * *Kỹ năng:* Prompt AI tối ưu hóa bộ nhớ RAM (In-memory Array) để xóa trùng, sửa số điện thoại mất số 0 và chuẩn hóa họ tên tốc độ cao.
+6. **[Bài 6: Phân Tích Nhóm Khách Hàng RFM & Vẽ Biểu Đồ](file:///d:/AI_10_Basic/docs/06_HUONG_DAN_BAI_TAP_6.md)**
+   * *Kỹ năng:* Prompt AI phân tích nhóm khách hàng theo mô hình RFM, tính điểm số tự động, thiết lập bảng phân khúc, vẽ biểu đồ tròn/cột.
+7. **[Bài 7: Hệ Thống Quản Lý Bán Hàng PRO & Bản Đồ Giao Hàng Trực Quan](file:///d:/AI_10_Basic/docs/07_HUONG_DAN_BAI_TAP_7.md)**
+   * *Kỹ năng:* Prompt AI thiết kế giao diện web Dashboard HTML Service, liên kết hai chiều Frontend-Backend (google.script.run) để quản lý kho hàng và tích hợp bản đồ Leaflet.js ghim vị trí đơn hàng tương tác.

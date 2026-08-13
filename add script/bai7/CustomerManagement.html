@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8fafc;
+            padding: 15px;
+        }
+
+        .card-custom {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card-custom p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="m-0 text-primary fw-bold"><i class="fa-solid fa-users me-2"></i>Quản Lý Khách Hàng</h5>
+            <button class="btn btn-success btn-sm fw-bold" onclick="openAddModal()">
+                <i class="fa-solid fa-user-plus me-1"></i>Thêm Khách Hàng
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-8">
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm tên, SĐT hoặc mã KH..."
+                    onkeyup="onSearch()">
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-outline-secondary btn-sm h-100" onclick="loadCustomers()">Làm mới</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã KH</th>
+                        <th>Tên Khách Hàng</th>
+                        <th>SĐT</th>
+                        <th>Email</th>
+                        <th>Thành Phố</th>
+                        <th>Loại</th>
+                        <th class="text-center">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Đang tải dữ liệu...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-2">
+            <small id="pageInfo" class="text-muted">Trang 1 / 1</small>
+            <div>
+                <button id="btnPrev" class="btn btn-outline-primary btn-sm me-1" onclick="changePage(-1)">Trước</button>
+                <button id="btnNext" class="btn btn-outline-primary btn-sm" onclick="changePage(1)">Sau</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Khách Hàng -->
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">Thêm Khách Hàng Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">Mã Khách Hàng *</label>
+                            <input type="text" id="custCode" class="form-control form-control-sm" placeholder="KH001"
+                                required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">Tên Khách Hàng *</label>
+                            <input type="text" id="custName" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">SĐT *</label>
+                                <input type="text" id="custPhone" class="form-control form-control-sm"
+                                    placeholder="0901234567" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Email</label>
+                                <input type="email" id="custEmail" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">Địa Chỉ</label>
+                            <input type="text" id="custAddress" class="form-control form-control-sm">
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Thành Phố</label>
+                                <select id="custCity" class="form-select form-select-sm">
+                                    <option value="Hà Nội">Hà Nội</option>
+                                    <option value="TP.HCM">TP.HCM</option>
+                                    <option value="Đà Nẵng">Đà Nẵng</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Loại KH</label>
+                                <select id="custType" class="form-select form-select-sm">
+                                    <option value="Thường">Thường</option>
+                                    <option value="VIP">VIP</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveCustomer()">💾 Lưu Khách
+                        Hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPage = 1, totalPages = 1, isEditMode = false, bsModal = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            bsModal = new bootstrap.Modal(document.getElementById('customerModal'));
+            loadCustomers();
+        });
+
+        function loadCustomers() {
+            let search = document.getElementById('searchInput').value;
+            google.script.run.withSuccessHandler(res => {
+                currentPage = res.page || 1;
+                totalPages = res.totalPages || 1;
+                renderTable(res.items);
+                document.getElementById('pageInfo').innerText = `Trang ${currentPage} / ${totalPages}`;
+            }).getCustomers(currentPage, search);
+        }
+
+        function renderTable(items) {
+            let tbody = document.getElementById('customerTableBody');
+            if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">Không có dữ liệu</td></tr>';
+                return;
+            }
+            let html = '';
+            items.forEach(c => {
+                let typeBadge = c.type === 'VIP' ? '<span class="badge bg-warning text-dark">VIP</span>' : '<span class="badge bg-secondary">Thường</span>';
+                html += `<tr>
+          <td class="fw-bold">${c.code}</td>
+          <td>${c.name}</td>
+          <td>${c.phone}</td>
+          <td>${c.email}</td>
+          <td>${c.city}</td>
+          <td>${typeBadge}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-warning me-1" onclick="editCust('${c.code}', '${c.name}', '${c.phone}', '${c.email}', '${c.address}', '${c.city}', '${c.type}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteCust('${c.code}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function openAddModal() {
+            isEditMode = false;
+            document.getElementById('custCode').readOnly = false;
+            document.getElementById('customerForm').reset();
+            bsModal.show();
+        }
+
+        function editCust(code, name, phone, email, address, city, type) {
+            isEditMode = true;
+            document.getElementById('custCode').value = code;
+            document.getElementById('custCode').readOnly = true;
+            document.getElementById('custName').value = name;
+            document.getElementById('custPhone').value = phone;
+            document.getElementById('custEmail').value = email;
+            document.getElementById('custAddress').value = address;
+            document.getElementById('custCity').value = city;
+            document.getElementById('custType').value = type;
+            bsModal.show();
+        }
+
+        function saveCustomer() {
+            let code = document.getElementById('custCode').value.trim();
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let email = document.getElementById('custEmail').value.trim();
+            let address = document.getElementById('custAddress').value.trim();
+            let city = document.getElementById('custCity').value;
+            let type = document.getElementById('custType').value;
+
+            let data = { code, name, phone, email, address, city, type };
+
+            if (isEditMode) {
+                google.script.run.withSuccessHandler(() => { bsModal.hide(); loadCustomers(); })
+                    .withFailureHandler(err => alert(err.message)).updateCustomer(code, data);
+            } else {
+                google.script.run.withSuccessHandler(() => { bsModal.hide(); loadCustomers(); })
+                    .withFailureHandler(err => alert(err.message)).addCustomer(data);
+            }
+        }
+
+        function deleteCust(code) {
+            if (confirm(`Xóa khách hàng ${code}?`)) {
+                google.script.run.withSuccessHandler(() => loadCustomers())
+                    .withFailureHandler(err => alert(err.message)).deleteCustomer(code);
+            }
+        }
+    </script>
+</body>
+
+</html>
