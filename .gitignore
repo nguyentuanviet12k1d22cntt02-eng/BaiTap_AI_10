@@ -1,0 +1,4 @@
+# Ignore large zip files and heavy assets
+*.zip
+data/Tiếng trung/
+Dữ liệu cần cho buổi dạy/
