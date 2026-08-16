@@ -92,6 +92,27 @@ COURSE_DATA.push(
       },
       {
         badge: "03",
+        title: "Kiểm Kê Cấu Trúc Sheet & Dữ Liệu Bằng AI (Prompt Trinh Sát)",
+        desc: "Để yêu cầu AI liệt kê chi tiết cấu trúc, danh sách các sheet và dữ liệu của từng sheet trong một file Google Sheet, giúp AI nắm rõ toàn bộ các sheet và cấu trúc cột trước khi bắt tay vào tự động hóa.",
+        promptBox: `Hãy truy cập vào file Google Sheet này: [Dán link vào đây].
+
+Tôi cần bạn thực hiện kiểm kê tổng quát về cấu trúc của file này. Vui lòng thực hiện các bước sau:
+
+1. Liệt kê tên tất cả các sheet (tab) hiện có trong file.
+
+2. Với mỗi sheet, hãy mô tả cấu trúc của nó bao gồm:
+   - Danh sách các tiêu đề cột (tên cột nằm ở dòng mấy).
+   - Định dạng dữ liệu của các cột đó (ví dụ: cột đó chứa văn bản, số, ngày tháng, hay công thức).
+   - Tổng số dòng dữ liệu ước tính trong sheet đó.
+
+3. Trình bày kết quả dưới dạng bảng tổng hợp để tôi dễ đối chiếu.`,
+        expectedResult: {
+          image: "assets/gemini_kiem_ke_cau_truc_sheet.png",
+          imageTitle: "Kết quả AI kiểm kê chi tiết cấu trúc các sheet và cột dữ liệu"
+        }
+      },
+      {
+        badge: "04",
         title: "Dán Master Prompt & Lấy Code Chuẩn Locale VN",
         desc: "Sao chép câu **Master Prompt** tại Tab 1, gửi cho AI (Gemini hoặc AI Agent) để AI tự động thiết kế mã nguồn.",
         promptBox: `[VAI TRÒ]: Bạn là Chuyên gia tự động hóa Google Sheets và Google Apps Script.
@@ -123,7 +144,7 @@ COURSE_DATA.push(
         }
       },
       {
-        badge: "04",
+        badge: "05",
         title: "Dán Code Vào Apps Script & Chạy Thử",
         desc: "Dán mã nguồn vào tệp <code>Code.gs</code>, chọn hàm <code>runDailyReport</code> hoặc dùng menu <b>🚀 BÁO CÁO ➔ Chạy Báo Cáo Ngay</b> trên Google Sheets để chạy thử nghiệm.",
         promptBox: `Sau khi dán mã nguồn vào Code.gs, chọn hàm runDailyReport trong danh sách hàm và bấm nút Chạy (Run) để kiểm tra gửi báo cáo ngay lập tức.`,
@@ -133,7 +154,7 @@ COURSE_DATA.push(
         }
       },
       {
-        badge: "05",
+        badge: "06",
         title: "Kích Hoạt Lịch Hẹn Giờ 08:00 Sáng",
         desc: "Chọn hàm <code>setupDailyTrigger</code> trong danh sách hàm và bấm <b>▷ Chạy</b> để thiết lập lịch gửi email tự động mỗi sáng. Kiểm tra hộp thư Gmail để nhận kết quả email HTML được thiết kế sang trọng.",
         promptBox: `Hãy thiết lập trigger tự động gửi báo cáo vào lúc 08:00 AM hàng ngày bằng cách chạy hàm setupDailyTrigger hoặc thiết lập thủ công trong phần Triggers.`,
@@ -342,50 +363,6 @@ function setupDailyTrigger() {
   } catch (e) {
     Logger.log("Trigger setup: " + e.toString());
   }
-}ght: bold; margin: 0;">\${topBranch}</p>
-          <p style="font-size: 14px; margin: 5px 0 0 0;">\${formattedMaxRevenue}</p>
-        </div>
-      </div>
-      
-      <h3 style="color: #000080; border-bottom: 2px solid #000080; padding-bottom: 5px;">Chi Tiết Các Chi Nhánh</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
-          <tr style="background-color: #000080; color: white;">
-            <th style="padding: 10px; text-align: left;">Mã CN</th>
-            <th style="padding: 10px; text-align: left;">Tên Chi Nhánh</th>
-            <th style="padding: 10px; text-align: left;">Khu Vực</th>
-            <th style="padding: 10px; text-align: right;">Doanh Thu Tuần</th>
-          </tr>
-        </thead>
-        <tbody>
-          \${tableRowsHTML}
-        </tbody>
-      </table>
-      
-      <p style="margin-top: 20px; font-size: 12px; color: #888; text-align: center;">Email này được gửi tự động từ hệ thống quản lý.</p>
-    </div>
-  \`;
-  
-  // Gửi email tới địa chỉ người nhận
-  MailApp.sendEmail({
-    to: "nguyentuanviet12k1@gmail.com", // Đổi thành email người nhận
-    subject: "[BÁO CÁO DOANH THU] - Cập nhật lúc " + now,
-    htmlBody: htmlBody
-  });
-}
-
-// Hàm tạo Trigger tự động chạy theo lịch
-function createDailyTrigger() {
-  var triggers = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < triggers.length; i++) {
-    ScriptApp.deleteTrigger(triggers[i]);
-  }
-  ScriptApp.newTrigger("sendRevenueReport")
-    .timeBased()
-    .atHour(8)
-    .everyDays(1)
-    .inTimezone("Asia/Ho_Chi_Minh")
-    .create();
 }`,
 
     triggerGuide: `
