@@ -648,7 +648,11 @@ function parseNumber_(val) {
         promptBox: `https://docs.google.com/spreadsheets/d/19jPP-MwIMPjeDfViicF1jTQBxx-0lTP8HAwR6IqArPI/edit
  
 bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong link này chứ? Hãy liệt kê 3 dòng dữ liệu đầu tiên để xác nhận.`,
-        note: "<b>💡 Mẹo:</b> Hãy đảm bảo file Google Sheets đã được bật chế độ chia sẻ là <i>'Bất kỳ ai có đường liên kết đều có thể xem'</i>."
+        note: "<b>💡 Mẹo:</b> Hãy đảm bảo file Google Sheets đã được bật chế độ chia sẻ là <i>'Bất kỳ ai có đường liên kết đều có thể xem'</i>.",
+        expectedResult: {
+          image: "assets/spark_read_success.png",
+          imageTitle: "AI phản hồi đã đọc file thành công"
+        }
       },
       {
         badge: "02",
@@ -657,7 +661,11 @@ bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong
         promptBox: `Hãy phân tích cấu trúc cột của sheet "DonHang_BT6" và đề xuất thuật toán tính 3 chỉ số RFM cho từng khách hàng duy nhất:
 1. R (Recency): Khoảng cách số ngày từ lần mua cuối của khách hàng đó đến ngày chốt báo cáo 31/08/2026.
 2. F (Frequency): Tổng số đơn hàng của khách hàng.
-3. M (Monetary): Tổng doanh thu mua sắm của khách hàng đó.`
+3. M (Monetary): Tổng doanh thu mua sắm của khách hàng đó.`,
+        expectedResult: {
+          image: "assets/spark_analyze_structure.png",
+          imageTitle: "AI phân tích cấu trúc cột & đề xuất"
+        }
       },
       {
         badge: "03",
@@ -673,7 +681,11 @@ bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong
 4. Ghi kết quả sang sheet mới tên là "BaoCao_RFM_BT6". Định dạng bảng chuyên nghiệp màu Navy.
 5. Tạo bảng tổng hợp phân khúc ở cột M-O bằng công thức COUNTIF & SUMIF. [BẮT BUỘC CHUẨN LOCALE VIỆT NAM]: Các đối số trong công thức phải được phân cách bằng dấu chấm phẩy (;) (ví dụ: =COUNTIF(K4:K8; "VIP")). Trong Apps Script, bắt buộc sử dụng phương thức .setFormulasLocal() thay vì .setFormulas() để phù hợp với cài đặt Locale Việt Nam của bảng tính.
 6. Vẽ tự động 1 Biểu đồ tròn (Pie Chart) thể hiện tỷ lệ % khách hàng của mỗi phân khúc và 1 Biểu đồ cột (Column Chart) thể hiện doanh số đóng góp của từng phân khúc. Đặt 2 biểu đồ cạnh bảng tổng hợp ở cột Q.
-7. Thêm menu "📊 PHÂN TÍCH" > "Chạy Phân Tích RFM Khách Hàng".`
+7. Thêm menu "📊 PHÂN TÍCH" > "Chạy Phân Tích RFM Khách Hàng".`,
+        expectedResult: {
+          image: "assets/spark_appscript_run.png",
+          imageTitle: "Kết quả chạy Apps Script vẽ biểu đồ và phân khúc"
+        }
       },
       {
         badge: "04",
@@ -687,7 +699,11 @@ bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong
    - Số lượng khách hàng Tiềm năng: {Potential_Count}
    - Số lượng khách hàng Mới: {New_Count}
    - Số lượng khách hàng Nguy cơ rời bỏ: {Churn_Count}
-3. Phần nhận định chung: "{Insights}".`
+3. Phần nhận định chung: "{Insights}".`,
+        expectedResult: {
+          image: "assets/spark_template_docs.png",
+          imageTitle: "Mẫu Google Docs với các thẻ biến"
+        }
       },
       {
         badge: "05",
@@ -697,7 +713,11 @@ bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong
 1. Mở file Google Docs "BaoCao_RFM_Template" bằng ID hoặc tên và tạo một bản sao tạm.
 2. Tìm và thay thế các từ khóa mẫu {VIP_Count}, {Loyal_Count}... bằng số liệu phân tích thật từ bảng tổng hợp.
 3. Xuất file Doc tạm đó thành định dạng PDF chất lượng cao lưu vào thư mục Drive "BaoCao_RFM_PDF".
-4. Xóa file Doc tạm để dọn rác Drive, và trả liên kết file PDF về ô H1 của sheet báo cáo.`
+4. Xóa file Doc tạm để dọn rác Drive, và trả liên kết file PDF về ô H1 của sheet báo cáo.`,
+        expectedResult: {
+          image: "assets/spark_pdf_exported_drive.png",
+          imageTitle: "Báo cáo PDF đã xuất lưu trên Google Drive"
+        }
       }
     ],
     checklist: [

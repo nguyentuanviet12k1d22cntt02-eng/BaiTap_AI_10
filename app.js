@@ -118,7 +118,7 @@ function switchExercise(id) {
 
   // Update Download Button dynamically based on file type
   if (ex.csvFile && ex.csvFile.endsWith('.xlsx')) {
-    btnDownloadCurrentCsv.innerHTML = `<i class="ph-bold ph-file-xls"></i> Tải File Excel Mẫu`;
+    btnDownloadCurrentCsv.innerHTML = `<i class="ph-bold ph-file-xls"></i> Tải Dữ Liệu XLSX`;
   } else {
     btnDownloadCurrentCsv.innerHTML = `<i class="ph-bold ph-file-csv"></i> Tải Dữ Liệu CSV`;
   }

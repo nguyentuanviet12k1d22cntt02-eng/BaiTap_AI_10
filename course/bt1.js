@@ -9,7 +9,7 @@ COURSE_DATA.push(
     time: "15 phút",
     tags: ["Gemini in Sheets", "Sparkline Prompt", "Gmail Automation", "No-Code"],
     desc: "Cách viết Prompt ra lệnh cho Gemini/AI Agent tự động viết công thức Sparkline vẽ biểu đồ mini trong ô và lập lịch tự động gửi email báo cáo HTML lúc 08:00 sáng mỗi ngày.",
-    csvFile: "bai_tap_1_doanh_thu_sparkline.csv",
+    csvFile: "bai_tap_1_doanh_thu_sparkline.xlsx",
     
     workflow: [
       { icon: "ph-chat-circle-dots", title: "1. Viết Master Prompt", desc: "Mô tả nghiệp vụ & dữ liệu cho Gemini" },
@@ -18,26 +18,29 @@ COURSE_DATA.push(
       { icon: "ph-clock-countdown", title: "4. Hẹn Giờ 08:00 Sáng", desc: "Tự động kích hoạt hàng ngày" }
     ],
 
-    masterPrompt: `[VAI TRÒ]: Bạn là Lập trình viên Google Apps Script.
-[NHIỆM VỤ]: Viết 1 đoạn code Apps Script (.gs) hoàn chỉnh cho tab "DoanhThu_BT1". Không giải thích, chỉ xuất khối mã code.
+    masterPrompt: `[VAI TRÒ]: Bạn là Chuyên gia tự động hóa Google Sheets và Google Apps Script.
+[BỐI CẢNH & NHIỆM VỤ]: Tôi có trang tính tên "DoanhThu_BT1" ghi nhận doanh thu 7 ngày (từ cột D đến J) từ dòng 4 trở đi của các chi nhánh. Hãy viết một đoạn mã Apps Script hoàn chỉnh để tự động hóa toàn bộ quy trình sau:
 
-[RÀNG BUỘC CÔNG THỨC NGHIÊM NGẠT - CHUẨN LOCALE VIỆT NAM]:
-1. Cột L (Col 12): Chèn công thức '=SUM(D4:J4)' từ dòng 4 đến lastRow.
-2. Cột K (Col 11): Chèn công thức SPARKLINE chuẩn Việt Nam từ dòng 4 đến lastRow. 
-   BẮT BỘC dùng chính xác cú pháp này (Dùng dấu ';' và dấu '\\'):
-   =SPARKLINE(D4:J4; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})
-   
-*LƯU Ý KỸ THUẬT KHI ĐƯA VÀO APPS SCRIPT:*
-- Không dùng dấu phẩy (,) trong mảng thuộc tính Sparkline.
-- Không thêm dấu gạch chéo ngược (\\) trước dấu # của mã màu.
-- Trong JS String, escape dấu nháy kép chuẩn: \\"charttype\\"\\"line\\"...
+1. TỰ ĐỘNG ĐIỀN CÔNG THỨC:
+   - Cột L (Tổng tuần): Tự động điền công thức tính tổng =SUM(D4:J4) cho tất cả các dòng có dữ liệu.
+   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương. Vì Google Sheets đang cài đặt tiếng Việt, hãy dùng chính xác cú pháp phân cách bằng dấu chấm phẩy và gạch chéo:
+     =SPARKLINE(D4:J4; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})
 
-[TÍNH NĂNG ĐỒNG BỘ]:
-- Quét dữ liệu Cột L để tính Tổng Doanh Thu Hệ Thống và Chi Nhánh Cao Nhất.
-- Soạn email HTML màu Navy (#0f172a) sang trọng có Thẻ KPI + Bảng chi tiết (định dạng VNĐ) gửi đến "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + dd/MM/yyyy.
-- Thêm hàm onOpen() tạo Menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên Sheet.
-- Thêm hàm setupDailyTrigger() đặt lịch 08:00 AM hàng ngày.
-- Hiện Browser.msgBox("Thành công!") khi chạy xong.`,
+2. TỔNG HỢP SỐ LIỆU & BÁO CÁO:
+   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh có doanh thu cao nhất.
+   - Tự động soạn email định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật và Bảng chi tiết doanh thu (định dạng tiền tệ VNĐ).
+   - Gửi email tới "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+3. TIỆN ÍCH SỬ DỤNG & TỰ ĐỘNG HÓA:
+   - Tạo Menu tiện ích "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trực tiếp trên thanh công cụ của Sheets để người dùng bấm chạy bất cứ lúc nào.
+   - Tạo chức năng hẹn giờ tự động chạy và gửi email lúc 08:00 sáng mỗi ngày.
+   - Hiển thị thông báo "Thành công!" trên màn hình sau khi hoàn thành.
+
+[QUY TẮC KỸ THUẬT BẮT BUỘC]:
+- CHỈ DÙNG API GOOGLE: Dùng hàm chuẩn setFormulas(), tuyệt đối không dùng cú pháp của Excel như setFormulasLocal.
+- DẤU PHÂN CÁCH THAM SỐ (;): Bảng tính tiếng Việt bắt buộc dùng dấu chấm phẩy (;) để phân cách các tham số trong hàm (ví dụ trong SPARKLINE), tuyệt đối KHÔNG dùng dấu phẩy (,).
+- ESCAPE CÔNG THỨC: Escape dấu gạch chéo ngược (\\) thành (\\\\) trong chuỗi code JavaScript.
+- CODE SẴN SÀNG: Chỉ xuất 1 khối mã code duy nhất hoàn chỉnh, không giải thích dài dòng, sẵn sàng copy dùng ngay.`,
 
     businessScenario: {
       story: "Bạn là Trợ lý Ban Giám Đốc hoặc Trưởng nhóm Kinh doanh tại chuỗi bán lẻ 10 chi nhánh toàn quốc. Mỗi sáng lúc 08:30, Ban Giám Đốc sẽ họp giao ban đầu ngày để đánh giá tốc độ bán hàng và điều phối hàng hóa giữa các vùng miền.",
@@ -46,11 +49,11 @@ COURSE_DATA.push(
     },
 
     promptBreakdown: [
-      { tag: "1. VAI TRÒ & NHIỆM VỤ", title: "Lập trình viên Google Apps Script", desc: "Yêu cầu AI đóng vai lập trình viên GAS, tập trung xuất duy nhất mã nguồn hoàn chỉnh." },
-      { tag: "2. CÔNG THỨC CHUẨN VN", title: "Locale Việt Nam (; và \\)", desc: "Ép cú pháp Sparkline chuẩn =SPARKLINE(D4:J4; {\"charttype\"\\\"line\";...}) tránh lỗi cú pháp dấu phẩy." },
-      { tag: "3. TÍNH NĂNG TÍNH TOÁN", title: "Quét Cột L & Phân Tích KPI", desc: "Tự động tính Tổng Doanh Thu Hệ Thống và tìm Chi Nhánh Dẫn Đầu có doanh thu cao nhất." },
-      { tag: "4. EMAIL HTML & MENU", title: "Navy Theme & Menu Nút Bấm", desc: "Tạo email HTML sang trọng (#0f172a) và hàm onOpen() tạo menu '🚀 BÁO CÁO' ngay trên thanh công cụ." },
-      { tag: "5. TỰ ĐỘNG HÓA & POPUP", title: "Trigger 08:00 & Thông Báo", desc: "Hàm setupDailyTrigger() chạy định kỳ và Browser.msgBox('Thành công!') báo kết quả." }
+      { tag: "1. VAI TRÒ & DỮ LIỆU", title: "Chuyên Gia Apps Script & Tab Dữ Liệu", desc: "Xác định rõ vai trò AI và chỉ định chính xác tên trang tính DoanhThu_BT1 cần xử lý." },
+      { tag: "2. CÔNG THỨC TIẾNG VIỆT", title: "Chuẩn Locale Việt Nam (; và \\)", desc: "Hướng dẫn AI dùng đúng định dạng dấu chấm phẩy cho hàm Sparkline tránh bị lỗi #ERROR." },
+      { tag: "3. TÍNH TOÁN KPI", title: "Tổng Doanh Thu & Top 1 Chi Nhánh", desc: "Yêu cầu AI tự động quét dữ liệu để tìm ra chi nhánh có doanh thu xuất sắc nhất." },
+      { tag: "4. EMAIL HTML CHUYÊN NGHIỆP", title: "Giao Diện Navy & Thẻ KPI", desc: "Mô tả phong cách email sang trọng với màu chủ đạo #0f172a và định dạng tiền VNĐ." },
+      { tag: "5. NÚT BẤM & HẸN GIỜ", title: "Menu Tiện Ích & Hẹn Giờ 08:00", desc: "Tạo menu bấm trực tiếp trên Google Sheets và kích hoạt gửi tự động mỗi sáng." }
     ],
 
     businessRequirements: `
@@ -72,28 +75,72 @@ COURSE_DATA.push(
       {
         badge: "01",
         title: "Kiểm Tra Định Dạng File (Bắt buộc: Không có badge .XLSX)",
-        desc: "Đảm bảo file đang ở chế độ <b>Google Trang tính gốc (không có badge .XLSX xanh bên cạnh tên file)</b> để kích hoạt đầy đủ tính năng Apps Script và Trigger. Nếu thấy có badge <code>.XLSX</code>, hãy nhấp vào menu <b>Tệp (File) ➔ Lưu dưới dạng Google Trang tính (Save as Google Sheets)</b> trước khi thực hiện tiếp."
+        desc: "Đảm bảo file đang ở chế độ <b>Google Trang tính gốc (không có badge .XLSX xanh bên cạnh tên file)</b> để kích hoạt đầy đủ tính năng Apps Script và Trigger. Nếu thấy có badge <code>.XLSX</code>, hãy nhấp vào menu <b>Tệp (File) ➔ Lưu dưới dạng Google Trang tính (Save as Google Sheets)</b> trước khi thực hiện tiếp.",
+        expectedResult: {
+          image: "assets/sheet_format_check.jpg",
+          imageTitle: "Kiểm tra và lưu file ở định dạng Google Sheets gốc"
+        }
       },
       {
         badge: "02",
         title: "Mở Tiện Ích Mở Rộng ➔ Apps Script",
-        desc: "Trên Google Sheets, vào menu <b>Tiện ích mở rộng ➔ Apps Script</b> để mở trình soạn thảo mã nguồn."
+        desc: "Trên Google Sheets, vào menu <b>Tiện ích mở rộng ➔ Apps Script</b> để mở trình soạn thảo mã nguồn.",
+        expectedResult: {
+          image: "assets/sheet_open_appscript.jpg",
+          imageTitle: "Mở trình soạn thảo Google Apps Script"
+        }
       },
       {
         badge: "03",
         title: "Dán Master Prompt & Lấy Code Chuẩn Locale VN",
-        desc: "Sao chép câu **Master Prompt** tại Tab 1, dán vào AI Agent hoặc copy trực tiếp toàn bộ code tại Tab 3.",
-        promptBox: "Dán Master Prompt từ Tab 1 vào AI Agent"
+        desc: "Sao chép câu **Master Prompt** tại Tab 1, gửi cho AI (Gemini hoặc AI Agent) để AI tự động thiết kế mã nguồn.",
+        promptBox: `[VAI TRÒ]: Bạn là Chuyên gia tự động hóa Google Sheets và Google Apps Script.
+[BỐI CẢNH & NHIỆM VỤ]: Tôi có trang tính tên "DoanhThu_BT1" ghi nhận doanh thu 7 ngày (từ cột D đến J) từ dòng 4 trở đi của các chi nhánh. Hãy viết một đoạn mã Apps Script hoàn chỉnh để tự động hóa toàn bộ quy trình sau:
+
+1. TỰ ĐỘNG ĐIỀN CÔNG THỨC:
+   - Cột L (Tổng tuần): Tự động điền công thức tính tổng =SUM(D4:J4) cho tất cả các dòng có dữ liệu.
+   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương. Vì Google Sheets đang cài đặt tiếng Việt, hãy dùng chính xác cú pháp phân cách bằng dấu chấm phẩy và gạch chéo:
+     =SPARKLINE(D4:J4; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})
+
+2. TỔNG HỢP SỐ LIỆU & BÁO CÁO:
+   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh có doanh thu cao nhất.
+   - Tự động soạn email định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật và Bảng chi tiết doanh thu (định dạng tiền tệ VNĐ).
+   - Gửi email tới "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+3. TIỆN ÍCH SỬ DỤNG & TỰ ĐỘNG HÓA:
+   - Tạo Menu tiện ích "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trực tiếp trên thanh công cụ của Sheets để người dùng bấm chạy bất cứ lúc nào.
+   - Tạo chức năng hẹn giờ tự động chạy và gửi email lúc 08:00 sáng mỗi ngày.
+   - Hiển thị thông báo "Thành công!" trên màn hình sau khi hoàn thành.
+
+[QUY TẮC KỸ THUẬT BẮT BUỘC]:
+- CHỈ DÙNG API GOOGLE: Dùng hàm chuẩn setFormulas(), tuyệt đối không dùng cú pháp của Excel như setFormulasLocal.
+- DẤU PHÂN CÁCH THAM SỐ (;): Bảng tính tiếng Việt bắt buộc dùng dấu chấm phẩy (;) để phân cách các tham số trong hàm (ví dụ trong SPARKLINE), tuyệt đối KHÔNG dùng dấu phẩy (,).
+- ESCAPE CÔNG THỨC: Escape dấu gạch chéo ngược (\\) thành (\\\\) trong chuỗi code JavaScript.
+- CODE SẴN SÀNG: Chỉ xuất 1 khối mã code duy nhất hoàn chỉnh, không giải thích dài dòng, sẵn sàng copy dùng ngay.`,
+        expectedResult: {
+          image: "assets/gemini_paste_prompt.jpg",
+          imageTitle: "Gửi prompt cho Gemini và nhận code Apps Script"
+        }
       },
       {
         badge: "04",
         title: "Dán Code Vào Apps Script & Chạy Thử",
-        desc: "Dán mã nguồn vào tệp <code>Code.gs</code>, chọn hàm <code>runDailyReport</code> hoặc dùng menu <b>🚀 BÁO CÁO ➔ Chạy Báo Cáo Ngay</b> trên Google Sheets."
+        desc: "Dán mã nguồn vào tệp <code>Code.gs</code>, chọn hàm <code>runDailyReport</code> hoặc dùng menu <b>🚀 BÁO CÁO ➔ Chạy Báo Cáo Ngay</b> trên Google Sheets để chạy thử nghiệm.",
+        promptBox: `Sau khi dán mã nguồn vào Code.gs, chọn hàm runDailyReport trong danh sách hàm và bấm nút Chạy (Run) để kiểm tra gửi báo cáo ngay lập tức.`,
+        expectedResult: {
+          image: "assets/appscript_run_code.jpg",
+          imageTitle: "Dán mã Code.gs và bấm nút Chạy thử nghiệm"
+        }
       },
       {
         badge: "05",
         title: "Kích Hoạt Lịch Hẹn Giờ 08:00 Sáng",
-        desc: "Chọn hàm <code>setupDailyTrigger</code> trong danh sách hàm và bấm <b>▷ Chạy</b> để thiết lập lịch gửi email tự động mỗi sáng."
+        desc: "Chọn hàm <code>setupDailyTrigger</code> trong danh sách hàm và bấm <b>▷ Chạy</b> để thiết lập lịch gửi email tự động mỗi sáng. Kiểm tra hộp thư Gmail để nhận kết quả email HTML được thiết kế sang trọng.",
+        promptBox: `Hãy thiết lập trigger tự động gửi báo cáo vào lúc 08:00 AM hàng ngày bằng cách chạy hàm setupDailyTrigger hoặc thiết lập thủ công trong phần Triggers.`,
+        expectedResult: {
+          image: "assets/gmail_received_report.jpg",
+          imageTitle: "Nhận báo cáo doanh thu HTML định dạng Navy tuyệt đẹp trong Gmail"
+        }
       }
     ],
 
