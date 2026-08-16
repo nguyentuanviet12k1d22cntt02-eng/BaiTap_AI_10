@@ -205,14 +205,21 @@ function switchExercise(id) {
               <span>Kết quả đối chiếu chuẩn xác</span>
             </div>
             <div class="step-image-gallery">
-              ${step.expectedResult.image ? `
+              ${step.expectedResult.images ? step.expectedResult.images.map(img => `
                 <div class="step-image-box">
-                  <div class="step-image-title">${step.expectedResult.imageTitle || 'Hình ảnh minh họa'}</div>
+                  <div class="step-image-title">${img.title ? `<i class="ph-bold ph-image"></i> ${img.title}` : (step.expectedResult.imageTitle || 'Hình ảnh minh họa')}</div>
+                  <div class="step-image-frame">
+                    <img src="${img.src || img}" alt="${img.title || 'Kết quả'}" class="step-result-img">
+                  </div>
+                </div>
+              `).join('') : (step.expectedResult.image ? `
+                <div class="step-image-box">
+                  <div class="step-image-title"><i class="ph-bold ph-image"></i> ${step.expectedResult.imageTitle || 'Hình ảnh minh họa'}</div>
                   <div class="step-image-frame">
                     <img src="${step.expectedResult.image}" alt="${step.expectedResult.imageTitle || 'Kết quả'}" class="step-result-img">
                   </div>
                 </div>
-              ` : ''}
+              ` : '')}
               ${step.expectedResult.htmlText ? `
                 <div class="step-result-text">
                   ${step.expectedResult.htmlText}
