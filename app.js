@@ -124,16 +124,16 @@ function switchExercise(id) {
   }
 
   // Render Tags
-  exerciseTags.innerHTML = ex.tags.map((t, idx) => {
+  exerciseTags.innerHTML = (ex.tags || []).map((t, idx) => {
     const colors = ["tag-purple", "tag-blue", "tag-emerald"];
     const col = colors[idx % colors.length];
     return `<span class="tag-badge ${col}">${t}</span>`;
   }).join("");
 
   // Render Workflow Diagram
-  workflowDiagram.innerHTML = ex.workflow.map(node => `
+  workflowDiagram.innerHTML = (ex.workflow || []).map(node => `
     <div class="workflow-node">
-      <div class="node-icon"><i class="ph-bold ${node.icon}"></i></div>
+      <div class="node-icon"><i class="ph-bold ${node.icon || 'ph-check'}"></i></div>
       <div class="node-title">${node.title}</div>
       <div class="node-desc">${node.desc}</div>
     </div>
@@ -147,8 +147,8 @@ function switchExercise(id) {
   }
 
   // Render Tab 1: Master Prompt Studio
-  masterPromptText.textContent = ex.masterPrompt;
-  promptBreakdownGrid.innerHTML = ex.promptBreakdown.map(item => `
+  masterPromptText.textContent = ex.masterPrompt || "";
+  promptBreakdownGrid.innerHTML = (ex.promptBreakdown || []).map(item => `
     <div class="breakdown-card">
       <span class="breakdown-tag">${item.tag}</span>
       <div class="breakdown-title">${item.title}</div>

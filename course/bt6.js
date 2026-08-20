@@ -2,737 +2,859 @@ COURSE_DATA.push(
 {
     id: "bt6",
     index: 6,
-    title: "Bài 6: Phân Tích Nhóm Khách Hàng RFM, Vẽ Biểu Đồ & Xuất Báo Cáo Tự Động",
-    shortTitle: "Phân Tích RFM & Biểu Đồ",
-    subtitle: "Apps Script vẽ biểu đồ cột, tròn & xuất báo cáo",
+    title: "Bài 6: Hệ Thống Quản Lý Sổ Quỹ Thu Chi, Tự Động Đồng Bộ Gmail & Dashboard Dòng Tiền",
+    shortTitle: "Quản Lý Sổ Quỹ & Đồng Bộ Gmail",
+    subtitle: "Apps Script Đọc Thử Gmail Ra Mail_Log, Nạp Sổ Quỹ & Cài Trigger 5 Phút",
     level: "Dành Cho Dân Văn Phòng",
-    time: "20 phút",
-    tags: ["RFM Segmentation", "Pie & Column Chart", "Google Docs Report", "PDF Export"],
-    desc: "Quy trình ra lệnh cho AI Agent tự động tính toán các chỉ số RFM để phân nhóm khách hàng, vẽ biểu đồ tròn tỷ lệ và biểu đồ cột doanh thu đóng góp, sau đó điền dữ liệu xuất file báo cáo Word/PDF chuyên nghiệp.",
-    csvFile: "bai_tap_6_rfm_analysis.csv",
-    scriptFile: "BaiTap6_PhanTichKhachHang_RFM.gs",
+    time: "25 phút",
+    tags: ["Quản Lý Thu Chi", "Đọc Thử Gmail", "Bóc Tách Mail_Log", "Ngân Hàng Biến Động Số Dư", "Time-driven Trigger"],
+    desc: "Quy trình thiết kế hệ thống Quản lý Sổ Quỹ Thu/Chi và Dashboard dòng tiền tự động hóa trên Google Sheets bằng Apps Script. Hệ thống hỗ trợ: (1) Đọc thử email biên lai BIDV/VCB bóc tách dữ liệu ra sheet Mail_Log để kiểm tra, (2) Nạp chuẩn 12 cột vào sheet Giao_Dich, (3) Cài đặt Trigger tự động ngầm 5 phút, (4) Theo dõi 4 KPI & 2 biểu đồ, (5) Form nhập nhanh tiền mặt.",
+    csvFile: "bai6.xlsx",
+    scriptFile: "BaiTap6_QuanLyThuChi_Dashboard.gs",
     scriptContent: `/**
- * BÀI TẬP 6: PHÂN TÍCH PHÂN KHÚC KHÁCH HÀNG THEO MÔ HÌNH RFM, VẼ BIỂU ĐỒ & XUẤT BÁO CÁO
- */
-const CONFIG_BT6 = {
-  SOURCE_SHEET: "DonHang_BT6",
-  REPORT_SHEET: "BaoCao_RFM_BT6",
-  REPORT_DATE: new Date("2026-08-31"), // Ngày chốt báo cáo cố định
-  FOLDER_PDF_NAME: "BaoCao_RFM_PDF"
-};
-
-function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu("📊 PHÂN TÍCH")
-    .addItem("Chạy Phân Tích RFM Khách Hàng", "runRFMAnalysis")
-    .addToUi();
-}
-
-function runRFMAnalysis() {
-  const startTime = new Date().getTime();
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sourceSheet = ss.getSheetByName(CONFIG_BT6.SOURCE_SHEET);
-  
-  if (!sourceSheet) {
-    SpreadsheetApp.getUi().alert(\`Lỗi: Không tìm thấy sheet nguồn "\${CONFIG_BT6.SOURCE_SHEET}"!\`);
-    return;
-  }
-  
-  const lastRow = sourceSheet.getLastRow();
-  if (lastRow < 4) {
-    SpreadsheetApp.getUi().alert("Lỗi: Không có dữ liệu giao dịch!");
-    return;
-  }
-  
-  const rawData = sourceSheet.getRange(4, 1, lastRow - 3, 5).getValues();
-  const customerMap = {};
-  
-  for (let i = 0; i < rawData.length; i++) {
-    const maKH = String(rawData[i][1]).trim();
-    const tenKH = String(rawData[i][2]).trim();
-    const ngayMua = rawData[i][3];
-    const doanhThu = Number(rawData[i][4]) || 0;
-    
-    if (maKH === "") continue;
-    
-    let ngayMuaDate;
-    if (ngayMua instanceof Date) {
-      ngayMuaDate = ngayMua;
-    } else {
-      const parts = String(ngayMua).split("/");
-      if (parts.length === 3) {
-        ngayMuaDate = new Date(parts[2], parts[1] - 1, parts[0]);
-      } else {
-        ngayMuaDate = new Date();
-      }
-    }
-    
-    if (!customerMap[maKH]) {
-      customerMap[maKH] = {
-        maKH: maKH,
-        tenKH: tenKH,
-        lastPurchase: ngayMuaDate,
-        frequency: 0,
-        monetary: 0
-      };
-    }
-    
-    customerMap[maKH].frequency += 1;
-    customerMap[maKH].monetary += doanhThu;
-    
-    if (ngayMuaDate > customerMap[maKH].lastPurchase) {
-      customerMap[maKH].lastPurchase = ngayMuaDate;
-    }
-  }
-  
-  const rfmReportRows = [];
-  let vipCount = 0;
-  
-  for (const maKH in customerMap) {
-    const cust = customerMap[maKH];
-    const diffTime = CONFIG_BT6.REPORT_DATE.getTime() - cust.lastPurchase.getTime();
-    let recencyDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (recencyDays < 0) recencyDays = 0;
-    
-    const f = cust.frequency;
-    const m = cust.monetary;
-    
-    let rScore = 1;
-    if (recencyDays <= 15) rScore = 5;
-    else if (recencyDays <= 45) rScore = 4;
-    else if (recencyDays <= 90) rScore = 3;
-    else if (recencyDays <= 180) rScore = 2;
-    
-    let fScore = 1;
-    if (f >= 10) fScore = 5;
-    else if (f >= 5) fScore = 4;
-    else if (f >= 3) fScore = 3;
-    else if (f >= 2) fScore = 2;
-    
-    let mScore = 1;
-    if (m >= 50000000) mScore = 5;
-    else if (m >= 20000000) mScore = 4;
-    else if (m >= 10000000) mScore = 3;
-    else if (m >= 5000000) mScore = 2;
-    
-    const totalScore = rScore + fScore + mScore;
-    
-    let classification = "Khách Hàng Nguy Cơ Rời Bỏ";
-    if (totalScore >= 13) {
-      classification = "VIP";
-      vipCount++;
-    } else if (totalScore >= 10) {
-      classification = "Khách Hàng Trung Thành";
-    } else if (totalScore >= 7) {
-      classification = "Khách Hàng Tiềm Năng";
-    } else if (totalScore >= 5) {
-      classification = "Khách Mới";
-    }
-    
-    const formattedLastDate = Utilities.formatDate(cust.lastPurchase, "GMT+7", "dd/MM/yyyy");
-    
-    rfmReportRows.push([
-      cust.maKH,
-      cust.tenKH,
-      formattedLastDate,
-      recencyDays,
-      f,
-      m,
-      rScore,
-      fScore,
-      mScore,
-      totalScore,
-      classification
-    ]);
-  }
-  
-  // Sắp xếp báo cáo theo mã khách hàng tăng dần
-  rfmReportRows.sort(function(a, b) {
-    return a[0].localeCompare(b[0]);
-  });
-  
-  // Ghi kết quả ra sheet BaoCao_RFM_BT6
-  var reportSheet = ss.getSheetByName(CONFIG_BT6.REPORT_SHEET);
-  if (!reportSheet) {
-    reportSheet = ss.insertSheet(CONFIG_BT6.REPORT_SHEET);
-  } else {
-    reportSheet.clear();
-    var oldCharts = reportSheet.getCharts();
-    for (var c = 0; c < oldCharts.length; c++) {
-      reportSheet.removeChart(oldCharts[c]);
-    }
-  }
-  
-  // Thiết lập đường lưới hiển thị
-  reportSheet.setHiddenGridlines(false);
-  
-  // Ghi Banner dòng 1
-  reportSheet.getRange("A1:K1").merge().setValue("BÁO CÁO PHÂN TÍCH PHÂN KHÚC KHÁCH HÀNG RFM")
-    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold").setFontSize(13)
-    .setHorizontalAlignment("center").setVerticalAlignment("center");
-  reportSheet.setRowHeight(1, 35);
-  
-  // Tiêu đề bảng
-  var headers = [
-    "Mã Khách Hàng", "Tên Khách Hàng", "Ngày Mua Cuối", "Recency (ngày)", 
-    "Frequency (lượt)", "Monetary (VNĐ)", "R-Score", "F-Score", "M-Score", 
-    "Tổng Điểm", "Phân Phân Khúc"
-  ];
-  
-  reportSheet.getRange("A3:K3").setValues([headers])
-    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold")
-    .setHorizontalAlignment("center").setVerticalAlignment("center");
-  reportSheet.setRowHeight(3, 24);
-  
-  // Ghi dữ liệu chi tiết
-  if (rfmReportRows.length > 0) {
-    var dataRange = reportSheet.getRange(4, 1, rfmReportRows.length, 11);
-    dataRange.setValues(rfmReportRows);
-    
-    // Định dạng dữ liệu
-    dataRange.setFontFamily("Arial").setFontSize(10);
-    reportSheet.getRange(4, 3, rfmReportRows.length, 1).setNumberFormat("dd/mm/yyyy").setHorizontalAlignment("center");
-    reportSheet.getRange(4, 4, rfmReportRows.length, 2).setNumberFormat("#,##0").setHorizontalAlignment("right");
-    reportSheet.getRange(4, 6, rfmReportRows.length, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
-    reportSheet.getRange(4, 7, rfmReportRows.length, 4).setHorizontalAlignment("center");
-    reportSheet.getRange(4, 11, rfmReportRows.length, 1).setFontWeight("bold");
-    
-    // Kẻ viền mảnh
-    dataRange.setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
-  }
-  
-  // Tự động căn chỉnh cột rộng vừa chữ
-  for (var col = 1; col <= 11; col++) {
-    reportSheet.autoResizeColumn(col);
-  }
-  
-  // --------------------------------------------------------------------------
-  // 4. TẠO BẢNG TỔNG HỢP PHÂN KHÚC (CỘT M - O)
-  // --------------------------------------------------------------------------
-  var summaryHeaders = ["Phân Khúc Khách Hàng", "Số Lượng KH", "Doanh Thu Đóng Góp (VNĐ)"];
-  reportSheet.getRange("M3:O3").setValues([summaryHeaders])
-    .setBackground("#1B365D").setFontColor("#FFFFFF").setFontWeight("bold").setHorizontalAlignment("center");
-  
-  var segments = [
-    "VIP",
-    "Khách Hàng Trung Thành",
-    "Khách Hàng Tiềm Năng",
-    "Khách Mới",
-    "Khách Hàng Nguy Cơ Rời Bỏ"
-  ];
-  
-  var endRowIndex = rfmReportRows.length + 3;
-  
-  const summaryFormulas = [];
-  for (let s = 0; s < segments.length; s++) {
-    const seg = segments[s];
-    const countFormula = '=COUNTIF(K4:K' + endRowIndex + '; "' + seg + '")';
-    const sumFormula = '=SUMIF(K4:K' + endRowIndex + '; "' + seg + '"; F4:F' + endRowIndex + ')';
-    summaryFormulas.push([seg, countFormula, sumFormula]);
-  }
-  
-  reportSheet.getRange("M4:O8").setFormulasLocal(summaryFormulas);
-  reportSheet.getRange("N4:N8").setNumberFormat("#,##0").setHorizontalAlignment("center");
-  reportSheet.getRange("O4:O8").setNumberFormat("#,##0");
-  reportSheet.getRange("M3:O8").setBorder(true, true, true, true, true, true, "#D9D9D9", SpreadsheetApp.BorderStyle.SOLID);
-  
-  // VẼ BIỂU ĐỒ TRÒN (PIE CHART) - PHÂN PHỐI SỐ LƯỢNG
-  var pieChart = reportSheet.newChart()
-    .setChartType(Charts.ChartType.PIE)
-    .addRange(reportSheet.getRange("M3:N8"))
-    .setPosition(10, 13, 0, 0)
-    .setOption("title", "TỶ LỆ PHÂN BỔ KHÁCH HÀNG THEO PHÂN KHÚC")
-    .setOption("width", 400)
-    .setOption("height", 280)
-    .setOption("is3D", true)
-    .build();
-  reportSheet.insertChart(pieChart);
-  
-  // VẼ BIỂU ĐỒ CỘT (COLUMN CHART) - DOANH THU ĐÓNG GÓP
-  var columnChart = reportSheet.newChart()
-    .setChartType(Charts.ChartType.COLUMN)
-    .addRange(reportSheet.getRange("M3:M8"))
-    .addRange(reportSheet.getRange("O3:O8"))
-    .setPosition(25, 13, 0, 0)
-    .setOption("title", "DOANH THU ĐÓNG GÓP THEO PHÂN KHÚC KHÁCH HÀNG")
-    .setOption("width", 400)
-    .setOption("height", 280)
-    .setOption("legend", {position: "none"})
-    .setOption("colors", ["#005A9C"])
-    .setOption("vAxis", {format: "#,##0"})
-    .build();
-  reportSheet.insertChart(columnChart);
-}`,
-    workflow: [
-      { icon: "ph-link", title: "1. Đọc Dữ Liệu", desc: "Xác nhận AI đọc chính xác sheet DonHang_BT6" },
-      { icon: "ph-table", title: "2. Phân Tích Cột", desc: "AI phân tích cấu trúc cột & công thức RFM" },
-      { icon: "ph-chart-pie", title: "3. Sinh Code Biểu Đồ", desc: "Apps Script tính toán và vẽ Combo/Pie charts" },
-      { icon: "ph-file-doc", title: "4. Tạo Mẫu Docs", desc: "Thiết kế biểu mẫu Word báo cáo RFM" },
-      { icon: "ph-file-pdf", title: "5. Xuất Báo Cáo PDF", desc: "Apps Script điền số liệu & lưu Drive" }
-    ],
-    masterPrompt: `/**
- * Trình tự tự động hóa Phân tích & Báo cáo RFM Khách Hàng
- * Tích hợp tính năng xuất PDF từ Google Docs Template
+ * ==============================================================================
+ * BÀI TẬP 6: HỆ THỐNG QUẢN LÝ SỔ QUỸ THU CHI, QUÉT GMAIL & DASHBOARD DÒNG TIỀN
+ * ==============================================================================
+ * Cấu trúc dự án theo mô hình tách từng file độc lập:
+ * 1. 1_Menu_ThuChi.gs      (Menu thanh công cụ, Đồng bộ Gmail & Mở Form Popup)
+ * 2. 2_Dashboard_KPI.gs   (Khởi tạo Dashboard & 4 Thẻ KPI Thu/Chi/Số Dư)
+ * 3. 3_CalcData_ThuChi.gs (Trang phụ Calc_Data tính toán gom nhóm)
+ * 4. 4_PieChart_ChiTieu.gs (Vẽ biểu đồ tròn cơ cấu chi tiêu theo nhóm)
+ * 5. 5_BarChart_KenhTT.gs  (Vẽ biểu đồ cột chi tiêu theo kênh thanh toán)
+ * 6. 6_BackendService.gs  (Xử lý thêm giao dịch thủ công, tính VAT & ghi log)
+ * 7. 7_DocThuEmail_Bank.gs (🌟 BƯỚC 7: Đọc thử email BIDV & xuất dữ liệu ra sheet Mail_Log để kiểm chứng)
+ * 8. 8_NapGiaoDich_Bank.gs (🌟 BƯỚC 8: Nạp chuẩn 12 cột vào Giao_Dich & cập nhật Dashboard)
+ * 9. 9_Trigger_AutoSync.gs (🌟 BƯỚC 9: Cài đặt Time-driven Trigger chạy ngầm mỗi 5 phút)
+ * 10. GiaoDichForm.html   (Giao diện Form nhập giao dịch nhanh Aesthetic Blue)
+ * ==============================================================================
  */
 
-// 1. Tạo Custom Menu trên thanh công cụ Google Sheets
+// ==============================================================================
+// 1. FILE 1_Menu_ThuChi.gs
+// ==============================================================================
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
-  ui.createMenu('📊 PHÂN TÍCH')
-    .addItem('Chạy Phân Tích RFM & Xuất PDF', 'runRFMAnalysis')
+  ui.createMenu('💰 Quản Lý Thu Chi')
+    .addItem('📊 Dashboard Sổ Quỹ', 'khoiTaoDashboardThuChi')
+    .addSeparator()
+    .addItem('🔍 1. Đọc Thử Email Ra Sheet Mail_Log', 'docThuEmailXuatMailLog')
+    .addItem('📥 2. Nạp Chính Thức Vào Sổ Quỹ Giao_Dich', 'quetVaNapVaoGiaoDich')
+    .addItem('⏰ 3. Bật Tự Động Quét Gmail (Mỗi 5 Phút)', 'caiDatTriggerQuetGmail')
+    .addItem('🛑 Tắt Tự Động Quét Gmail', 'huyTriggerQuetGmail')
+    .addSeparator()
+    .addItem('➕ Nhập Giao Dịch Thủ Công', 'moFormNhapGiaoDich')
+    .addSeparator()
+    .addItem('🔄 Làm Mới Dashboard', 'khoiTaoDashboardThuChi')
+    .addItem('❓ Hướng Dẫn Sử Dụng', 'hienThiHuongDanThuChi')
     .addToUi();
 }
 
-// 2. Hàm chính thực hiện phân tích RFM
-function runRFMAnalysis() {
+function moFormNhapGiaoDich() {
+  var html = HtmlService.createTemplateFromFile('GiaoDichForm')
+    .evaluate()
+    .setWidth(720)
+    .setHeight(620)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  SpreadsheetApp.getUi().showModalDialog(html, '➕ Nhập Giao Dịch Thu/Chi Mới');
+}
+
+function hienThiHuongDanThuChi() {
+  var msg = "=== HƯỚNG DẪN QUẢN LÝ SỔ QUỸ THU CHI & ĐỒNG BỘ GMAIL ===\\n\\n" +
+    "1. 🔍 Đọc Thử Email: Bóc tách email BIDV xuất ra sheet 'Mail_Log' để kiểm tra trước.\\n" +
+    "2. 📥 Nạp Chính Thức: Đưa dữ liệu chuẩn vào sheet 'Giao_Dich' & cập nhật Dashboard.\\n" +
+    "3. ⏰ Bật Tự Động Quét: Cài Trigger chạy ngầm mỗi 5 phút hoàn toàn tự động.\\n" +
+    "4. ➕ Nhập Thủ Công: Form popup nhập các khoản tiền mặt ngoài ngân hàng.";
+  SpreadsheetApp.getUi().alert('❓ Hướng Dẫn', msg, SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+// ==============================================================================
+// 2. FILE 2_Dashboard_KPI.gs
+// ==============================================================================
+function khoiTaoDashboardThuChi() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sourceSheet = ss.getSheetByName("DonHang_BT6");
-  
+  var sourceSheet = ss.getSheetByName('Giao_Dich');
   if (!sourceSheet) {
-    SpreadsheetApp.getUi().alert('⚠️ Không tìm thấy sheet "DonHang_BT6". Vui lòng kiểm tra lại!');
+    SpreadsheetApp.getUi().alert('Lỗi: Không tìm thấy sheet nguồn "Giao_Dich"!');
     return;
   }
+
+  // Khởi tạo trang Dashboard
+  var dashName = "📊 Dashboard Sổ Quỹ";
+  var dashSheet = ss.getSheetByName(dashName) || ss.insertSheet(dashName, 0);
+  ss.setActiveSheet(dashSheet);
+  ss.moveActiveSheet(1);
+  dashSheet.clear();
+  dashSheet.getCharts().forEach(function(c) { dashSheet.removeChart(c); });
+
+  // Thiết lập Banner
+  dashSheet.getRange("A1:H1").merge().setValue("💰 SỔ QUỸ THU CHI & QUẢN TRỊ DÒNG TIỀN 2026")
+    .setFontSize(18).setFontWeight("bold").setFontColor("#FFFFFF").setBackground("#0f4c81")
+    .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.setRowHeight(1, 55);
+
+  var timeStr = Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm:ss');
+  dashSheet.getRange("A3:H3").merge().setValue("📅 Dữ liệu cập nhật tự động lúc: " + timeStr)
+    .setFontColor("#627d98").setFontSize(10).setFontStyle("italic")
+    .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.setRowHeight(3, 25);
+
+  // 4 Thẻ KPI
+  // KPI 1: TỔNG THU
+  dashSheet.getRange("A5:B5").merge().setValue("🟢 TỔNG THU (ĐÃ THU)").setBackground("#e6f4ea").setFontColor("#137333").setFontWeight("bold").setHorizontalAlignment("center");
+  dashSheet.getRange("A6:B7").merge().setFormula('=SUMIFS(Giao_Dich!J3:J; Giao_Dich!C3:C; "Thu")').setBackground("#e6f4ea").setFontColor("#0d652d").setFontSize(16).setFontWeight("bold").setNumberFormat('#,##0 "VNĐ"').setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.getRange("A5:B7").setBorder(true, true, true, true, false, false, "#81c995", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 2: TỔNG CHI
+  dashSheet.getRange("C5:D5").merge().setValue("🔴 TỔNG CHI (ĐÃ CHI)").setBackground("#fce8e6").setFontColor("#c5221f").setFontWeight("bold").setHorizontalAlignment("center");
+  dashSheet.getRange("C6:D7").merge().setFormula('=SUMIFS(Giao_Dich!J3:J; Giao_Dich!C3:C; "Chi")').setBackground("#fce8e6").setFontColor("#a50e0e").setFontSize(16).setFontWeight("bold").setNumberFormat('#,##0 "VNĐ"').setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.getRange("C5:D7").setBorder(true, true, true, true, false, false, "#f28b82", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 3: SỐ DƯ QUỸ
+  dashSheet.getRange("E5:F5").merge().setValue("🔵 SỐ DƯ QUỸ THỰC TẾ").setBackground("#e8f0fe").setFontColor("#1a73e8").setFontWeight("bold").setHorizontalAlignment("center");
+  dashSheet.getRange("E6:F7").merge().setFormula('=A6-C6').setBackground("#e8f0fe").setFontColor("#174ea6").setFontSize(16).setFontWeight("bold").setNumberFormat('#,##0 "VNĐ"').setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.getRange("E5:F7").setBorder(true, true, true, true, false, false, "#8ab4f8", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 4: TỶ LỆ CHI/THU
+  dashSheet.getRange("G5:H5").merge().setValue("📊 TỶ LỆ CHI / THU").setBackground("#f3e8fd").setFontColor("#7627bb").setFontWeight("bold").setHorizontalAlignment("center");
+  dashSheet.getRange("G6:H7").merge().setFormula('=IF(A6>0; C6/A6; 0)').setBackground("#f3e8fd").setFontColor("#52188c").setFontSize(16).setFontWeight("bold").setNumberFormat('0.0%').setHorizontalAlignment("center").setVerticalAlignment("middle");
+  dashSheet.getRange("G5:H7").setBorder(true, true, true, true, false, false, "#c58af9", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // Tự động gọi các hàm tạo bảng phụ và vẽ biểu đồ nếu có
+  if (typeof thietLapCalcDataThuChi === 'function') {
+    var calcSheet = thietLapCalcDataThuChi(ss);
+    SpreadsheetApp.flush();
+    if (typeof veBieuDoTronChiTieu === 'function') veBieuDoTronChiTieu(dashSheet, calcSheet);
+    if (typeof veBieuDoCotKenhTT === 'function') veBieuDoCotKenhTT(dashSheet, calcSheet);
+  }
+}
+
+// ==============================================================================
+// 3. FILE 3_CalcData_ThuChi.gs
+// ==============================================================================
+function thietLapCalcDataThuChi(ss) {
+  var ssObj = ss || SpreadsheetApp.getActiveSpreadsheet();
+  var calcName = "Calc_Data";
+  var calcSheet = ssObj.getSheetByName(calcName) || ssObj.insertSheet(calcName);
+  calcSheet.clear();
+
+  // Bảng 1: Cơ cấu Chi tiêu theo Nhóm (A1:B9)
+  calcSheet.getRange("A1:B1").setValues([["Nhóm Chi Tiêu", "Tổng Chi Sau Thuế"]]).setFontWeight("bold");
+  var nhomList = ["Ăn uống", "Đi lại", "Nhà ở", "Mua sắm", "Y tế", "Học tập", "Giải trí", "Khác"];
+  var nhomFormulas = [];
+  for (var i = 0; i < nhomList.length; i++) {
+    var rIdx = i + 2;
+    nhomFormulas.push([
+      nhomList[i],
+      '=SUMIFS(Giao_Dich!J$3:J; Giao_Dich!C$3:C; "Chi"; Giao_Dich!D$3:D; A' + rIdx + ')'
+    ]);
+  }
+  calcSheet.getRange(2, 1, nhomFormulas.length, 2).setFormulas(nhomFormulas);
+  calcSheet.getRange("B2:B9").setNumberFormat("#,##0");
+
+  // Bảng 2: Chi tiêu theo Kênh Thanh Toán (D1:E5)
+  calcSheet.getRange("D1:E1").setValues([["Kênh Thanh Toán", "Tổng Chi"]]).setFontWeight("bold");
+  var kenhList = ["Tiền mặt", "Chuyển khoản", "Ví điện tử", "Thẻ ngân hàng"];
+  var kenhFormulas = [];
+  for (var k = 0; k < kenhList.length; k++) {
+    var kIdx = k + 2;
+    kenhFormulas.push([
+      kenhList[k],
+      '=SUMIFS(Giao_Dich!J$3:J; Giao_Dich!C$3:C; "Chi"; Giao_Dich!G$3:G; D' + kIdx + ')'
+    ]);
+  }
+  calcSheet.getRange(2, 4, kenhFormulas.length, 2).setFormulas(kenhFormulas);
+  calcSheet.getRange("E2:E5").setNumberFormat("#,##0");
+
+  return calcSheet;
+}
+
+// ==============================================================================
+// 4. FILE 4_PieChart_ChiTieu.gs
+// ==============================================================================
+function veBieuDoTronChiTieu(dashSheet, calcSheet) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dSheet = dashSheet || ss.getSheetByName("📊 Dashboard Sổ Quỹ");
+  var cSheet = calcSheet || ss.getSheetByName("Calc_Data");
+  if (!dSheet || !cSheet) return;
+
+  var pieRange = cSheet.getRange("A1:B9");
+  var pieChart = dSheet.newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(pieRange)
+    .setNumHeaders(1)
+    .setPosition(9, 1, 0, 0)
+    .setOption("title", "📊 CƠ CẤU CHI TIÊU THEO TỪNG NHÓM")
+    .setOption("titleTextStyle", { color: "#0f4c81", fontSize: 13, bold: true })
+    .setOption("pieSliceText", "percentage")
+    .setOption("legend", { position: "right", textStyle: { fontSize: 11, color: "#334e68" } })
+    .setOption("width", 490)
+    .setOption("height", 360)
+    .build();
+
+  dSheet.insertChart(pieChart);
+}
+
+// ==============================================================================
+// 5. FILE 5_BarChart_KenhTT.gs
+// ==============================================================================
+function veBieuDoCotKenhTT(dashSheet, calcSheet) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dSheet = dashSheet || ss.getSheetByName("📊 Dashboard Sổ Quỹ");
+  var cSheet = calcSheet || ss.getSheetByName("Calc_Data");
+  if (!dSheet || !cSheet) return;
+
+  var colRange = cSheet.getRange("D1:E5");
+  var colChart = dSheet.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(colRange)
+    .setNumHeaders(1)
+    .setPosition(9, 5, 0, 0)
+    .setOption("title", "💳 CHI TIÊU THEO KÊNH THANH TOÁN")
+    .setOption("titleTextStyle", { color: "#0f4c81", fontSize: 13, bold: true })
+    .setOption("colors", ["#2563EB"])
+    .setOption("legend", { position: "none" })
+    .setOption("hAxis", { title: "Kênh Thanh Toán", textStyle: { fontSize: 10 } })
+    .setOption("vAxis", { title: "Số Tiền Chi (VNĐ)", minValue: 0 })
+    .setOption("width", 560)
+    .setOption("height", 360)
+    .build();
+
+  dSheet.insertChart(colChart);
+}
+
+// ==============================================================================
+// 6. FILE 6_BackendService.gs
+// ==============================================================================
+function luuGiaoDichMoi(formData) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Giao_Dich");
+    if (!sheet) return { success: false, message: "Không tìm thấy trang tính Giao_Dich!" };
+
+    var soTien = Number(formData.soTien) || 0;
+    var vat = Number(formData.vat) || 0;
+    var tongSauThue = Math.round(soTien * (1 + vat));
+
+    var newRow = [
+      formData.ngayGD,       // Cột A: Ngày GD
+      formData.thangNam,      // Cột B: Tháng/Năm
+      formData.loaiGD,        // Cột C: Loại GD (Thu / Chi)
+      formData.nhomChiTieu,   // Cột D: Nhóm Chi Tiêu
+      formData.moTa,          // Cột E: Mô Tả
+      formData.nguoiLienQuan, // Cột F: Người Liên Quan
+      formData.kenhTT,        // Cột G: Kênh Thanh Toán
+      soTien,                 // Cột H: Số Tiền
+      vat,                    // Cột I: VAT (%)
+      tongSauThue,            // Cột J: Tổng Sau Thuế
+      formData.trangThai,     // Cột K: Trạng Thái
+      formData.ghiChu         // Cột L: Ghi Chú
+    ];
+
+    sheet.appendRow(newRow);
+    SpreadsheetApp.flush();
+
+    // Làm mới lại Dashboard nếu đang có
+    if (typeof khoiTaoDashboardThuChi === 'function') {
+      khoiTaoDashboardThuChi();
+    }
+
+    return { success: true, message: "Đã lưu giao dịch thành công!" };
+  } catch (e) {
+    return { success: false, message: "Lỗi lưu dữ liệu: " + e.toString() };
+  }
+}
+
+// ==============================================================================
+// 7. FILE 7_DocThuEmail_Bank.gs (🌟 BƯỚC 7: ĐỌC THỬ & XUẤT RA SHEET Mail_Log)
+// ==============================================================================
+function docThuEmailXuatMailLog() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logName = "Mail_Log";
+  var logSheet = ss.getSheetByName(logName) || ss.insertSheet(logName);
   
-  // Đọc dữ liệu từ dòng 4 (A4:E)
-  var lastRow = sourceSheet.getLastRow();
-  if (lastRow < 4) {
-    SpreadsheetApp.getUi().alert('⚠️ Sheet "DonHang_BT6" không có dữ liệu từ dòng 4 trở đi.');
+  // Khởi tạo dòng tiêu đề nếu sheet còn trống
+  if (logSheet.getLastRow() === 0) {
+    logSheet.getRange("A1:G1").setValues([[
+      "Thời Gian Quét", "Tiêu Đề Email", "Số Lệnh GD", "Ngày GD Bóc Được", "Người Chuyển", "Số Tiền (VNĐ)", "Nội Dung Chuyển Tiền"
+    ]]).setFontWeight("bold").setBackground("#e8f0fe");
+    logSheet.setRowHeight(1, 35);
+  }
+
+  // Tìm kiếm email từ BIDV hoặc tài khoản gửi giả lập
+  var query = 'from:nguyentuanviet12k1@gmail.com OR subject:("BIDV" OR "Biên lai chuyển tiền" OR "biến động số dư")';
+  var threads = GmailApp.search(query, 0, 5);
+  var count = 0;
+
+  for (var i = 0; i < threads.length; i++) {
+    var messages = threads[i].getMessages();
+    for (var j = 0; j < messages.length; j++) {
+      var msg = messages[j];
+      var bodyText = msg.getPlainBody();
+      var bodyHtml = msg.getBody();
+      var subject = msg.getSubject();
+      var dateReceived = msg.getDate();
+
+      // Bóc tách thông tin
+      var info = bocTachChiTietEmail(subject, bodyText, bodyHtml, dateReceived);
+
+      // Ghi dòng kiểm tra vào sheet Mail_Log
+      var timeScan = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm:ss");
+      logSheet.appendRow([
+        timeScan,
+        subject,
+        info.maGD,
+        info.ngayGD,
+        info.nguoiChuyen,
+        info.soTien,
+        info.noiDung
+      ]);
+      count++;
+    }
+  }
+
+  SpreadsheetApp.flush();
+  SpreadsheetApp.getUi().alert(
+    '🔍 ĐÃ ĐỌC THỬ THÀNH CÔNG',
+    'Hệ thống đã đọc ' + count + ' email và ghi dữ liệu bóc tách được vào sheet "Mail_Log".\\n\\nHãy mở tab Mail_Log để kiểm tra trước khi nạp chính thức!',
+    SpreadsheetApp.getUi().ButtonSet.OK
+  );
+}
+
+/**
+ * Hàm phân tích & bóc tách chi tiết email (Hỗ trợ cả THU & CHI, phân loại nhóm chi tiêu)
+ */
+function bocTachChiTietEmail(subject, bodyText, bodyHtml, dateObj) {
+  var content = (bodyText || "") + " " + (bodyHtml || "");
+  var cleanText = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+  var ngayGD = Utilities.formatDate(dateObj, "GMT+7", "dd/MM/yyyy");
+  var thangNam = Utilities.formatDate(dateObj, "GMT+7", "MM/yyyy");
+  var soTien = 0;
+  var nguoiChuyen = "";
+  var nguoiNhan = "";
+  var noiDung = "";
+  var maGD = "---";
+  var loaiGD = "Thu";
+  var nhomChiTieu = "Khác";
+  var kenhTT = "Chuyển khoản";
+  var trangThai = "Đã thu";
+
+  // 1. Trích xuất Ngày giao dịch (dd/MM/yyyy)
+  var dateMatch = cleanText.match(/(\d{2}\/\d{2}\/\d{4})/);
+  if (dateMatch) {
+    ngayGD = dateMatch[1];
+    var parts = ngayGD.split('/');
+    if (parts.length === 3) thangNam = parts[1] + "/" + parts[2];
+  }
+
+  // 2. Trích xuất Số lệnh giao dịch
+  var orderMatch = subject.match(/Lệnh GD\s*([0-9a-zA-Z]+)/i) 
+                || cleanText.match(/(?:Số lệnh giao dịch|Order Number)\s*[:\s]*([0-9a-zA-Z]+)/i);
+  if (orderMatch && orderMatch[1] && orderMatch[1].toLowerCase() !== "giao") {
+    maGD = orderMatch[1].trim();
+  }
+
+  // 3. Nhận diện Loại Giao Dịch (Thu hoặc Chi)
+  var loaiMatch = cleanText.match(/Loại giao dịch\s*[:\s]*([^<\n\r]+?)(?=(?:Tài khoản|Người|Số tiền|$))/i);
+  if (loaiMatch && loaiMatch[1]) {
+    var rawLoai = loaiMatch[1].toLowerCase();
+    if (rawLoai.indexOf("chi") >= 0 || rawLoai.indexOf("chuyển tiền đi") >= 0 || rawLoai.indexOf("thanh toán") >= 0) {
+      loaiGD = "Chi";
+      trangThai = "Đã chi";
+    }
+  } else if (cleanText.toLowerCase().indexOf("thanh toán") >= 0 || cleanText.toLowerCase().indexOf("chuyển tiền đi") >= 0) {
+    loaiGD = "Chi";
+    trangThai = "Đã chi";
+  }
+
+  // 4. Trích xuất Người chuyển tiền & Người nhận tiền
+  var remitterMatch = cleanText.match(/(?:Tên người chuyển tiền|Người chuyển tiền|Remitter's name)\s*[:\s]*([^:]+?)(?=(?:Tài khoản|Người nhận|Tên người hưởng|Beneficiary|Số tiền|$))/i);
+  if (remitterMatch && remitterMatch[1]) {
+    nguoiChuyen = remitterMatch[1].replace(/Remitter's name/gi, '').replace(/Tài khoản.*/gi, '').trim();
+  }
+
+  var beneficiaryMatch = cleanText.match(/(?:Tên người hưởng|Người nhận tiền|Beneficiary Name)\s*[:\s]*([^:]+?)(?=(?:Kênh|Ngân hàng|Số tiền|Nội dung|$))/i);
+  if (beneficiaryMatch && beneficiaryMatch[1]) {
+    nguoiNhan = beneficiaryMatch[1].replace(/Beneficiary Name/gi, '').replace(/Kênh.*/gi, '').trim();
+  }
+
+  var nguoiLienQuan = loaiGD === "Thu" ? (nguoiChuyen || "Khách hàng") : (nguoiNhan || "Nhà cung cấp");
+
+  // 5. Trích xuất Kênh thanh toán
+  var channelMatch = cleanText.match(/(?:Kênh thanh toán|Tên ngân hàng hưởng|Payment Channel)\s*[:\s]*([^:]+?)(?=(?:Số tiền|Nội dung|$))/i);
+  if (channelMatch && channelMatch[1]) {
+    kenhTT = channelMatch[1].trim();
+  }
+
+  // 6. Trích xuất Số tiền
+  var moneyMatch = cleanText.match(/(?:Số tiền giao dịch|Số tiền|Amount)\s*[:\s]*([+-]?[0-9.,]+)\s*(?:VND|VNĐ|₫|d|đ)?/i)
+                || cleanText.match(/([+-]?[0-9]{1,3}(?:[.,][0-9]{3})+)\s*(?:VND|VNĐ|₫|d|đ)/i);
+  if (moneyMatch && moneyMatch[1]) {
+    var raw = moneyMatch[1].replace(/[+-]/g, '').replace(/[.,](?=[0-9]{3})/g, '').replace(',', '.').replace('₫', '').trim();
+    soTien = Math.abs(parseFloat(raw)) || 0;
+  }
+
+  // 7. Trích xuất Nội dung chuyển tiền
+  var ndMatch = cleanText.match(/(?:Nội dung chuyển tiền|Details of Payment)\s*[:\s]*([^:]+?)(?=(?:Cảm ơn|Thank you|Lưu ý|Note|$))/i);
+  if (ndMatch && ndMatch[1]) {
+    noiDung = ndMatch[1].replace(/Details of Payment/gi, '').replace(/Cảm ơn Quý khách.*/gi, '').replace(/Thank you.*/gi, '').trim();
+  } else {
+    noiDung = subject;
+  }
+
+  // 8. Tự động nhận diện Nhóm Chi Tiêu dựa trên từ khóa nội dung
+  var ndLower = (noiDung + " " + subject).toLowerCase();
+  if (ndLower.indexOf("an ") >= 0 || ndLower.indexOf("ăn") >= 0 || ndLower.indexOf("tiec") >= 0 || ndLower.indexOf("tiệc") >= 0 || ndLower.indexOf("cafe") >= 0 || ndLower.indexOf("sen tay ho") >= 0) {
+    nhomChiTieu = "Ăn uống";
+  } else if (ndLower.indexOf("dien") >= 0 || ndLower.indexOf("điện") >= 0 || ndLower.indexOf("nuoc") >= 0 || ndLower.indexOf("nước") >= 0 || ndLower.indexOf("nha") >= 0 || ndLower.indexOf("nhà") >= 0) {
+    nhomChiTieu = "Nhà ở";
+  } else if (ndLower.indexOf("mua sam") >= 0 || ndLower.indexOf("mua sắm") >= 0 || ndLower.indexOf("quan ao") >= 0 || ndLower.indexOf("vinmart") >= 0 || ndLower.indexOf("sieu thi") >= 0) {
+    nhomChiTieu = "Mua sắm";
+  } else if (ndLower.indexOf("xang") >= 0 || ndLower.indexOf("xăng") >= 0 || ndLower.indexOf("grab") >= 0 || ndLower.indexOf("be") >= 0 || ndLower.indexOf("xe") >= 0) {
+    nhomChiTieu = "Đi lại";
+  } else if (ndLower.indexOf("hoc") >= 0 || ndLower.indexOf("học") >= 0 || ndLower.indexOf("sach") >= 0 || ndLower.indexOf("sách") >= 0) {
+    nhomChiTieu = "Học tập";
+  } else if (ndLower.indexOf("kham") >= 0 || ndLower.indexOf("thuoc") >= 0 || ndLower.indexOf("y te") >= 0) {
+    nhomChiTieu = "Y tế";
+  }
+
+  return {
+    ngayGD: ngayGD,
+    thangNam: thangNam,
+    loaiGD: loaiGD,
+    nhomChiTieu: nhomChiTieu,
+    soTien: soTien,
+    nguoiLienQuan: nguoiLienQuan,
+    kenhTT: kenhTT,
+    noiDung: noiDung,
+    trangThai: trangThai,
+    maGD: maGD
+  };
+}
+
+// ==============================================================================
+// 8. FILE 8_NapGiaoDich_Bank.gs (🌟 BƯỚC 8: NẠP CHUẨN 12 CỘT VÀO GIAO_DICH)
+// ==============================================================================
+function quetVaNapVaoGiaoDich() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Giao_Dich");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('Lỗi: Không tìm thấy sheet "Giao_Dich"!');
     return;
   }
-  
-  var data = sourceSheet.getRange(4, 1, lastRow - 3, 5).getValues();
-  var reportDate = new Date(2026, 7, 31); // Mốc ngày chốt báo cáo 31/08/2026
-  
-  // Tổng hợp dữ liệu theo từng Mã Khách Hàng
-  var customers = {};
-  
-  for (var i = 0; i < data.length; i++) {
-    var orderId = data[i][0];
-    var custId = data[i][1];
-    var custName = data[i][2];
-    var dateVal = parseDate_(data[i][3]);
-    var revenueVal = parseNumber_(data[i][4]);
-    
-    if (!custId) continue; // Bỏ qua dòng trống
-    
-    if (!customers[custId]) {
-      customers[custId] = {
-        id: custId,
-        name: custName,
-        lastDate: dateVal,
-        frequency: 1,
-        monetary: revenueVal
-      };
-    } else {
-      customers[custId].frequency += 1;
-      customers[custId].monetary += revenueVal;
-      if (dateVal && (!customers[custId].lastDate || dateVal > customers[custId].lastDate)) {
-        customers[custId].lastDate = dateVal;
-        if (custName) customers[custId].name = custName;
+
+  var labelName = "Da_Nap_Sheets";
+  var label = GmailApp.getUserLabelByName(labelName) || GmailApp.createLabel(labelName);
+
+  // 1. Quét danh sách các Mã Lệnh GD đã có trong sheet Giao_Dich (Cột L) để chống trùng
+  var lastRow = sheet.getLastRow();
+  var danhSachMaDaCo = "";
+  if (lastRow >= 3) {
+    danhSachMaDaCo = sheet.getRange("L3:L" + lastRow).getValues().flat().join(" ");
+  }
+
+  // 2. Tìm kiếm email có tiêu đề chứa "Biên lai chuyển tiền"
+  var query = 'subject:("Biên lai chuyển tiền") is:unread -label:' + labelName;
+  var threads = GmailApp.search(query, 0, 10);
+  var soLuong = 0;
+
+  for (var i = 0; i < threads.length; i++) {
+    var messages = threads[i].getMessages();
+    for (var j = 0; j < messages.length; j++) {
+      var msg = messages[j];
+      if (msg.isUnread()) {
+        var info = bocTachChiTietEmail(msg.getSubject(), msg.getPlainBody(), msg.getBody(), msg.getDate());
+
+        if (info && info.soTien > 0) {
+          // Kiểm tra chống trùng lặp: Nếu mã GD đã có trong sheet thì bỏ qua
+          if (info.maGD !== "---" && danhSachMaDaCo.indexOf(info.maGD) >= 0) {
+            Logger.log("ℹ️ Bỏ qua giao dịch đã tồn tại: " + info.maGD);
+            continue;
+          }
+
+          // Chuẩn bị dòng 12 cột chuẩn khớp 100% với sheet Giao_Dich
+          var newRow = [
+            info.ngayGD,        // Cột A: Ngày GD
+            info.thangNam,      // Cột B: Tháng/Năm
+            info.loaiGD,        // Cột C: Loại GD (Thu / Chi)
+            info.nhomChiTieu,   // Cột D: Nhóm Chi Tiêu
+            info.noiDung,       // Cột E: Mô TẢ
+            info.nguoiLienQuan, // Cột F: Người Liên Quan
+            info.kenhTT,        // Cột G: Kênh Thanh Toán
+            info.soTien,        // Cột H: Số Tiền
+            0,                  // Cột I: VAT (0%)
+            info.soTien,        // Cột J: Tổng Sau Thuế
+            info.trangThai,     // Cột K: Trạng Thái (Đã thu / Đã chi)
+            "Biên lai GD: " + info.maGD // Cột L: Ghi Chú
+          ];
+
+          sheet.appendRow(newRow);
+          danhSachMaDaCo += " " + info.maGD; // Cập nhật bộ nhớ đệm chống trùng
+          soLuong++;
+        }
+        msg.markRead();
       }
     }
+    threads[i].addLabel(label);
   }
-  
-  // Tính chỉ số R, F, M, chấm điểm và phân hạng
-  var outputRows = [];
-  for (var id in customers) {
-    var c = customers[id];
-    
-    var recency = 0;
-    if (c.lastDate) {
-      var diffTime = reportDate.getTime() - c.lastDate.getTime();
-      recency = Math.max(0, Math.round(diffTime / (1000 * 3600 * 24)));
+
+  if (soLuong > 0) {
+    SpreadsheetApp.flush();
+    if (typeof khoiTaoDashboardThuChi === 'function') {
+      khoiTaoDashboardThuChi();
     }
-    
-    var rScore = 1;
-    if (recency <= 15) rScore = 5;
-    else if (recency <= 45) rScore = 4;
-    else if (recency <= 90) rScore = 3;
-    else if (recency <= 180) rScore = 2;
-    else rScore = 1;
-    
-    var fScore = 1;
-    if (c.frequency >= 10) fScore = 5;
-    else if (c.frequency >= 5) fScore = 4;
-    else if (c.frequency >= 3) fScore = 3;
-    else if (c.frequency >= 2) fScore = 2;
-    else fScore = 1;
-    
-    var mScore = 1;
-    if (c.monetary >= 50000000) mScore = 5;
-    else if (c.monetary >= 20000000) mScore = 4;
-    else if (c.monetary >= 10000000) mScore = 3;
-    else if (c.monetary >= 5000000) mScore = 2;
-    else mScore = 1;
-    
-    var totalScore = rScore + fScore + mScore;
-    
-    var segment = "";
-    if (totalScore >= 13) segment = "VIP";
-    else if (totalScore >= 10) segment = "Trung thành";
-    else if (totalScore >= 7) segment = "Tiềm năng";
-    else if (totalScore >= 5) segment = "Khách mới";
-    else segment = "Nguy cơ rời bỏ";
-    
-    outputRows.push([
-      c.id, c.name, c.lastDate, recency, c.frequency, c.monetary,
-      rScore, fScore, mScore, totalScore, segment
-    ]);
-  }
-  
-  outputRows.sort(function(a, b) {
-    return a[0].localeCompare(b[0]);
-  });
-  
-  var targetSheet = ss.getSheetByName("BaoCao_RFM_BT6");
-  if (!targetSheet) {
-    targetSheet = ss.insertSheet("BaoCao_RFM_BT6");
+    SpreadsheetApp.getUi().alert(
+      '📥 ĐÃ NẠP THÀNH CÔNG',
+      'Đã nạp ' + soLuong + ' giao dịch mới (cả Thu & Chi) vào sheet "Giao_Dich" và cập nhật Dashboard!',
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
   } else {
-    targetSheet.clearContents();
-    targetSheet.clearFormats();
-    var existingCharts = targetSheet.getCharts();
-    for (var k = 0; k < existingCharts.length; k++) {
-      targetSheet.removeChart(existingCharts[k]);
-    }
-  }
-  
-  targetSheet.setHiddenGridlines(false);
-  
-  var headers = [
-    "Mã Khách Hàng", "Tên Khách Hàng", "Ngày Mua Gần Nhất", 
-    "Recency (Ngày)", "Frequency (Số đơn)", "Monetary (VNĐ)", 
-    "Điểm R", "Điểm F", "Điểm M", "Tổng Điểm", "Phân Hạng"
-  ];
-  
-  targetSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  
-  if (outputRows.length > 0) {
-    targetSheet.getRange(2, 1, outputRows.length, headers.length).setValues(outputRows);
-  }
-  
-  var numRows = outputRows.length;
-  var lastDataRow = numRows + 1;
-  
-  var navyColor = "#1B365D";
-  targetSheet.getRange(1, 1, 1, headers.length)
-             .setBackground(navyColor)
-             .setFontColor("#FFFFFF")
-             .setFontWeight("bold")
-             .setHorizontalAlignment("center")
-             .setVerticalAlignment("middle");
-  targetSheet.setRowHeight(1, 35);
-  
-  if (numRows > 0) {
-    var dataRange = targetSheet.getRange(2, 1, numRows, headers.length);
-    dataRange.setFontFamily("Roboto")
-             .setFontSize(10)
-             .setVerticalAlignment("middle");
-    
-    for (var r = 2; r <= lastDataRow; r++) {
-      targetSheet.getRange(r, 1, 1, headers.length)
-                 .setBackground(r % 2 === 0 ? "#F4F6F9" : "#FFFFFF");
-    }
-    
-    targetSheet.getRange(2, 1, numRows, 1).setHorizontalAlignment("center");
-    targetSheet.getRange(2, 2, numRows, 1).setHorizontalAlignment("left");
-    targetSheet.getRange(2, 3, numRows, 1).setNumberFormat("dd/mm/yyyy").setHorizontalAlignment("center");
-    targetSheet.getRange(2, 4, numRows, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
-    targetSheet.getRange(2, 5, numRows, 1).setNumberFormat("#,##0").setHorizontalAlignment("right");
-    targetSheet.getRange(2, 6, numRows, 1).setNumberFormat("#,##0 \"VNĐ\"").setHorizontalAlignment("right");
-    targetSheet.getRange(2, 7, numRows, 4).setNumberFormat("0").setHorizontalAlignment("center");
-    targetSheet.getRange(2, 11, numRows, 1).setHorizontalAlignment("center").setFontWeight("bold");
-    
-    dataRange.setBorder(true, true, true, true, true, true, "#D3D3D3", SpreadsheetApp.BorderStyle.SOLID);
-  }
-  
-  // Bảng Tổng Hợp Phân Khúc
-  var summaryHeaders = ["Phân Hạng", "Số Lượng Khách", "Tổng Doanh Thu"];
-  targetSheet.getRange(1, 13, 1, 3).setValues([summaryHeaders])
-             .setBackground(navyColor)
-             .setFontColor("#FFFFFF")
-             .setFontWeight("bold")
-             .setHorizontalAlignment("center")
-             .setVerticalAlignment("middle");
-             
-  var segments = ["VIP", "Trung thành", "Tiềm năng", "Khách mới", "Nguy cơ rời bỏ"];
-  var summaryNames = [];
-  var summaryFormulas = [];
-  
-  for (var s = 0; s < segments.length; s++) {
-    var rowIdx = s + 2;
-    summaryNames.push([segments[s]]);
-    summaryFormulas.push([
-      '=COUNTIF(K$2:K$' + lastDataRow + '; M' + rowIdx + ')',
-      '=SUMIF(K$2:K$' + lastDataRow + '; M' + rowIdx + '; F$2:F$' + lastDataRow + ')'
-    ]);
-  }
-  
-  summaryNames.push(["Tổng cộng"]);
-  summaryFormulas.push([
-    '=SUM(N2:N6)',
-    '=SUM(O2:O6)'
-  ]);
-  
-  targetSheet.getRange(2, 13, summaryNames.length, 1).setValues(summaryNames);
-  targetSheet.getRange(2, 14, summaryFormulas.length, 2).setValues(summaryFormulas);
-
-  targetSheet.getRange(2, 13, 6, 3).setBorder(true, true, true, true, true, true, "#D3D3D3", SpreadsheetApp.BorderStyle.SOLID);
-  targetSheet.getRange("M2:M6").setHorizontalAlignment("left").setFontWeight("bold");
-  targetSheet.getRange("N2:N7").setNumberFormat("#,##0").setHorizontalAlignment("right");
-  targetSheet.getRange("O2:O7").setNumberFormat("#,##0 \"VNĐ\"").setHorizontalAlignment("right");
-  targetSheet.getRange("M7:O7")
-             .setBackground("#E8EEF5")
-             .setFontWeight("bold")
-             .setBorder(true, true, true, true, true, true, navyColor, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
-
-  // Tạo Biểu Đồ
-  var pieChart = targetSheet.newChart()
-    .setChartType(Charts.ChartType.PIE)
-    .addRange(targetSheet.getRange("M1:N6"))
-    .setPosition(2, 17, 0, 0)
-    .setOption('title', 'Tỷ Lệ Khách Hàng Theo Phân Khúc')
-    .setOption('is3D', true)
-    .setOption('width', 480)
-    .setOption('height', 300)
-    .build();
-  targetSheet.insertChart(pieChart);
-  
-  var columnChart = targetSheet.newChart()
-    .setChartType(Charts.ChartType.COLUMN)
-    .addRange(targetSheet.getRange("M1:M6"))
-    .addRange(targetSheet.getRange("O1:O6"))
-    .setPosition(18, 17, 0, 0)
-    .setOption('title', 'Doanh Số Đóng Góp Theo Phân Khúc')
-    .setOption('legend', {position: 'none'})
-    .setOption('width', 480)
-    .setOption('height', 300)
-    .setOption('colors', [navyColor])
-    .setOption('vAxis', {title: 'Doanh thu (VNĐ)', format: 'short'})
-    .build();
-  targetSheet.insertChart(columnChart);
-  
-  for (var col = 1; col <= 15; col++) {
-    if (col === 12) {
-      targetSheet.setColumnWidth(12, 30);
-    } else {
-      targetSheet.autoResizeColumn(col);
-    }
-  }
-
-  // =========================================================================
-  // PHẦN NÂNG CẤP: TẠO BÁO CÁO PDF TỪ GOOGLE DOCS TEMPLATE
-  // =========================================================================
-  try {
-    // 1. Lấy dữ liệu từ bảng tổng hợp (Cần ép tính toán để lấy value thực tế)
-    SpreadsheetApp.flush(); 
-    
-    var vipCount = targetSheet.getRange("N2").getValue();
-    var loyalCount = targetSheet.getRange("N3").getValue();
-    var potentialCount = targetSheet.getRange("N4").getValue();
-    var newCount = targetSheet.getRange("N5").getValue();
-    var churnCount = targetSheet.getRange("N6").getValue();
-    
-    // ID của file template "BaoCao_RFM_Template"
-    var templateId = "1DQ857s2uv0U1fS1MdaIAztf7wxwuvrJvMxFzt7430yc"; 
-    
-    // 2. Tìm hoặc tạo thư mục "BaoCao_RFM_PDF"
-    var folderName = "BaoCao_RFM_PDF";
-    var folders = DriveApp.getFoldersByName(folderName);
-    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
-    
-    // 3. Tạo bản sao tạm thời của template
-    var templateFile = DriveApp.getFileById(templateId);
-    var tempFile = templateFile.makeCopy("Temp_BaoCao_RFM", folder);
-    var tempDoc = DocumentApp.openById(tempFile.getId());
-    var body = tempDoc.getBody();
-    
-    // 4. Thay thế từ khóa bằng số liệu thật
-    body.replaceText("{{VIP_Count}}", vipCount);
-    body.replaceText("{{Loyal_Count}}", loyalCount);
-    body.replaceText("{{Potential_Count}}", potentialCount);
-    body.replaceText("{{New_Count}}", newCount);
-    body.replaceText("{{Churn_Count}}", churnCount);
-    
-    // Thêm nhận định tự động
-    var insightText = "Phân khúc VIP (" + vipCount + " KH) và Trung thành (" + loyalCount + " KH) đang là nhóm nòng cốt. Cần đặc biệt chú ý chiến dịch giữ chân nhóm Nguy cơ rời bỏ (" + churnCount + " KH).";
-    body.replaceText("{{Insights}}", insightText);
-    
-    // Lưu và đóng file tạm để đảm bảo nội dung được ghi lại
-    tempDoc.saveAndClose();
-    
-    // 5. Xuất ra định dạng PDF
-    var pdfBlob = tempFile.getAs(MimeType.PDF);
-    var timeString = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "ddMMyyyy_HHmmss");
-    var pdfFile = folder.createFile(pdfBlob).setName("BaoCao_RFM_" + timeString + ".pdf");
-    var pdfUrl = pdfFile.getUrl();
-    
-    // 6. Xóa file Doc tạm để dọn rác
-    tempFile.setTrashed(true);
-    
-    // 7. Ghi link PDF vào ô H1 dưới dạng RichText Hyperlink
-    var richText = SpreadsheetApp.newRichTextValue()
-      .setText("📥 XEM BÁO CÁO PDF")
-      .setLinkUrl(pdfUrl)
-      .build();
-    
-    targetSheet.getRange("M10").setRichTextValue(richText)
-               .setBackground("#28a745")
-               .setFontColor("#FFFFFF")
-               .setFontWeight("bold")
-               .setHorizontalAlignment("center")
-               .setVerticalAlignment("middle");
-               
-    SpreadsheetApp.getUi().alert('✅ Đã phân tích RFM và xuất báo cáo PDF thành công!\nLink PDF đã được gắn tại ô H1.');
-    
-  } catch (e) {
-    SpreadsheetApp.getUi().alert("⚠️ Đã phân tích xong dữ liệu, nhưng có lỗi khi tạo PDF: " + e.message);
+    SpreadsheetApp.getUi().alert('Thông báo', 'Không có email biên lai mới chưa đọc hoặc tất cả giao dịch đã tồn tại.', SpreadsheetApp.getUi().ButtonSet.OK);
   }
 }
 
-// Hàm hỗ trợ ép kiểu Ngày
-function parseDate_(val) {
-  if (!val) return null;
-  if (val instanceof Date) return val;
-  if (typeof val === 'string' && val.trim() !== '') {
-    var parts = val.trim().split('/');
-    if (parts.length === 3) {
-      return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-    }
-    var d = new Date(val);
-    if (!isNaN(d.getTime())) return d;
-  }
-  return null;
+// ==============================================================================
+// 9. FILE 9_Trigger_AutoSync.gs (🌟 BƯỚC 9: CÀI ĐẶT TRIGGER TỰ ĐỘNG MỖI 5 PHÚT)
+// ==============================================================================
+function caiDatTriggerQuetGmail() {
+  huyTriggerQuetGmail();
+
+  ScriptApp.newTrigger('quetVaNapVaoGiaoDich')
+    .timeBased()
+    .everyMinutes(5)
+    .create();
+
+  SpreadsheetApp.getUi().alert(
+    '⏰ ĐÃ BẬT TỰ ĐỘNG HÓA 5 PHÚT',
+    'Hệ thống sẽ tự động chạy ngầm mỗi 5 phút để đọc email biên lai và nạp thẳng vào Google Sheets!',
+    SpreadsheetApp.getUi().ButtonSet.OK
+  );
 }
 
-// Hàm hỗ trợ ép kiểu Số
-function parseNumber_(val) {
-  if (typeof val === 'number') return val;
-  if (typeof val === 'string' && val.trim() !== '') {
-    var clean = val.replace(/\./g, '').replace(/,/g, '').trim();
-    var n = parseFloat(clean);
-    return isNaN(n) ? 0 : n;
+function huyTriggerQuetGmail() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'quetVaNapVaoGiaoDich') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
   }
-  return 0;
 }`,
+    workflow: [
+      { icon: "ph-brain", title: "0. Hiểu Sổ Quỹ", desc: "AI quét & hiểu 12 cột bảng Giao_Dich" },
+      { icon: "ph-list-plus", title: "1. Menu Tiện Ích", desc: "Tạo file 1_Menu_ThuChi.gs" },
+      { icon: "ph-chart-line-up", title: "2. Dashboard KPI", desc: "Tạo file 2_Dashboard_KPI.gs (4 thẻ KPI)" },
+      { icon: "ph-table", title: "3. Bảng Calc_Data", desc: "Tạo file 3_CalcData_ThuChi.gs" },
+      { icon: "ph-chart-pie-slice", title: "4. Biểu Đồ Tròn", desc: "Tạo file 4_PieChart_ChiTieu.gs" },
+      { icon: "ph-chart-bar", title: "5. Biểu Đồ Cột", desc: "Tạo file 5_BarChart_KenhTT.gs" },
+      { icon: "ph-database", title: "6. Backend Lưu Đơn", desc: "Tạo file 6_BackendService.gs" },
+      { icon: "ph-file-magnifying-glass", title: "7. Đọc Thử Mail_Log", desc: "Tạo file 7_DocThuEmail_Bank.gs" },
+      { icon: "ph-broom", title: "8. Tinh Chỉnh Regex", desc: "Làm sạch rác ký tự bóc tách" },
+      { icon: "ph-tray-arrow-down", title: "9. Nạp Giao_Dich", desc: "Tạo file 8_NapGiaoDich_Bank.gs" },
+      { icon: "ph-clock-countdown", title: "10. Trigger 5 Phút", desc: "Tạo file 9_Trigger_AutoSync.gs" },
+      { icon: "ph-browser", title: "11. Form Pop-up", desc: "Tạo file GiaoDichForm.html" }
+    ],
+    masterPrompt: `[VAI TRÒ]: Bạn là Chuyên gia Tự động hóa Google Sheets và Lập trình viên Google Apps Script / HTML UI chuyên nghiệp.
+[NHIỆM VỤ]: Viết mã Google Apps Script và giao diện HTML hoàn chỉnh theo kiến trúc tách từng file độc lập để xây dựng hệ thống Quản lý Sổ Quỹ Thu Chi, Tự động quét Gmail BIDV (qua bước kiểm tra Mail_Log trước khi nạp Giao_Dich) và Dashboard Dòng Tiền.
+[DANH SÁCH CÁC FILE CẦN TẠO]:
+1. 1_Menu_ThuChi.gs (Tạo Menu "💰 Quản Lý Thu Chi" gồm Đọc thử Mail_Log, Nạp Giao_Dich, Trigger 5 phút & Form popup)
+2. 2_Dashboard_KPI.gs (Tạo Dashboard Sổ Quỹ & 4 thẻ KPI: Tổng Thu, Tổng Chi, Số Dư Quỹ, Tỷ Lệ Chi/Thu)
+3. 3_CalcData_ThuChi.gs (Trang phụ Calc_Data tính gom nhóm theo 8 Nhóm Chi Tiêu và 4 Kênh Thanh Toán)
+4. 4_PieChart_ChiTieu.gs (Vẽ biểu đồ tròn cơ cấu chi tiêu)
+5. 5_BarChart_KenhTT.gs (Vẽ biểu đồ cột chi tiêu theo kênh thanh toán)
+6. 6_BackendService.gs (Hàm luuGiaoDichMoi tính VAT và thêm dòng mới vào Giao_Dich)
+7. 7_DocThuEmail_Bank.gs (Hàm docThuEmailXuatMailLog quét email BIDV bóc tách ra sheet Mail_Log để kiểm tra an toàn)
+8. 8_NapGiaoDich_Bank.gs (Hàm quetVaNapVaoGiaoDich nạp chuẩn 12 cột vào Giao_Dich, markRead & cập nhật Dashboard)
+9. 9_Trigger_AutoSync.gs (Hàm cài đặt & hủy Trigger time-driven chạy ngầm mỗi 5 phút)
+10. GiaoDichForm.html (Form pop-up nhập giao dịch nhanh Aesthetic Blue tự tính VAT)
+
+[QUY TẮC BẮT BUỘC]:
+- Tuân thủ file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md: Chuẩn Locale VN dấu ;, mảng escape \\, dải ô mở Giao_Dich!J3:J, không ẩn tab Calc_Data khi vẽ biểu đồ, setNumHeaders(1).`,
     businessScenario: {
-      story: "Bạn là Chuyên viên Phân tích Dữ liệu hoặc Trưởng bộ phận Chăm sóc khách hàng. Công ty chuẩn bị cho chiến dịch Tri ân cuối năm và cần gửi ưu đãi riêng cho từng nhóm khách hàng.",
-      pain: "Bạn có danh sách hàng nghìn giao dịch thô. Để tính ra được ai là VIP hay ai sắp rời bỏ, bạn phải viết hàng loạt cột phụ, tính toán đếm số đơn bằng COUNTIFS, cộng tiền bằng SUMIFS, rồi lồng các hàm IF cực kỳ dễ sai sót và mỏi mắt.",
-      solution: "Apps Script tự động quét toàn bộ đơn hàng, tính toán RFM, phân nhóm khách hàng VIP/Trung thành/Nguy cơ rời bỏ, vẽ biểu đồ phân phối và đóng góp doanh số, sau đó xuất báo cáo chuyên nghiệp chỉ trong 3 giây!"
+      story: "Bạn là Kế toán nội bộ / Chuyên viên Hành chính - Thủ quỹ hoặc chủ doanh nghiệp / cửa hàng. Hàng ngày phát sinh hàng chục khoản thu chi qua tài khoản ngân hàng (BIDV, Vietcombank, Techcombank...) và ví điện tử, đồng thời cũng có các khoản chi tiêu tiền mặt trực tiếp.",
+      pain: "Phải ngồi gõ tay từng giao dịch ngân hàng vào Google Sheets rất tốn thời gian, dễ sai sót số tiền và quên giao dịch. Cuối tháng làm báo cáo dòng tiền lại phải cộng trừ thủ công.",
+      solution: "Xây dựng Hệ thống Tự Động Hóa Quản Lý Sổ Quỹ Toàn Diện: (1) Đọc thử email bóc tách ra sheet Mail_Log kiểm tra an toàn, (2) Nạp chuẩn vào Sổ Quỹ Giao_Dich & Dashboard, (3) Tự động ngầm mỗi 5 phút bằng Trigger, (4) Form pop-up nhập tiền mặt."
     },
     promptBreakdown: [
-      { tag: "1. VAI TRÒ & DỮ LIỆU", title: "Phân tích RFM từ DonHang_BT6", desc: "AI nhận diện sheet DonHang_BT6 và tập trung phân tích 3 chỉ số Recency, Frequency, Monetary." },
-      { tag: "2. LUẬT CHẤM ĐIỂM", title: "Quy tắc điểm 1-5 & Phân nhóm", desc: "Chấm điểm từng chỉ số và tính tổng điểm (tối đa 15đ) để xếp hạng khách hàng chính xác." },
-      { tag: "3. TỔNG HỢP & BIỂU ĐỒ", title: "Pie & Column Chart", desc: "Tự lập bảng tổng hợp phân khúc bằng COUNTIF/SUMIF, vẽ 1 biểu đồ tròn và 1 biểu đồ cột song song." },
-      { tag: "4. DOCUMENT REPORT", title: "Docs & PDF Export", desc: "(Nâng cao) Tự động điền dữ liệu phân khúc vào biểu mẫu báo cáo Docs và xuất PDF lưu Drive." }
+      { tag: "1. VAI TRÒ & DỮ LIỆU", title: "Quản lý dữ liệu Giao_Dich", desc: "AI nhận diện sheet Giao_Dich với 12 cột thông tin chuẩn và bắt đầu dữ liệu từ dòng số 3." },
+      { tag: "2. CÔNG THỨC VIỆT NAM", title: "Quy chuẩn SUMIFS chuẩn dấu ;", desc: "Sử dụng công thức SUMIFS chuẩn Locale Việt Nam để lọc Tổng Thu, Tổng Chi và Số Dư Quỹ chính xác." },
+      { tag: "3. TỔNG HỢP & BIỂU ĐỒ", title: "Pie & Column Chart", desc: "Tự tạo bảng phụ Calc_Data sạch từ dòng 1 và vẽ 2 biểu đồ phân tích cơ cấu chi tiêu và kênh thanh toán." },
+      { tag: "4. ĐỌC THỬ RA MAIL_LOG", title: "Kiểm tra bóc tách an toàn", desc: "Quét Gmail BIDV và bóc tách các trường: Ngày, Người chuyển, Số tiền, Nội dung xuất ra tab Mail_Log." },
+      { tag: "5. NẠP SỔ QUỸ & TRIGGER", title: "Đồng bộ Giao_Dich & Chạy ngầm 5 phút", desc: "Nạp 12 cột vào Giao_Dich, làm mới Dashboard và thiết lập Trigger chạy ngầm mỗi 5 phút." }
     ],
     businessRequirements: `
-      <p><b>Bài toán thực tế:</b> Phân loại nhóm khách hàng dựa trên lịch sử mua sắm để tối ưu hóa hiệu quả chăm sóc khách hàng. Tự động hóa hoàn toàn quy trình xử lý, tính toán điểm RFM, vẽ biểu đồ tròn tỷ lệ, biểu đồ cột doanh số và xuất file báo cáo văn bản.</p>
+      <p><b>Bài toán thực tế:</b> Xây dựng ứng dụng quản lý sổ quỹ thu chi, tự động hóa đọc Gmail ngân hàng qua bước kiểm chứng an toàn:</p>
       <ul>
-        <li><b>Mục tiêu:</b> Chạy thuật toán in-memory xử lý 100+ dòng giao dịch, vẽ 2 biểu đồ trực quan hóa và xuất kết quả báo cáo.</li>
-        <li><b>Kỹ năng đạt được:</b> Làm chủ mô hình phân tích RFM, vẽ biểu đồ nâng cao qua Apps Script, xuất file in ấn sang PDF/Google Drive.</li>
+        <li><b>Mô hình 1 Vi Bước = 1 File Độc Lập:</b> Giúp người học làm đến đâu thấy ngay kết quả đến đó, không lo chắp vá hay dán đè code.</li>
+        <li><b>Bước Kiểm Chứng An Toàn (Sheet Mail_Log):</b> Đọc email BIDV và xuất dữ liệu bóc tách ra tab <code>Mail_Log</code> để học viên kiểm tra tính chính xác trước khi ghi vào sổ quỹ chính.</li>
+        <li><b>Đồng Bộ Vào Sheet Giao_Dich:</b> Nạp tự động vào 12 cột của bảng <code>Giao_Dich</code>, đánh dấu <code>markRead()</code> và gắn nhãn <code>Da_Nap_Sheets</code>.</li>
+        <li><b>Cài đặt Trigger thời gian (Time-driven):</b> Script tự động chạy ngầm mỗi 5–10 phút mà không cần người dùng phải mở bảng tính.</li>
+        <li><b>Dashboard Sổ Quỹ Thông Minh:</b> 4 thẻ KPI nổi bật (🟢 Tổng Thu, 🔴 Tổng Chi, 🔵 Số Dư Quỹ, 📊 Tỷ Lệ Chi/Thu) & 2 Biểu đồ phân tích.</li>
       </ul>
     `,
-    tableHeaders: ["Mã Đơn", "Mã KH", "Tên Khách Hàng", "Ngày Mua", "Doanh Thu Đơn"],
+    tableHeaders: ["Ngày GD", "Tháng/Năm", "Loại GD", "Nhóm Chi Tiêu", "Mô Tả", "Người Liên Quan", "Kênh Thanh Toán", "Số Tiền", "VAT (%)", "Tổng Sau Thuế", "Trạng Thái", "Ghi Chú"],
     tableRows: [
-      ["DH-RFM-0001", "KH001", "Nguyễn Văn An", "28/08/2026", "5,200,000"],
-      ["DH-RFM-0002", "KH002", "Trần Thị Bích", "25/08/2026", "12,800,000"],
-      ["DH-RFM-0003", "KH001", "Nguyễn Văn An", "15/07/2026", "3,500,000"],
-      ["DH-RFM-0004", "KH003", "Lê Hoàng Long", "10/06/2026", "2,400,000"],
-      ["DH-RFM-0005", "KH002", "Trần Thị Bích", "05/05/2026", "8,500,000"]
+      ["01/01/2026", "01/2026", "Chi", "Ăn uống", "Ăn sáng bún bò Huế", "Nguyễn Văn An", "Tiền mặt", 45000, 0, 45000, "Đã chi", "—"],
+      ["05/01/2026", "05/2026", "Thu", "Khác", "Lương tháng 01/2026", "Nguyễn Văn An", "Chuyển khoản", 15000000, 0, 15000000, "Đã thu", "Biên lai GD: 15668595287"],
+      ["07/01/2026", "07/2026", "Chi", "Đi lại", "Đổ xăng xe máy", "Trần Thị Bình", "Tiền mặt", 120000, 0.08, 129600, "Đã chi", "Shell Hoàng Cầu"],
+      ["10/01/2026", "10/2026", "Chi", "Nhà ở", "Tiền điện tháng 01", "Lê Hoàng Cường", "Ví điện tử", 380000, 0.1, 418000, "Đã chi", "Biên lai GD: 88472910481"],
+      ["12/01/2026", "12/2026", "Chi", "Mua sắm", "Mua quần áo siêu thị", "Phạm Thị Dung", "Thẻ ngân hàng", 850000, 0.08, 918000, "Đã chi", "Vinmart+"]
     ],
     steps: [
       {
+        badge: "00",
+        title: "Bước 0: AI Tự Đọc & Nắm Rõ Cấu Trúc Sheet Giao_Dich",
+        desc: "Gửi link Google Sheets để AI tự động quét cấu trúc 12 cột dữ liệu trang Giao_Dich trước khi bắt đầu lập trình.",
+        promptBox: `Link Google Sheets: [Dán đường link bảng tính của bạn vào đây]
+
+Tôi đang có một file bảng tính quản lý giao dịch thu chi "Giao_Dich" ở đường link trên.
+Nhiệm vụ của bạn ở bước này:
+1. Hãy truy cập vào link bảng tính và đọc kỹ trang tính "Giao_Dich".
+2. Nắm rõ: tên các cột dữ liệu (từ Cột A đến Cột L), dòng tiêu đề (Dòng 2), dòng bắt đầu có dữ liệu thực tế (Dòng 3) và các loại giao dịch (Thu / Chi).
+3. Tóm tắt ngắn gọn lại những gì bạn đã đọc được để tôi biết bạn đã hiểu đúng cấu trúc dữ liệu.
+
+⚠️ Lưu ý: Chưa viết bất kỳ dòng code nào ở bước này.`
+      },
+      {
         badge: "01",
-        title: "Bước 1: Kiểm Tra Xem AI Có Thực Sự Đang Đọc Được File Hay Không",
-        desc: "Trước khi thực hiện phân tích hay lập trình, hãy gửi đường link Google Sheets của bạn và kiểm tra xem AI (Spark / Gemini) có truy cập đọc được trang dữ liệu <code>DonHang_BT6</code> không.",
-        promptBox: `https://docs.google.com/spreadsheets/d/19jPP-MwIMPjeDfViicF1jTQBxx-0lTP8HAwR6IqArPI/edit
- 
-bạn có thể đọc được nội dung của trang tính "DonHang_BT6" trong link này chứ? Hãy liệt kê 3 dòng dữ liệu đầu tiên để xác nhận.`,
-        note: "<b>💡 Mẹo:</b> Hãy đảm bảo file Google Sheets đã được bật chế độ chia sẻ là <i>'Bất kỳ ai có đường liên kết đều có thể xem'</i>.",
-        expectedResult: {
-          image: "assets/spark_read_success.png",
-          imageTitle: "AI phản hồi đã đọc file thành công"
-        }
+        title: "Bước 1: Tạo File 1_Menu_ThuChi.gs (Menu Tiện Ích Đầy Đủ)",
+        desc: "Tạo thanh Menu Quản Lý Thu Chi tích hợp các nút: Xem Dashboard, Đọc thử Mail_Log, Nạp Giao_Dich, Bật Trigger và Form nhập.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Dựa trên bảng tính đã đọc ở Bước 0, hãy viết mã cho file độc lập "1_Menu_ThuChi.gs" để tạo thanh Menu tiện ích khi mở Google Sheets:
+
+1. Tạo Menu tên là "💰 Quản Lý Thu Chi" gồm các mục sau:
+   - "📊 Dashboard Sổ Quỹ" (gọi hàm khoiTaoDashboardThuChi)
+   - [Đường gạch ngang phân cách]
+   - "🔍 1. Đọc Thử Email Ra Sheet Mail_Log" (gọi hàm docThuEmailXuatMailLog)
+   - "📥 2. Nạp Chính Thức Vào Sổ Quỹ Giao_Dich" (gọi hàm quetVaNapVaoGiaoDich)
+   - "⏰ 3. Bật Tự Động Quét Gmail (Mỗi 5 Phút)" (gọi hàm caiDatTriggerQuetGmail)
+   - "🛑 Tắt Tự Động Quét Gmail" (gọi hàm huyTriggerQuetGmail)
+   - [Đường gạch ngang phân cách]
+   - "➕ Nhập Giao Dịch Thủ Công" (gọi hàm moFormNhapGiaoDich mở file HTML 'GiaoDichForm' kích thước 720px x 620px)
+   - [Đường gạch ngang phân cách]
+   - "🔄 Làm Mới Dashboard" (gọi hàm khoiTaoDashboardThuChi)
+   - "❓ Hướng Dẫn Sử Dụng" (hiện thông báo tóm tắt cách dùng)
+
+2. Bọc mã an toàn: nếu các hàm xử lý chưa được tạo thì hiện thông báo nhắc nhở nhẹ nhàng chứ không báo lỗi đỏ.`
       },
       {
         badge: "02",
-        title: "Bước 2: Yêu Cầu AI Phân Tích Cấu Trúc Bảng & Chỉ Số Phân Phối",
-        desc: "Ra lệnh cho AI phân tích cấu trúc cột, xác định tọa độ và phương pháp tính các chỉ số RFM trước khi viết code.",
-        promptBox: `Hãy phân tích cấu trúc cột của sheet "DonHang_BT6" và đề xuất thuật toán tính 3 chỉ số RFM cho từng khách hàng duy nhất:
-1. R (Recency): Khoảng cách số ngày từ lần mua cuối của khách hàng đó đến ngày chốt báo cáo 31/08/2026.
-2. F (Frequency): Tổng số đơn hàng của khách hàng.
-3. M (Monetary): Tổng doanh thu mua sắm của khách hàng đó.`,
-        expectedResult: {
-          image: "assets/spark_analyze_structure.png",
-          imageTitle: "AI phân tích cấu trúc cột & đề xuất"
-        }
+        title: "Bước 2: Tạo File 2_Dashboard_KPI.gs (Banner & 4 Thẻ KPI Tài Chính)",
+        desc: "Khởi tạo trang 📊 Dashboard Sổ Quỹ, tạo Banner Header và nạp công thức tính 4 thẻ KPI Thu/Chi/Số Dư chuẩn tiếng Việt.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" chứa hàm khoiTaoDashboardThuChi() để xây dựng giao diện Dashboard sổ quỹ:
+
+1. Khởi tạo trang tính "📊 Dashboard Sổ Quỹ":
+   - Tự động tạo mới trang này ở vị trí đầu tiên (nếu đã có thì xóa sạch bảng biểu, biểu đồ cũ để làm mới).
+   - Hàng 1: Dòng tiêu đề lớn "💰 SỔ QUỸ THU CHI & QUẢN TRỊ DÒNG TIỀN 2026" (nền xanh dương đậm #0f4c81, chữ trắng in đậm cỡ 18).
+   - Hàng 3: Dòng hiển thị ngày giờ cập nhật dữ liệu tự động.
+
+2. Thiết kế 4 ô thông tin nổi bật (KPI) từ Hàng 5 đến Hàng 7 (sử dụng dải ô mở tính từ dòng 3 trở đi):
+   - 🟢 TỔNG THU (cột A-B): Tính tổng cột 'Tổng Sau Thuế' (cột J) với điều kiện Loại GD là 'Thu' từ trang Giao_Dich (định dạng tiền tệ 'VNĐ').
+   - 🔴 TỔNG CHI (cột C-D): Tính tổng cột 'Tổng Sau Thuế' (cột J) với điều kiện Loại GD là 'Chi' từ trang Giao_Dich (định dạng tiền tệ 'VNĐ').
+   - 🔵 SỐ DƯ QUỸ THỰC TẾ (cột E-F): Lấy Tổng Thu trừ Tổng Chi (định dạng tiền tệ 'VNĐ').
+   - 📊 TỶ LỆ CHI / THU (cột G-H): Tính tỷ lệ phần trăm Tổng Chi / Tổng Thu (định dạng '0.0%').
+
+3. Hàm điều phối khoiTaoDashboardThuChi(): Tự động gọi thietLapCalcDataThuChi(), veBieuDoTronChiTieu(), veBieuDoCotKenhTT() nếu các hàm này đã tồn tại.
+
+* Nghiệm thu Bước 2: Bấm Menu ➔ Thấy 4 thẻ KPI Sổ Quỹ nhảy số liệu chính xác!`
       },
       {
         badge: "03",
-        title: "Bước 3: Ra Lệnh AI Viết Apps Script Tính Toán RFM & Vẽ Biểu Đồ (Cột & Tròn)",
-        desc: "Sử dụng Siêu Prompt chi tiết để AI viết mã nguồn tự động tạo bảng phân khúc và chèn biểu đồ cột + tròn song song trên Sheet.",
-        promptBox: `Bạn là Lập trình viên Google Apps Script. Viết 1 đoạn code Apps Script (.gs) hoàn chỉnh cho sheet "DonHang_BT6":
-1. Đọc dữ liệu từ dòng 4 (A4:E) và tính toán R (so với ngày 31/08/2026), F, M cho mỗi khách hàng.
-2. Chấm điểm RFM từ 1-5 theo quy tắc:
-   - R: <=15 ngày: 5đ; <=45 ngày: 4đ; <=90 ngày: 3đ; <=180 ngày: 2đ; còn lại: 1đ.
-   - F: >=10 lần: 5đ; >=5 lần: 4đ; >=3 lần: 3đ; >=2 lần: 2đ; còn lại: 1đ.
-   - M: >=50.000.000: 5đ; >=20.000.000: 4đ; <=10.000.000: 3đ; >=5.000.000: 2đ; còn lại: 1đ.
-3. Phân hạng dựa trên tổng điểm RFM (tối đa 15đ): VIP (>=13), Trung thành (10-12), Tiềm năng (7-9), Khách mới (5-6), Nguy cơ rời bỏ (<=4).
-4. Ghi kết quả sang sheet mới tên là "BaoCao_RFM_BT6". Định dạng bảng chuyên nghiệp màu Navy.
-5. Tạo bảng tổng hợp phân khúc ở cột M-O bằng công thức COUNTIF & SUMIF. [BẮT BUỘC CHUẨN LOCALE VIỆT NAM]: Các đối số trong công thức phải được phân cách bằng dấu chấm phẩy (;) (ví dụ: =COUNTIF(K4:K8; "VIP")). Trong Apps Script, bắt buộc sử dụng phương thức .setFormulasLocal() thay vì .setFormulas() để phù hợp với cài đặt Locale Việt Nam của bảng tính.
-6. Vẽ tự động 1 Biểu đồ tròn (Pie Chart) thể hiện tỷ lệ % khách hàng của mỗi phân khúc và 1 Biểu đồ cột (Column Chart) thể hiện doanh số đóng góp của từng phân khúc. Đặt 2 biểu đồ cạnh bảng tổng hợp ở cột Q.
-7. Thêm menu "📊 PHÂN TÍCH" > "Chạy Phân Tích RFM Khách Hàng".`,
-        expectedResult: {
-          image: "assets/spark_appscript_run.png",
-          imageTitle: "Kết quả chạy Apps Script vẽ biểu đồ và phân khúc"
-        }
+        title: "Bước 3: Tạo File 3_CalcData_ThuChi.gs (Bảng Tính Phụ Cho Biểu Đồ)",
+        desc: "Tạo trang tính phụ Calc_Data tính toán gom nhóm chi tiêu theo Nhóm ngành hàng và theo Kênh thanh toán sạch sẽ từ dòng 1.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "3_CalcData_ThuChi.gs" chứa hàm thietLapCalcDataThuChi(ss) để tính toán số liệu nguồn cho biểu đồ:
+
+1. Xử lý trang tính phụ "Calc_Data" (để trang này hiển thị bình thường, TUYỆT ĐỐI KHÔNG ẨN TAB):
+   - Bảng 1 (bắt đầu từ ô A1:B1 không gộp ô): Dòng 1 là tiêu đề ['Nhóm Chi Tiêu', 'Tổng Chi Sau Thuế']. Từ dòng 2 đến dòng 9 nạp 8 nhóm chi tiêu (Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác) và công thức SUMIFS tính tổng tiền chi tương ứng từ sheet Giao_Dich (định dạng số '#,##0').
+   - Bảng 2 (bắt đầu từ ô D1:E1 không gộp ô): Dòng 1 là tiêu đề ['Kênh Thanh Toán', 'Tổng Chi']. Từ dòng 2 đến dòng 5 nạp 4 kênh (Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng) và công thức SUMIFS tính tổng tiền chi theo từng kênh.
+
+* Nghiệm thu Bước 3: Mở tab "Calc_Data" thấy xuất hiện 2 bảng số liệu sạch sẽ bắt đầu từ dòng 1.`
       },
       {
         badge: "04",
-        title: "Bước 4: Ra Lệnh Cho AI Thiết Lập Biểu Mẫu Word (Google Docs) Thô",
-        desc: "Hướng dẫn AI tạo ra biểu mẫu Docs mẫu đại diện cho một báo cáo phân tích khách hàng chính thức trên Word, chứa các thẻ placeholder <code>{VIP_Count}</code>, <code>{Loyal_Count}</code>... để sau này điền dữ liệu tự động.",
-        promptBox: `Hãy tạo một file Google Docs template đặt tên là "BaoCao_RFM_Template" với cấu trúc sau:
-1. Tiêu đề: "BÁO CÁO PHÂN TÍCH CHẤT LƯỢNG KHÁCH HÀNG DOANH NGHIỆP".
-2. Bảng thống kê phân khúc khách hàng gồm các dòng:
-   - Số lượng khách hàng VIP: {VIP_Count}
-   - Số lượng khách hàng Trung thành: {Loyal_Count}
-   - Số lượng khách hàng Tiềm năng: {Potential_Count}
-   - Số lượng khách hàng Mới: {New_Count}
-   - Số lượng khách hàng Nguy cơ rời bỏ: {Churn_Count}
-3. Phần nhận định chung: "{Insights}".`,
-        expectedResult: {
-          image: "assets/spark_template_docs.png",
-          imageTitle: "Mẫu Google Docs với các thẻ biến"
-        }
+        title: "Bước 4: Tạo File 4_PieChart_ChiTieu.gs (Biểu Đồ Tròn Cơ Cấu Chi Tiêu)",
+        desc: "Tự động vẽ biểu đồ tròn tỷ lệ phần trăm chi tiêu theo từng nhóm (Ăn uống, Đi lại, Nhà ở...), đặt tại ô A9 trên Dashboard.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "4_PieChart_ChiTieu.gs" chứa hàm veBieuDoTronChiTieu(dashSheet, calcSheet) để vẽ Biểu đồ tròn:
+
+1. Thiết lập Biểu đồ tròn (Charts.ChartType.PIE):
+   - Lấy nguồn dữ liệu từ bảng Nhóm chi tiêu trên trang Calc_Data (dải ô A1:B9), có khai báo .setNumHeaders(1).
+   - Đặt biểu đồ tại Hàng 9 Cột A trên trang "📊 Dashboard Sổ Quỹ" (kích thước khoảng 490px rộng, 360px cao).
+   - Tiêu đề biểu đồ: "📊 CƠ CẤU CHI TIÊU THEO TỪNG NHÓM", chữ in đậm màu xanh #0f4c81.
+   - Hiển thị rõ tỷ lệ phần trăm (percentage) trên từng lát cắt và có chú thích danh mục rõ ràng bên phải.
+
+* Nghiệm thu Bước 4: Bấm "🔄 Làm Mới Dashboard", Biểu đồ tròn xuất hiện ngay ngắn bên dưới thẻ KPI Tổng Thu và Tổng Chi!`
       },
       {
         badge: "05",
-        title: "Bước 5: Ra Lệnh Cho AI Apps Script Điền Dữ Liệu & Xuất Báo Cáo PDF",
-        desc: "Tích hợp quy trình tự động hóa khép kín: Nhân bản biểu mẫu Docs mẫu, điền dữ liệu thực tế tính toán từ Sheet và xuất PDF lưu Drive.",
-        promptBox: `Hãy nâng cấp mã nguồn Apps Script của bạn để thực hiện:
-1. Mở file Google Docs "BaoCao_RFM_Template" bằng ID hoặc tên và tạo một bản sao tạm.
-2. Tìm và thay thế các từ khóa mẫu {VIP_Count}, {Loyal_Count}... bằng số liệu phân tích thật từ bảng tổng hợp.
-3. Xuất file Doc tạm đó thành định dạng PDF chất lượng cao lưu vào thư mục Drive "BaoCao_RFM_PDF".
-4. Xóa file Doc tạm để dọn rác Drive, và trả liên kết file PDF về ô H1 của sheet báo cáo.`,
-        expectedResult: {
-          image: "assets/spark_pdf_exported_drive.png",
-          imageTitle: "Báo cáo PDF đã xuất lưu trên Google Drive"
-        }
+        title: "Bước 5: Tạo File 5_BarChart_KenhTT.gs (Biểu Đồ Cột Kênh Thanh Toán)",
+        desc: "Tự động vẽ biểu đồ cột so sánh chi tiêu giữa các kênh Tiền mặt, Chuyển khoản, Ví điện tử và Thẻ ngân hàng tại ô E9.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "5_BarChart_KenhTT.gs" chứa hàm veBieuDoCotKenhTT(dashSheet, calcSheet) để vẽ Biểu đồ cột:
+
+1. Thiết lập Biểu đồ cột (Charts.ChartType.COLUMN):
+   - Lấy nguồn dữ liệu từ bảng Kênh thanh toán trên trang Calc_Data (dải ô D1:E5), có khai báo .setNumHeaders(1).
+   - Đặt biểu đồ tại Hàng 9 Cột E trên trang "📊 Dashboard Sổ Quỹ" (nằm song song bên phải Biểu đồ tròn, kích thước khoảng 560px rộng, 360px cao).
+   - Tiêu đề biểu đồ: "💳 CHI TIÊU THEO KÊNH THANH TOÁN", cột màu xanh dương #2563EB.
+   - Trục hoành ghi rõ tên các kênh thanh toán, trục tung ghi số tiền chi.
+
+* Nghiệm thu Bước 5: Bấm "🔄 Làm Mới Dashboard", cả 2 Biểu đồ tròn và cột hiển thị song song tuyệt đẹp bên dưới 4 thẻ KPI!`
+      },
+      {
+        badge: "06",
+        title: "Bước 6: Tạo File 6_BackendService.gs (Hàm Lưu Giao Dịch Thủ Công)",
+        desc: "Viết hàm luuGiaoDichMoi(formData) tính thuế VAT, tính tổng sau thuế và tự động ghi vào dòng mới nhất của sheet Giao_Dich.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "6_BackendService.gs" chứa hàm xử lý lưu giao dịch thu chi mới vào Google Sheets:
+
+1. Viết hàm luuGiaoDichMoi(formData):
+   - Nhận dữ liệu từ form HTML gồm: ngayGD, thangNam, loaiGD (Thu/Chi), nhomChiTieu, moTa, nguoiLienQuan, kenhTT, soTien, vat, trangThai, ghiChu.
+   - Tự động tính: tongSauThue = Math.round(soTien * (1 + vat)).
+   - Thêm 1 dòng mới vào cuối trang tính "Giao_Dich" với đúng thứ tự 12 cột (A đến L).
+   - Tự động gọi khoiTaoDashboardThuChi() để cập nhật lại số liệu trên Dashboard ngay lập tức.
+   - Trả về kết quả { success: true, message: "Đã lưu giao dịch thành công!" }.`
+      },
+      {
+        badge: "07",
+        title: "Bước 7: Tạo File 7_DocThuEmail_Bank.gs (Đọc Thử Email Ra Sheet Mail_Log)",
+        desc: "Quét email ngân hàng, trích xuất dữ liệu ban đầu và xuất ra trang tính phụ Mail_Log với 8 cột để kiểm tra.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "7_DocThuEmail_Bank.gs" chứa hàm đọc thử email biên lai ngân hàng và xuất dữ liệu ra sheet "Mail_Log":
+
+1. Viết hàm bocTachChiTietEmail(subject, bodyText, bodyHtml, dateObj):
+   - Sử dụng Regex để trích xuất các trường từ email:
+     + Ngày GD (dd/MM/yyyy) & Tháng/Năm (MM/yyyy).
+     + Số lệnh GD: Mã số lệnh giao dịch.
+     + Loại GD: Nhận diện 'Thu' (nếu là nhận tiền) hoặc 'Chi' (nếu là chuyển tiền đi/thanh toán).
+     + Người liên quan: Tên người chuyển tiền (đối với Thu) hoặc Người nhận tiền (đối với Chi).
+     + Kênh thanh toán: Tên ngân hàng / Kênh thanh toán.
+     + Số tiền: Bóc tách số tiền giao dịch.
+     + Nội dung: Bóc tách nội dung chuyển tiền.
+
+2. Viết hàm docThuEmailXuatMailLog():
+   - Khởi tạo trang tính "Mail_Log" (nếu chưa có thì tạo mới) với 8 cột tiêu đề: ['Thời Gian Quét', 'Tiêu Đề Email', 'Số Lệnh GD', 'Ngày GD', 'Loại GD', 'Người Liên Quan', 'Số Tiền (VNĐ)', 'Nội Dung Chuyển Tiền'].
+   - Tìm kiếm email khớp: 'subject:("Biên lai chuyển tiền")'.
+   - Lặp qua từng email, gọi hàm bocTachChiTietEmail() và thêm dòng mới vào sheet "Mail_Log".
+   - Hiển thị Alert để người dùng mở tab Mail_Log kiểm tra kết quả ban đầu.`
+      },
+      {
+        badge: "08",
+        title: "Bước 8: Phản Hồi AI Tinh Chỉnh Bộ Lọc, Phân Loại Thu/Chi & Chống Trùng Lặp",
+        desc: "Yêu cầu AI chỉ lọc đúng email 'Biên lai chuyển tiền', phân loại Thu/Chi, tự động nhận diện Nhóm chi tiêu và chống nạp trùng mã GD.",
+        promptBox: `Tôi đã chạy thử file "7_DocThuEmail_Bank.gs" và nhận được kết quả tại sheet Mail_Log. Dữ liệu đang có một số điểm cần tối ưu hóa:
+- Số Lệnh GD đang bị bóc dính chữ thừa: "giao"
+- Người Chuyển/Nhận đang bị dính chữ tiếng Anh: "Remitter's name...", "Beneficiary Name..."
+- Số Tiền đang có ký hiệu tiền tệ (1.000.000 ₫) cần chuyển thành số nguyên sạch (1000000)
+- Nội Dung đang bị dính chữ "Details of Payment..." và lời cảm ơn cuối thư.
+
+HÃY CẬP NHẬT LẠI FILE "7_DocThuEmail_Bank.gs" HOÀN THIỆN CÁC TÍNH NĂNG SAU:
+1. BỘ LỌC CHÍNH XÁC: Chỉ tìm và lấy các email có tiêu đề chứa đúng cụm từ "Biên lai chuyển tiền" (query: 'subject:"Biên lai chuyển tiền"'), bỏ qua toàn bộ email khác.
+2. NHẬN DIỆN THU / CHI & NHÓM CHI TIÊU:
+   - Nếu là nhận tiền -> Loại GD là 'Thu', Trạng thái 'Đã thu'.
+   - Nếu là chuyển tiền đi/thanh toán -> Loại GD là 'Chi', Trạng thái 'Đã chi'.
+   - Tự động phân loại 'Nhóm Chi Tiêu' theo từ khóa nội dung: Ăn uống (ăn, cafe, tiec), Nhà ở (tiền điện, nước, nhà), Mua sắm (quần áo, siêu thị, vinmart), Đi lại (xăng, grab, xe), Khác.
+3. CƠ CHẾ CHỐNG TRÙNG LẶP (Deduplication): Trước khi thêm dòng, kiểm tra xem Mã Lệnh GD này đã có trong sheet chưa. Nếu ĐÃ CÓ RỒI thì BỎ QUA NGAY!
+4. LÀM SẠCH KÝ TỰ RÁC:
+   - Số Lệnh GD: Lấy đúng chuỗi mã số (ví dụ: 15668595287).
+   - Người Liên Quan: Cắt bỏ hoàn toàn các chữ thừa "Remitter's name", "Tài khoản..." chỉ giữ lại đúng Tên (ví dụ: CONG TY CONG NGHE ABC, NHA HANG SEN TAY HO).
+   - Số Tiền: Chuyển thành số nguyên sạch để tính toán (ví dụ: 15000000, 1250000).
+   - Nội Dung: Cắt bỏ "Details of Payment" và các câu cảm ơn cuối thư.`
+      },
+      {
+        badge: "09",
+        title: "Bước 9: Tạo File 8_NapGiaoDich_Bank.gs (Tự Động Nạp Từ Mail_Log Sang Giao_Dich)",
+        desc: "Lập tức nạp dòng mới từ sheet Mail_Log vào bảng chính Giao_Dich (đủ 12 cột chuẩn), đánh dấu đã nạp và tự động làm mới Dashboard.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "8_NapGiaoDich_Bank.gs" chứa hàm đồng bộ tự động từ sheet "Mail_Log" sang sheet "Giao_Dich":
+
+1. Viết hàm dongBoMailLogSangGiaoDich() (hoặc quetVaNapVaoGiaoDich()):
+   - KẾT NỐI TỨC THÌ: Mỗi khi sheet "Mail_Log" nhận thêm một dòng dữ liệu mới (từ quá trình quét email hoặc nhập thêm), hệ thống sẽ lập tức lấy các dòng mới này và nạp ngay sang sheet "Giao_Dich".
+   - KIỂM TRA CHỐNG TRÙNG: Quét cột 'Ghi Chú' (Cột L) của sheet "Giao_Dich" theo Mã Số Lệnh GD. Nếu giao dịch đã tồn tại thì bỏ qua, chỉ nạp những dòng mới.
+   - NẠP ĐỦ 12 CỘT CHUẨN XÁC VÀO SHEET "Giao_Dich":
+     [
+       ngayGD,        // Cột A: Ngày GD
+       thangNam,      // Cột B: Tháng/Năm
+       loaiGD,        // Cột C: Loại GD (Thu / Chi)
+       nhomChiTieu,   // Cột D: Nhóm Chi Tiêu (Ăn uống, Nhà ở, Mua sắm, Khác...)
+       noiDung,       // Cột E: Mô Tả (Nội dung chuyển tiền)
+       nguoiLienQuan, // Cột F: Người Liên Quan (Người gửi / Người nhận)
+       kenhTT,        // Cột G: Kênh Thanh Toán (Chuyển khoản / Thẻ ngân hàng)
+       soTien,        // Cột H: Số Tiền
+       0,             // Cột I: VAT (0%)
+       soTien,        // Cột J: Tổng Sau Thuế
+       trangThai,     // Cột K: Trạng Thái (Đã thu / Đã chi)
+       "Biên lai GD: " + maGD // Cột L: Ghi Chú (Mã lệnh GD)
+     ]
+   - ĐÁNH DẤU HOÀN TẤT: Cập nhật trạng thái tại sheet "Mail_Log" là "Đã nạp vào Giao_Dich", đánh dấu email đã đọc (markRead()) và gắn nhãn 'Da_Nap_Sheets'.
+   - LÀM MỚI DASHBOARD: Tự động gọi hàm khoiTaoDashboardThuChi() để 4 thẻ KPI và 2 Biểu Đồ trên Dashboard cập nhật số liệu ngay lập tức!
+
+* Nghiệm thu Bước 9: Bấm Menu "📥 2. Nạp Chính Thức Vào Sổ Quỹ Giao_Dich" ➔ Toàn bộ dòng mới từ Mail_Log lập tức nhảy sang sheet Giao_Dich và Dashboard tự động nhảy số!`
+      },
+      {
+        badge: "10",
+        title: "Bước 10: Tạo File 9_Trigger_AutoSync.gs (Cài Đặt Trigger Tự Động Mỗi 5 Phút)",
+        desc: "Thiết lập Time-driven Trigger để hàm nạp giao dịch tự động chạy ngầm mỗi 5 phút hoàn toàn không cần người dùng mở máy.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "9_Trigger_AutoSync.gs" chứa hàm quản lý Trigger tự động chạy ngầm:
+
+1. Viết hàm caiDatTriggerQuetGmail():
+   - Xóa các trigger cũ trùng tên 'quetVaNapVaoGiaoDich' để tránh lặp.
+   - Dùng ScriptApp.newTrigger('quetVaNapVaoGiaoDich').timeBased().everyMinutes(5).create() để tạo trigger chạy ngầm mỗi 5 phút.
+   - Hiển thị thông báo Alert xác nhận đã bật tự động hóa thành công.
+
+2. Viết hàm huyTriggerQuetGmail():
+   - Tìm và xóa bỏ toàn bộ trigger đang gắn với hàm 'quetVaNapVaoGiaoDich'.
+
+* Nghiệm thu Bước 10: Bấm Menu "⏰ 3. Bật Tự Động Quét Gmail" ➔ Hệ thống kích hoạt Trigger chạy ngầm mỗi 5 phút thành công!`
+      },
+      {
+        badge: "11",
+        title: "Bước 11: Tạo File GiaoDichForm.html (Form Pop-up Nhập Giao Dịch Thủ Công)",
+        desc: "Thiết kế giao diện form nhập nhanh giao dịch Thu/Chi với tông màu Aesthetic Blue, tự động tính tiền VAT và kết nối với file 6.",
+        promptBox: `Hãy thiết kế mã nguồn cho tệp giao diện "GiaoDichForm.html" kết nối với file 6_BackendService.gs:
+
+1. Phong cách thiết kế:
+   - Sử dụng Bootstrap 5 và FontAwesome (qua CDN), tông màu Aesthetic Blue sang trọng, bo góc 12px, font Inter.
+2. Cấu trúc Form Nhập Giao Dịch Nhanh:
+   - Hàng 1: Ngày phát sinh (mặc định hôm nay), Tháng/Năm (tự điền dạng MM/YYYY).
+   - Hàng 2: Loại Giao Dịch (Radio chọn 🟢 Thu hoặc 🔴 Chi), Nhóm Chi Tiêu (Dropdown 8 nhóm: Ăn uống, Đi lại, Nhà ở...).
+   - Hàng 3: Mô tả chi tiết giao dịch, Người liên quan.
+   - Hàng 4: Kênh thanh toán (Dropdown: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng).
+   - Hàng 5: Số tiền (có định dạng hiển thị phân cách hàng nghìn), Thuế VAT (Dropdown chọn: 0%, 8%, 10%), Ô Tổng sau thuế (tự động nhảy số khi gõ tiền/chọn VAT).
+   - Hàng 6: Trạng thái (Đã chi / Đã thu), Ghi chú thêm.
+   - Nút "💾 Lưu Giao Dịch": Gọi hàm luuGiaoDichMoi bên 6_BackendService.gs và thông báo thành công.
+
+* Nghiệm thu Bước 11: Mở Menu "➕ Nhập Giao Dịch Thủ Công" ➔ Điền thử 1 khoản chi tiền ăn uống ➔ Bấm Lưu thấy giao dịch xuất hiện ở sheet Giao_Dich và Dashboard tự động tăng tiền chi!`
       }
     ],
     checklist: [
-      "Đã tạo sheet dữ liệu giao dịch DonHang_BT6 thành công",
-      "Đã gửi link Sheet và xác nhận AI Agent đọc chính xác dữ liệu",
-      "AI phân tích chi tiết cấu trúc cột và đề xuất thuật toán tính RFM",
-      "Đã copy Master Prompt gửi AI để sinh mã nguồn Apps Script",
-      "Mã Apps Script thực thi không lỗi, tạo thành công sheet BaoCao_RFM_BT6",
-      "Tự động tạo bảng tổng hợp (COUNTIF/SUMIF) và vẽ biểu đồ Tròn & Cột cạnh nhau",
-      "(Nâng cao) Bản sao Docs mẫu được điền số liệu và xuất thành công file PDF lên Drive"
+      "Trang tính gồm sheet nguồn Giao_Dich với cấu trúc 12 cột chuẩn xác từ A đến L.",
+      "Đã tạo đủ 9 file .gs độc lập và 1 file GiaoDichForm.html trong Apps Script Editor.",
+      "Menu '💰 Quản Lý Thu Chi' hiển thị đầy đủ các mục: Đọc thử Mail_Log, Nạp Giao_Dich, Trigger 5 phút và Form nhập.",
+      "Trang 📊 Dashboard Sổ Quỹ tự động tạo mới, hiển thị đúng 4 thẻ KPI Tổng Thu, Tổng Chi, Số Dư Quỹ, Tỷ Lệ Chi/Thu.",
+      "Trang phụ Calc_Data nạp đủ 2 bảng số liệu thô sạch bắt đầu từ dòng 1.",
+      "Cả 2 Biểu đồ tròn (Cơ cấu chi tiêu) và Biểu đồ cột (Kênh thanh toán) hiển thị đầy đủ màu sắc và số liệu.",
+      "Bấm '🔍 1. Đọc Thử Email Ra Sheet Mail_Log': Bóc tách thử nghiệm thành công và xuất dữ liệu ra tab Mail_Log để kiểm tra.",
+      "Bấm '📥 2. Nạp Chính Thức Vào Sổ Quỹ Giao_Dich': Dữ liệu biên lai nhảy vào sheet Giao_Dich, email được đánh dấu đã đọc và gắn nhãn chống trùng.",
+      "Bấm '⏰ 3. Bật Tự Động Quét Gmail': Trigger 5 phút được thiết lập và tự chạy ngầm định kỳ.",
+      "Nhập thử giao dịch qua pop-up GiaoDichForm thành công, dòng mới được ghi vào Giao_Dich và Dashboard cập nhật ngay lập tức."
     ],
     triggerGuide: `
-      <h3 class="section-title"><i class="ph-bold ph-calendar-blank"></i> Kích Hoạt Tự Động Đầu Tháng</h3>
+      <h3 class="section-title"><i class="ph-bold ph-lightning"></i> Quy Trình Tự Động Hóa Quét Gmail Ngân Hàng 3 Bước Chuẩn</h3>
       <p style="color: var(--text-secondary); line-height: 1.7;">
-        Bạn có thể yêu cầu AI: <i>"Hãy hướng dẫn tôi thiết lập Trigger tự động chạy báo cáo phân tích RFM này vào ngày 1 hàng tháng lúc 00:00"</i> để ban giám đốc luôn có báo cáo phân khúc mới nhất ngay khi bước vào tháng mới.
+        <b>Bước 1 - Đọc thử kiểm tra:</b> Bấm <b>"🔍 1. Đọc Thử Email Ra Sheet Mail_Log"</b> để xem trước dữ liệu bóc tách được từ email BIDV.<br>
+        <b>Bước 2 - Nạp sổ quỹ:</b> Bấm <b>"📥 2. Nạp Chính Thức Vào Sổ Quỹ Giao_Dich"</b> để ghi vào bảng chính và xem Dashboard cập nhật.<br>
+        <b>Bước 3 - Bật chạy ngầm:</b> Bấm <b>"⏰ 3. Bật Tự Động Quét Gmail (Mỗi 5 Phút)"</b> để hệ thống tự động hóa hoàn toàn 24/7.
       </p>
     `
   }
