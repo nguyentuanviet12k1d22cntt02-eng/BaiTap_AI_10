@@ -349,6 +349,18 @@ btnDownloadCurrentCsv.addEventListener("click", () => {
   }
 });
 
+// Download AI Rules
+const btnDownloadRules = document.getElementById("btnDownloadRules");
+if (btnDownloadRules) {
+  btnDownloadRules.addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = "data/QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md";
+    a.download = "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md";
+    a.click();
+    showToast("Đang tải xuống Bộ Quy Tắc AI Apps Script...");
+  });
+}
+
 // Download All Excel
 btnDownloadAllExcel.addEventListener("click", () => {
   const a = document.createElement("a");

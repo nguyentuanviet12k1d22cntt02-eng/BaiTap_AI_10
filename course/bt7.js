@@ -1271,36 +1271,32 @@ function generateId(prefix) {
 </html>
 `,
     workflow: [
-      { icon: "ph-database", title: "1. Cấu Trúc Bảng Tính", desc: "Tạo cấu trúc 6 sheet bán hàng (Sản phẩm, Khách hàng, Đơn hàng...)" },
-      { icon: "ph-code", title: "2. Lập Trình Backend", desc: "Apps Script kết nối dữ liệu, tự động trừ tồn kho, ghi log lịch sử kho" },
-      { icon: "ph-app-window", title: "3. Dashboard Động", desc: "Tính KPI tổng quan và biểu đồ tự động bằng công thức Việt Nam" },
-      { icon: "ph-users", title: "4. Form Giao Diện CRUD", desc: "Thiết kế các biểu mẫu HTML/CSS quản lý sản phẩm, khách hàng, đơn hàng" }
+      { icon: "ph-brain", title: "0. Hiểu Bảng Tính", desc: "AI quét & nắm toàn bộ cấu trúc 6 sheet nguồn" },
+      { icon: "ph-list-plus", title: "1. Menu Tiện Ích", desc: "Tạo file 1_Menu.gs hiển thị menu thanh công cụ" },
+      { icon: "ph-chart-line-up", title: "2. Dashboard KPI", desc: "Tạo file 2_Dashboard_KPI.gs tính 4 thẻ KPI" },
+      { icon: "ph-table", title: "3. Bảng Calc_Data", desc: "Tạo file 3_CalcData.gs nạp dữ liệu thô cho biểu đồ" },
+      { icon: "ph-chart-pie-slice", title: "4. Biểu Đồ Tròn", desc: "Tạo file 4_PieChart.gs phân tích cơ cấu doanh thu" },
+      { icon: "ph-chart-bar", title: "5. Biểu Đồ Cột", desc: "Tạo file 5_ColumnChart.gs xếp hạng Top 10 sản phẩm" },
+      { icon: "ph-database", title: "6. Backend CRUD", desc: "Tạo file 6_BackendService.gs trừ kho & ghi log" },
+      { icon: "ph-browser", title: "7-9. Giao Diện HTML", desc: "Tạo 3 file HTML popup Quản lý SP, KH và Đơn hàng" }
     ],
     masterPrompt: `[VAI TRÒ]: Bạn là Chuyên gia Tự động hóa và Lập trình viên Google Apps Script / HTML UI chuyên nghiệp.
-[NHIỆM VỤ]: Viết mã Google Apps Script và các tệp giao diện HTML hoàn chỉnh để xây dựng hệ thống quản lý bán hàng tích hợp Dashboard tự động trên Google Sheets cho Tech Hub Store.
-[YÊU CẦU BACKEND (Google Sheets)]:
-1. Tạo menu "🏪 Tech Hub Store" khi mở file (onOpen) để mở các cửa sổ giao diện:
-   - "Quản Lý Sản Phẩm" (ProductManagement, 920x660)
-   - "Quản Lý Khách Hàng" (CustomerManagement, 920x660)
-   - "Quản Lý Đơn Hàng" (OrderManagement, 1020x720)
-   - "Làm Mới Dashboard" (hàm refreshDashboard)
-2. Viết các hàm nghiệp vụ:
-   - Đọc, thêm, sửa, xóa dữ liệu Sản phẩm (sheet SanPham_BT7) và Khách hàng (sheet KhachHang_BT7), bỏ qua 3 dòng đầu tiêu đề. Không cho xóa sản phẩm nếu đã có đơn bán.
-   - Hàm lưu đơn hàng mới: ghi vào DonHang_BT7 và ChiTietDonHang_BT7, đồng thời tự động trừ tồn kho trong SanPham_BT7 và ghi log nhật ký xuất kho vào LichSuTonKho_BT7.
-3. Hàm tạo Dashboard (createDashboard):
-   - Tạo sheet "📊 Dashboard" và sheet ẩn "Calc_Data" để đặt công thức biểu đồ.
-   - Nạp các ô thống kê KPI Doanh thu, Đơn hàng, Khách hàng, Cảnh báo tồn kho.
-   - Sử dụng dấu chấm phẩy ';' làm dấu ngăn cách tham số công thức và dấu gạch chéo ngược '\\' làm dấu ghép mảng ngang cho tiếng Việt.
-   - Tự động vẽ Biểu đồ tròn (doanh thu danh mục) và Biểu đồ cột (top 10 bán chạy) lấy dữ liệu động từ Calc_Data.
-   - Tạo bảng xếp hạng Top 5 khách hàng VIP chi tiêu cao nhất dùng hàm LET/MAP.
-   - Tạo ô tra cứu nhanh đơn hàng bằng mã đơn trên Dashboard.
-[YÊU CẦU FRONTEND (HTML/CSS/JS)]:
-1. Thiết kế giao diện chuyên nghiệp tông màu Aesthetic Blue, font Inter/Quicksand, bo góc tròn và hiệu ứng bóng đổ mịn.
-2. Các form đều hỗ trợ tìm kiếm, phân trang hiển thị 10 dòng, hiển thị thông báo toast/modal sinh động khi thêm, sửa hoặc xóa dữ liệu thành công.`,
+[NHIỆM VỤ]: Viết mã Google Apps Script và các tệp giao diện HTML hoàn chỉnh theo kiến trúc tách từng file độc lập để xây dựng hệ thống quản lý bán hàng tích hợp Dashboard tự động trên Google Sheets cho Tech Hub Store.
+[DANH SÁCH FILE CẦN XÂY DỰNG]:
+1. 1_Menu.gs (Khởi tạo Menu và các hàm mở Popup Modal)
+2. 2_Dashboard_KPI.gs (Khởi tạo Dashboard Banner và 4 thẻ chỉ số KPI Doanh thu, Đơn hàng, Khách hàng, Cảnh báo tồn kho)
+3. 3_CalcData.gs (Trang tính phụ Calc_Data tính toán gom nhóm Danh mục và Top 10 sản phẩm)
+4. 4_PieChart.gs (Hàm veBieuDoTron vẽ biểu đồ tròn cơ cấu doanh thu)
+5. 5_ColumnChart.gs (Hàm veBieuDoCot vẽ biểu đồ cột Top 10 sản phẩm bán chạy)
+6. 6_BackendService.gs (Các hàm CRUD Sản phẩm, Khách hàng, lưu đơn hàng, tự động trừ tồn kho và ghi log vào LichSuTonKho_BT7)
+7. ProductManagement.html, CustomerManagement.html, OrderManagement.html (3 giao diện form hiện đại Aesthetic Blue)
+
+[QUY TẮC BẮT BUỘC]:
+- Tuân thủ file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md: Chuẩn Locale VN dấu ;, mảng escape \\, dải ô mở E4:E, không ẩn tab Calc_Data khi vẽ biểu đồ, setNumHeaders(1).`,
     businessScenario: {
       story: "Bạn là quản lý vận hành của chuỗi cửa hàng công nghệ Tech Hub Store. Mọi quy trình xử lý đơn hàng, nhập thông tin khách hàng và cập nhật hàng tồn kho hiện tại đang làm hoàn toàn thủ công trên Google Sheets rất chậm và dễ nhầm lẫn.",
       pain: "Nhân viên phải copy-paste dữ liệu chéo nhau, quên trừ tồn kho khi bán hàng, khó khăn trong việc theo dõi biểu đồ doanh số thời gian thực và tra cứu thông tin đơn hàng.",
-      solution: "Sử dụng Google Apps Script và HTML Service thiết lập hệ thống Menu, Dashboard tự động phân tích và các cửa sổ pop-up (Sản phẩm, Khách hàng, Đơn hàng) giúp đồng bộ dữ liệu chỉ với 1 click chuột."
+      solution: "Sử dụng Google Apps Script theo mô hình tách từng file vi bước (Menu, KPI, Bảng phụ, Biểu đồ, Backend và 3 Giao diện HTML) giúp hệ thống vận hành tự động 100%, dễ quản lý và không bao giờ xung đột mã nguồn."
     },
     promptBreakdown: [
       { tag: "1. VAI TRÒ & NHIỆM VỤ", title: "Chuyên gia tự động hóa Google Sheets", desc: "Nhận diện vai trò lập trình viên Apps Script và mục tiêu xây dựng web-app quản lý bán hàng đồng bộ." },
@@ -1311,10 +1307,11 @@ function generateId(prefix) {
     businessRequirements: `
       <p><b>Yêu cầu nghiệp vụ cốt lõi:</b> Xây dựng ứng dụng quản lý bán hàng tự động hóa hoàn toàn trên Google Sheets:</p>
       <ul>
+        <li><b>Mô hình 1 Vi Bước = 1 File Độc Lập:</b> Giúp người học làm đến đâu thấy ngay kết quả đến đó, không lo chắp vá hay dán đè code.</li>
         <li><b>Đồng bộ dữ liệu:</b> Tự động cập nhật 6 sheets dữ liệu liên kết chéo.</li>
-        <li><b>Công thức chuẩn Locale Việt Nam:</b> Áp dụng dấu chấm phẩy <code>;</code> và mảng ngang <code>\\</code> để Sheets không báo lỗi <code>#ERROR!</code>.</li>
+        <li><b>Công thức chuẩn Locale Việt Nam:</b> Áp dụng dấu chấm phẩy <code>;</code> và dải ô mở vô tận (ví dụ <code>E4:E</code>).</li>
         <li><b>Tự động trừ tồn kho:</b> Khi hoàn tất đơn hàng, tồn kho sản phẩm tự động giảm và ghi log chi tiết.</li>
-        <li><b>Dashboard tương tác:</b> Biểu đồ tự vẽ động, xếp hạng Top 5 VIP chi tiêu dùng hàm <code>LET/MAP</code>, tra cứu thông tin đơn hàng theo mã.</li>
+        <li><b>Dashboard trực quan:</b> 4 thẻ KPI nổi bật cùng 2 Biểu đồ tròn và cột hiển thị đồng bộ thời gian thực.</li>
       </ul>
     `,
     tableHeaders: ["Mã KH", "Tên Khách Hàng", "SĐT", "Email", "Địa Chỉ", "Thành Phố", "Ngày Đăng Ký", "Loại KH"],
@@ -1326,97 +1323,189 @@ function generateId(prefix) {
     ],
     steps: [
       {
-        badge: "01",
-        title: "Bước 1: Thiết lập thanh công cụ Menu tiện ích",
-        desc: "Yêu cầu AI viết mã Apps Script tạo menu điều hướng mở các giao diện và thực hiện làm mới Dashboard.",
-        promptBox: `Tôi muốn viết một đoạn mã Google Apps Script để tạo Menu tùy chỉnh trên thanh công cụ của Google Sheets.
-Khi tôi mở file bảng tính này lên, hãy tự động xuất hiện một Menu mới tên là "🏪 Tech Hub Store" gồm các mục chọn sau:
-1. "📊 Dashboard Tổng Quan" (khi bấm vào sẽ chạy chức năng làm mới Dashboard)
-2. Một đường gạch ngang phân cách
-3. "🛍️ Quản Lý Sản Phẩm" (khi bấm vào sẽ mở ra giao diện quản lý sản phẩm)
-4. "👥 Quản Lý Khách Hàng" (khi bấm vào sẽ mở ra giao diện quản lý khách hàng)
-5. "📦 Quản Lý Đơn Hàng" (khi bấm vào sẽ mở ra giao diện tạo và quản lý đơn hàng)
-6. Một đường gạch ngang phân cách
-7. "🔄 Làm Mới Dashboard" (khi bấm vào sẽ chạy chức năng cập nhật lại số liệu Dashboard)
-8. "❓ Hướng Dẫn Sử Dụng" (khi bấm vào sẽ hiện một bảng thông báo nhỏ hướng dẫn sơ lược cách dùng)
+        badge: "00",
+        title: "Bước 0: AI Tự Đọc & Nắm Rõ Cấu Trúc Toàn Bộ Bảng Tính",
+        desc: "Gửi link Google Sheets để AI tự động quét cấu trúc 6 bảng dữ liệu trước khi bắt đầu lập trình.",
+        promptBox: `Link Google Sheets: [Dán đường link bảng tính của bạn vào đây]
 
-Yêu cầu thiết lập kích thước các cửa sổ giao diện khi mở ra:
-- Cửa sổ Sản phẩm: rộng 920px, cao 660px.
-- Cửa sổ Khách hàng: rộng 920px, cao 660px.
-- Cửa sổ Đơn hàng: rộng 1020px, cao 720px.`
+Tôi đang có một file bảng tính quản lý bán hàng "Tech Hub Store" ở đường link trên.
+Nhiệm vụ của bạn ở bước này:
+1. Hãy truy cập vào link bảng tính và đọc kỹ toàn bộ các trang tính (sheet) hiện có.
+2. Nắm rõ: tên từng sheet, các cột dữ liệu, dòng bắt đầu có dữ liệu thực tế và mối liên hệ giữa các bảng.
+3. Tóm tắt ngắn gọn lại những gì bạn đã đọc được để tôi biết bạn đã hiểu đúng cấu trúc dữ liệu.
+
+⚠️ Lưu ý: Chưa viết bất kỳ dòng code nào ở bước này.`
+      },
+      {
+        badge: "01",
+        title: "Bước 1: Tạo File 1_Menu.gs (Menu Tiện Ích Trên Thanh Công Cụ)",
+        desc: "Yêu cầu AI viết mã cho file độc lập 1_Menu.gs để tạo thanh Menu tùy chỉnh và các hàm mở popup modal.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Dựa trên bảng tính đã đọc ở Bước 0, hãy viết mã cho file độc lập "1_Menu.gs" để tạo thanh Menu tiện ích khi tôi mở Google Sheets:
+
+1. Tạo Menu tên là "🏪 Tech Hub Store" gồm các mục sau:
+   - "📊 Dashboard Tổng Quan" (gọi hàm moDashboardTongQuan)
+   - [Đường gạch ngang phân cách]
+   - "🛍️ Quản Lý Sản Phẩm" (gọi hàm moGiaoDienSanPham)
+   - "👥 Quản Lý Khách Hàng" (gọi hàm moGiaoDienKhachHang)
+   - "📦 Quản Lý Đơn Hàng" (gọi hàm moGiaoDienDonHang)
+   - [Đường gạch ngang phân cách]
+   - "🔄 Làm Mới Dashboard" (gọi hàm khoiTaoDashboard)
+   - "❓ Hướng Dẫn Sử Dụng" (hiện bảng thông báo hướng dẫn sơ lược cách dùng)
+
+2. Kích thước các cửa sổ popup khi mở ra:
+   - Cửa sổ Sản phẩm: rộng 920px, cao 660px, mở file 'ProductManagement'.
+   - Cửa sổ Khách hàng: rộng 920px, cao 660px, mở file 'CustomerManagement'.
+   - Cửa sổ Đơn hàng: rộng 1020px, cao 720px, mở file 'OrderManagement'.
+   - Bọc mã an toàn: nếu hàm khoiTaoDashboard chưa có thì hiện thông báo nhắc nhở nhẹ nhàng.`
       },
       {
         badge: "02",
-        title: "Bước 2: Thiết lập trang Dashboard và các ô chỉ số KPI",
-        desc: "AI tạo trang thống kê tổng quan và nạp các công thức tính toán doanh số chuẩn locale tiếng Việt.",
-        promptBox: `Hãy viết hàm Google Apps Script để khởi tạo và định cấu trúc trang tính "📊 Dashboard". 
-Yêu cầu chi tiết như sau:
-1. Mỗi lần tôi chạy chức năng này, hãy xóa toàn bộ bảng biểu và biểu đồ cũ trên trang "📊 Dashboard" để làm mới từ đầu. Nếu chưa có trang này thì tự động tạo mới.
-2. Tạo một dòng tiêu đề lớn ở hàng 1: "🏪 TECH HUB STORE - DASHBOARD QUẢN LÝ", định dạng cỡ chữ lớn 20, in đậm, chữ màu trắng, nền màu xanh dương đậm.
-3. Thiết kế 4 ô thông tin nổi bật (KPI) từ hàng 5 đến hàng 7:
-   - Ô 1: "💰 DOANH THU" (tự động tính tổng tiền từ cột E của trang tính "DonHang_BT7", lấy dữ liệu từ dòng 4 trở đi).
-   - Ô 2: "📦 ĐƠN HÀNG" (tự động đếm số đơn hàng tại cột A của trang tính "DonHang_BT7", lấy dữ liệu từ dòng 4 trở đi).
-   - Ô 3: "👥 KHÁCH HÀNG" (tự động đếm số khách hàng tại cột A của trang tính "KhachHang_BT7", lấy từ dòng 4 trở đi).
-   - Ô 4: "⚠️ CẢNH BÁO TỒN KHO" (tự động đếm xem có bao nhiêu sản phẩm có lượng tồn kho hiện tại nhỏ hơn lượng tồn kho tối thiểu trong trang tính "SanPham_BT7", lấy dữ liệu từ dòng 4 trở đi).
+        title: "Bước 2: Tạo File 2_Dashboard_KPI.gs (Banner & 4 Thẻ Chỉ Số KPI)",
+        desc: "Khởi tạo trang tính 📊 Dashboard, tạo Banner Header và nạp công thức tính 4 thẻ chỉ số KPI chuẩn tiếng Việt.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
 
-* LƯU Ý QUAN TRỌNG VỀ ĐỊNH DẠNG VIỆT NAM:
-- Tất cả các công thức điền vào ô trang tính bắt buộc phải sử dụng dấu chấm phẩy ';' làm dấu phân cách (ví dụ: dùng SUM(A1; A2) chứ không dùng dấu phẩy như ở Mỹ).
-- Ô doanh thu và tiền tệ cần định dạng hiển thị số có phân cách hàng nghìn và thêm chữ 'VNĐ' ở cuối (ví dụ: 1.500.000 VNĐ).`
+Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" chứa hàm thietLapGiaoDienDashboard() và hàm điều phối khoiTaoDashboard():
+
+1. Khởi tạo trang "📊 Dashboard":
+   - Tự động tạo mới trang "📊 Dashboard" ở vị trí đầu tiên (nếu đã có thì xóa sạch bảng biểu, biểu đồ cũ và hủy gộp ô cũ để làm mới).
+   - Hàng 1: Dòng tiêu đề lớn "🏪 TECH HUB STORE - DASHBOARD QUẢN LÝ" (nền xanh dương đậm #0f4c81, chữ trắng in đậm cỡ 18).
+   - Hàng 3: Dòng hiển thị ngày giờ cập nhật dữ liệu tự động.
+
+2. Thiết kế 4 ô thông tin nổi bật (KPI) từ Hàng 5 đến Hàng 7 (dùng dải ô mở tính từ dòng 4 trở đi):
+   - 💰 TỔNG DOANH THU (cột A-B): Tính tổng cột Thành tiền từ trang DonHang_BT7 (định dạng 'VNĐ').
+   - 📦 TỔNG ĐƠN HÀNG (cột C-D): Đếm tổng số lượng mã đơn hàng từ trang DonHang_BT7 (định dạng 'đơn').
+   - 👥 TỔNG KHÁCH HÀNG (cột E-F): Đếm tổng số lượng khách hàng từ trang KhachHang_BT7 (định dạng 'khách').
+   - ⚠️ CẢNH BÁO TỒN KHO (cột G-H): Đếm số sản phẩm có lượng tồn kho hiện tại nhỏ hơn lượng tồn tối thiểu trong trang SanPham_BT7 (định dạng 'sản phẩm').
+
+3. Hàm điều phối khoiTaoDashboard():
+   - Tự động gọi thietLapGiaoDienDashboard().
+   - Kiểm tra và tự động gọi tiếp các hàm: thietLapTrangCalcData() (ở file 3_CalcData.gs), veBieuDoTron() (ở file 4_PieChart.gs), veBieuDoCot() (ở file 5_ColumnChart.gs) nếu các hàm này đã tồn tại.`
       },
       {
         badge: "03",
-        title: "Bước 3: Thiết lập công thức mảng và tự động vẽ biểu đồ",
-        desc: "AI lập trình biểu đồ tròn phân tích ngành hàng và biểu đồ cột top 10 sản phẩm bán chạy sử dụng sheet Calc_Data trung gian.",
-        promptBox: `Tôi muốn viết mã Apps Script để tự động vẽ biểu đồ trên trang Dashboard:
-1. Tạo thêm một trang tính phụ tên là "Calc_Data" để làm nơi tính toán trung gian và ẩn trang này đi.
-2. Điền công thức mảng để tự động lọc và gom nhóm doanh thu theo từng Danh mục sản phẩm (sử dụng dữ liệu từ trang ChiTietDonHang_BT7 và SanPham_BT7 bắt đầu từ dòng 4).
-3. Điền công thức mảng để tự động tìm ra Top 10 sản phẩm bán được số lượng nhiều nhất.
+        title: "Bước 3: Tạo File 3_CalcData.gs (Bảng Tính Phụ Cho Biểu Đồ)",
+        desc: "Tạo trang tính phụ Calc_Data tính toán gom nhóm danh mục và top 10 sản phẩm sạch sẽ từ dòng 1, không ẩn tab.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
 
-* LƯU Ý CÔNG THỨC TIẾNG VIỆT:
-- Trong công thức Excel/Sheets tiếng Việt, các hàm phải phân tách bằng dấu chấm phẩy ';'.
-- Khi ghép các cột dữ liệu hàng ngang trong công thức mảng, bắt buộc phải dùng dấu gạch chéo ngược '\\'. Vì vậy, trong đoạn mã JavaScript, hãy viết là hai dấu gạch chéo ngược "\\\\" để khi lưu xuống ô tính Excel nó hiển thị đúng một dấu '\\' (ví dụ: [Cột 1] \\\\ [Cột 2]).
-4. Vẽ một biểu đồ tròn thể hiện tỷ lệ phần trăm doanh thu theo từng Danh mục sản phẩm, hiển thị rõ nhãn tên danh mục có đường kẻ chỉ dẫn.
-5. Vẽ một biểu đồ cột thể hiện Top 10 sản phẩm bán chạy nhất. Đặt cả 2 biểu đồ này nằm gọn gàng bên dưới các ô thông tin KPI trên trang Dashboard.`
+Hãy viết toàn bộ mã nguồn cho file độc lập "3_CalcData.gs" chứa hàm thietLapTrangCalcData(sheet) để tính toán số liệu nguồn cho biểu đồ:
+
+1. Xử lý trang tính phụ "Calc_Data" (để trang này hiển thị bình thường, TUYỆT ĐỐI KHÔNG ẨN TAB):
+   - Bảng 1 (bắt đầu từ ô A1:B1 không gộp ô): Dòng 1 là tiêu đề ['Tên Danh Mục', 'Doanh Thu']. Từ dòng 2 trở đi, nạp danh sách 7 danh mục từ DanhMuc_BT7 và công thức tính tổng doanh thu tương ứng từ ChiTietDonHang_BT7 (định dạng số '#,##0').
+   - Bảng 2 (bắt đầu từ ô D1:E1 không gộp ô): Điền công thức QUERY tự động lọc Top 10 sản phẩm bán chạy nhất (Tên sản phẩm và Số lượng bán) từ ChiTietDonHang_BT7.`
       },
       {
         badge: "04",
-        title: "Bước 4: Nghiệp vụ lưu dữ liệu, tự động trừ kho và ghi log",
-        desc: "Hoàn thiện các hàm backend đồng bộ dữ liệu sản phẩm, khách hàng, lưu đơn hàng, trừ tồn kho và ghi nhật ký giao dịch kho tự động.",
-        promptBox: `Hãy viết mã Apps Script đóng vai trò xử lý dữ liệu ở trang tính để kết nối với giao diện người dùng:
-1. Đối với Sản phẩm và Khách hàng: Viết các chức năng giúp lấy danh sách (hỗ trợ phân trang 10 dòng mỗi trang và tìm kiếm theo tên hoặc mã), chức năng thêm mới, chỉnh sửa thông tin và xóa. 
-   - Lưu ý đặc biệt: Khi người dùng muốn xóa một sản phẩm, hãy kiểm tra xem sản phẩm đó đã từng xuất hiện trong đơn hàng nào ở trang ChiTietDonHang_BT7 chưa. Nếu đã có thì báo lỗi "Không thể xóa sản phẩm đã bán" và không cho xóa.
-2. Đối với Đơn hàng: Viết chức năng lưu đơn hàng mới khi người dùng nhấn Hoàn tất trên giao diện:
-   - Ghi thông tin chung (Mã đơn hàng tự động tăng, Khách hàng, Ngày mua, Tổng tiền đơn hàng) vào trang DonHang_BT7.
-   - Ghi chi tiết từng mặt hàng được mua (Mã sản phẩm, Tên sản phẩm, Đơn vị tính, Số lượng, Đơn giá, Thành tiền) vào trang ChiTietDonHang_BT7.
-   - **Tự động trừ kho**: Với mỗi mặt hàng được bán, hãy tìm đúng sản phẩm đó ở trang SanPham_BT7 và giảm số lượng tồn kho của sản phẩm đó đi tương ứng với số lượng khách mua.
-   - **Ghi nhật ký tồn kho**: Tự động ghi một dòng thông tin vào trang LichSuTonKho_BT7 gồm: Mã giao dịch, ngày giao dịch, mã sản phẩm, loại giao dịch là "Xuất Bán", số lượng xuất (số âm), tồn kho mới sau khi trừ, và tên người thực hiện.
+        title: "Bước 4: Tạo File 4_PieChart.gs (Biểu Đồ Tròn Doanh Thu Danh Mục)",
+        desc: "Tự động vẽ biểu đồ tròn tỷ lệ phần trăm doanh thu theo từng danh mục sản phẩm, đặt tại ô A9 trên Dashboard.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
 
-* Lưu ý chung: Tất cả dữ liệu sản phẩm, khách hàng, đơn hàng trên các sheet đều bắt đầu từ dòng số 4 (dòng 1 đến 3 là tiêu đề). Hãy điều chỉnh mã để khi tìm kiếm hoặc cập nhật thì bỏ qua 3 dòng đầu này.`
+Hãy viết toàn bộ mã nguồn cho file độc lập "4_PieChart.gs" chứa hàm veBieuDoTron(dashSheet, calcSheet) để vẽ Biểu đồ tròn:
+
+1. Thiết lập Biểu đồ tròn (Charts.ChartType.PIE):
+   - Lấy nguồn dữ liệu từ bảng Danh mục trên trang Calc_Data (dải ô A1:B8), có khai báo .setNumHeaders(1).
+   - Đặt biểu đồ tại Hàng 9 Cột A trên trang "📊 Dashboard" (kích thước khoảng 490px rộng, 360px cao).
+   - Tiêu đề biểu đồ: "📊 TỶ LỆ DOANH THU THEO DANH MỤC", chữ in đậm màu xanh #0f4c81.
+   - Hiển thị rõ tỷ lệ phần trăm (percentage) trên từng lát cắt và có chú thích danh mục rõ ràng bên phải.`
       },
       {
         badge: "05",
-        title: "Bước 5: Thiết kế giao diện các Form quản lý HTML",
-        desc: "Yêu cầu AI thiết kế 3 giao diện HTML theo phong cách Aesthetic Blue cao cấp, hỗ trợ tìm kiếm và phân trang.",
-        promptBox: `Hãy thiết kế 3 tệp giao diện HTML riêng biệt: ProductManagement.html, CustomerManagement.html, và OrderManagement.html.
-Yêu cầu thiết kế:
-1. Giao diện đồng bộ theo tông màu Aesthetic Blue sang trọng, bo góc 12px, font chữ Inter/Quicksand hiện đại, sử dụng thư viện Bootstrap 5 và biểu tượng FontAwesome.
-2. Form Quản lý Sản phẩm và Khách hàng: Có bảng danh sách (hiển thị 10 dòng/trang, có phân trang, có ô tìm kiếm), nút Thêm mới mở popup modal, mỗi dòng có nút Sửa (icon bút màu vàng) và Xóa (icon thùng rác màu đỏ). Khi click nút Sửa, tải dữ liệu cũ vào modal để sửa.
-3. Form Quản lý Đơn hàng: Có nút Tạo đơn hàng mới mở popup modal. Trong modal gồm: Dropdown chọn khách hàng, khu vực chọn sản phẩm và nhập số lượng, nút 'Thêm sản phẩm' để đẩy sản phẩm vào bảng giỏ hàng tạm thời bên dưới, tính tổng tiền đơn hàng tự động và nút 'Hoàn tất đơn hàng' để gửi dữ liệu về backend lưu vào sheets.`
+        title: "Bước 5: Tạo File 5_ColumnChart.gs (Biểu Đồ Cột Top 10 Bán Chạy)",
+        desc: "Tự động vẽ biểu đồ cột Top 10 sản phẩm bán chạy nhất đặt tại ô E9 song song bên cạnh biểu đồ tròn.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "5_ColumnChart.gs" chứa hàm veBieuDoCot(dashSheet, calcSheet) để vẽ Biểu đồ cột:
+
+1. Thiết lập Biểu đồ cột (Charts.ChartType.COLUMN):
+   - Lấy nguồn dữ liệu từ bảng Top 10 trên trang Calc_Data (dải ô D1:E11), có khai báo .setNumHeaders(1).
+   - Đặt biểu đồ tại Hàng 9 Cột E trên trang "📊 Dashboard" (nằm song song bên phải Biểu đồ tròn, kích thước khoảng 560px rộng, 360px cao).
+   - Tiêu đề biểu đồ: "🏆 TOP 10 SẢN PHẨM BÁN CHẠY NHẤT", cột màu xanh dương #1a73e8.
+   - Nhãn tên sản phẩm ở trục hoành xoay nghiêng 30 độ để không bị đè chữ.`
+      },
+      {
+        badge: "06",
+        title: "Bước 6: Tạo File 6_BackendService.gs (CRUD & Tự Động Trừ Kho)",
+        desc: "Hoàn thiện các hàm backend đồng bộ dữ liệu sản phẩm, khách hàng, lưu đơn hàng, trừ tồn kho và ghi log tự động.",
+        promptBox: `QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: (đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md)
+
+Hãy viết toàn bộ mã nguồn cho file độc lập "6_BackendService.gs" để xử lý các nghiệp vụ bán hàng kết nối với bảng tính:
+
+1. Quản lý Sản phẩm (trang SanPham_BT7):
+   - getProducts(page, search, category): đọc danh sách sản phẩm hiển thị 10 dòng/trang, có tìm kiếm.
+   - saveProduct(productData): thêm mới (tự sinh mã SP067) hoặc cập nhật sản phẩm cũ.
+   - deleteProduct(productId): kiểm tra nếu sản phẩm đã bán trong ChiTietDonHang_BT7 thì không cho xóa.
+
+2. Quản lý Khách hàng (trang KhachHang_BT7):
+   - getCustomers(page, search, type): đọc danh sách khách hàng phân trang 10 dòng.
+   - saveCustomer(customerData): thêm mới (tự sinh mã KH031) hoặc cập nhật khách hàng.
+   - deleteCustomer(customerId): xóa khách hàng.
+
+3. Xử lý Đơn hàng & Tự động trừ kho:
+   - getOrderFormData(): lấy danh sách khách hàng và sản phẩm còn tồn kho.
+   - createOrder(orderHeader, orderItems):
+     a. Tự sinh mã đơn mới (DH-031) và lưu vào DonHang_BT7.
+     b. Lưu chi tiết từng món vào ChiTietDonHang_BT7.
+     c. TỰ ĐỘNG TRỪ KHO: Giảm tồn kho tại cột F sheet SanPham_BT7.
+     d. GHI NHẬT KÝ KHO: Thêm 1 dòng log xuất bán vào LichSuTonKho_BT7.
+     e. Tự động đồng bộ số liệu trên Dashboard.`
+      },
+      {
+        badge: "07",
+        title: "Bước 7: Tạo File ProductManagement.html (Quản Lý Sản Phẩm)",
+        desc: "Thiết kế giao diện pop-up Aesthetic Blue xem danh sách sản phẩm, phân trang, tìm kiếm và form modal Thêm/Sửa.",
+        promptBox: `Hãy thiết kế mã nguồn cho tệp giao diện "ProductManagement.html" kết nối với file 6_BackendService.gs:
+
+1. Giao diện & Thư viện:
+   - Sử dụng Bootstrap 5 và FontAwesome (qua CDN), tông màu Aesthetic Blue sang trọng, bo góc 12px, font Inter.
+2. Chức năng chính:
+   - Thanh công cụ phía trên: Ô tìm kiếm nhanh sản phẩm theo tên hoặc mã, bộ lọc theo danh mục, nút "➕ Thêm Sản Phẩm Mới".
+   - Bảng danh sách sản phẩm: Hiển thị 10 dòng mỗi trang, có phân trang (Trang trước, Trang sau), mỗi dòng có nút Sửa (icon bút vàng) và nút Xóa (icon thùng rác đỏ).
+   - Popup Modal Thêm/Sửa: Biểu mẫu nhập Tên SP, Danh mục (dropdown), Đơn vị tính, Giá bán, Tồn kho tối thiểu.
+   - Kết nối hai chiều với các hàm getProducts, saveProduct, deleteProduct trong 6_BackendService.gs.`
+      },
+      {
+        badge: "08",
+        title: "Bước 8: Tạo File CustomerManagement.html (Quản Lý Khách Hàng)",
+        desc: "Thiết kế giao diện pop-up quản lý danh bạ khách hàng, phân hạng VIP/Thường, tìm kiếm và modal Thêm/Sửa.",
+        promptBox: `Hãy thiết kế mã nguồn cho tệp giao diện "CustomerManagement.html" kết nối với file 6_BackendService.gs:
+
+1. Giao diện & Thư viện:
+   - Sử dụng Bootstrap 5 và FontAwesome, tông màu Aesthetic Blue sang trọng đồng bộ hệ thống.
+2. Chức năng chính:
+   - Thanh công cụ: Ô tìm kiếm khách hàng (theo tên hoặc số điện thoại), bộ lọc phân loại (Tất cả / VIP / Thường), nút "➕ Thêm Khách Hàng".
+   - Bảng danh sách khách hàng: Hiển thị 10 dòng/trang, có phân trang, huy hiệu (badge) nổi bật cho khách VIP (màu tím/vàng), nút Sửa và Xóa.
+   - Popup Modal Thêm/Sửa: Nhập Tên, SĐT, Email, Địa chỉ, Tỉnh/Thành phố, Phân hạng thành viên.
+   - Kết nối với các hàm getCustomers, saveCustomer, deleteCustomer trong 6_BackendService.gs.`
+      },
+      {
+        badge: "09",
+        title: "Bước 9: Tạo File OrderManagement.html (Lập Đơn Hàng & Giỏ Hàng)",
+        desc: "Thiết kế giao diện tạo đơn hàng đa sản phẩm, bảng giỏ hàng tự tính tiền và nút hoàn tất đơn hàng tự động trừ kho.",
+        promptBox: `Hãy thiết kế mã nguồn cho tệp giao diện "OrderManagement.html" kết nối với file 6_BackendService.gs:
+
+1. Giao diện & Thư viện:
+   - Sử dụng Bootstrap 5 và FontAwesome, tông màu Aesthetic Blue, kích thước chuẩn rộng 1020px x cao 720px.
+2. Chức năng màn hình Lập Đơn Hàng Thông Minh:
+   - Phần 1 (Thông tin chung): Dropdown chọn Khách hàng (tự động điền SĐT và địa chỉ), ngày đặt hàng, trạng thái đơn.
+   - Phần 2 (Chọn mặt hàng): Dropdown chọn Sản phẩm (hiển thị rõ số lượng tồn kho còn lại và giá bán), ô nhập Số lượng, nút "➕ Thêm Vào Giỏ".
+   - Phần 3 (Bảng giỏ hàng tạm thời): Hiển thị các món vừa thêm, có cột Đơn giá, Thành tiền, nút Xóa từng dòng khỏi giỏ, ô Tổng tiền đơn hàng tự động cộng dồn.
+   - Nút "🚀 Hoàn Tất & Xuất Đơn": Gửi dữ liệu về hàm createOrder trong 6_BackendService.gs để lưu vào Google Sheets và tự động trừ tồn kho.`
       }
     ],
     checklist: [
       "Trang tính gồm đủ 6 sheets nguồn với tên gọi chính xác: DanhMuc_BT7, SanPham_BT7, KhachHang_BT7, DonHang_BT7, ChiTietDonHang_BT7, LichSuTonKho_BT7.",
-      "Bảng dữ liệu của các sheet đều bắt đầu ghi nhận từ dòng thứ 4 trở đi (3 dòng đầu dành cho tiêu đề và trang trí).",
-      "Đã tạo đủ 4 file trong Apps Script Editor: Code.gs, ProductManagement.html, CustomerManagement.html, OrderManagement.html.",
+      "Đã tạo đủ các file độc lập trong Apps Script: 1_Menu.gs, 2_Dashboard_KPI.gs, 3_CalcData.gs, 4_PieChart.gs, 5_ColumnChart.gs, 6_BackendService.gs, ProductManagement.html, CustomerManagement.html, OrderManagement.html.",
       "Menu '🏪 Tech Hub Store' hiển thị trên thanh công cụ sau khi mở file Google Sheets.",
-      "Trang Dashboard tự động tạo mới, hiển thị đúng 4 thẻ chỉ số KPI Doanh thu, Đơn hàng, Khách hàng, Cảnh báo tồn kho mà không có ô nào báo lỗi #ERROR!.",
-      "Biểu đồ tròn Doanh thu theo Danh mục và biểu đồ cột Top 10 sản phẩm bán chạy tự động vẽ dựa trên sheet Calc_Data mà không bị lỗi mảng.",
-      "Tạo đơn hàng mới thành công, tồn kho của sản phẩm trong sheet SanPham_BT7 tự động giảm và sheet LichSuTonKho_BT7 tự động ghi log giao dịch."
+      "Trang 📊 Dashboard tự động tạo mới, hiển thị đúng 4 thẻ chỉ số KPI Doanh thu, Đơn hàng, Khách hàng, Cảnh báo tồn kho mà không có ô nào báo lỗi #ERROR!.",
+      "Trang Calc_Data có dữ liệu thô sạch bắt đầu từ dòng 1 và KHÔNG bị ẩn tab.",
+      "Cả 2 Biểu đồ tròn (Doanh thu danh mục) và Biểu đồ cột (Top 10 sản phẩm) hiển thị đẹp mắt, đầy đủ tỷ lệ % và số liệu.",
+      "Tạo đơn hàng mới thành công qua popup OrderManagement, tồn kho của sản phẩm trong sheet SanPham_BT7 tự động giảm và sheet LichSuTonKho_BT7 tự động ghi log giao dịch."
     ],
     triggerGuide: `
       <h3 class="section-title"><i class="ph-bold ph-lightning"></i> Tự Động Hóa Định Kỳ</h3>
       <p style="color: var(--text-secondary); line-height: 1.7;">
-        Học viên có thể cài đặt Trigger tự động kích hoạt hàm <code>refreshDashboard()</code> mỗi giờ một lần hoặc chạy định kỳ cuối ngày lúc 23:00 để gửi báo cáo tóm tắt các sản phẩm có tồn kho dưới hạn mức tối thiểu đến email của người quản lý.
+        Học viên có thể cài đặt Trigger tự động kích hoạt hàm <code>khoiTaoDashboard()</code> mỗi giờ một lần hoặc chạy định kỳ cuối ngày lúc 23:00 để cập nhật lại toàn bộ số liệu thống kê và kiểm tra các sản phẩm có tồn kho dưới hạn mức tối thiểu.
       </p>
     `
   }

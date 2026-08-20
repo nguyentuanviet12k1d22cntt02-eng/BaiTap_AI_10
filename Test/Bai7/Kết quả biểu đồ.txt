@@ -1,0 +1,178 @@
+
+/**
+ * ============================================================================
+ * HỆ THỐNG QUẢN LÝ BÁN HÀNG TECH HUB STORE
+ * File: 2_Dashboard.gs
+ * Chức năng: Tự động khởi tạo, tính toán và vẽ Dashboard tổng quan kinh doanh
+ * ============================================================================
+ */
+
+function khoiTaoDashboard() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var requiredSheets = ['DanhMuc_BT7', 'SanPham_BT7', 'KhachHang_BT7', 'DonHang_BT7', 'ChiTietDonHang_BT7'];
+  for (var i = 0; i < requiredSheets.length; i++) {
+    if (!ss.getSheetByName(requiredSheets[i])) {
+      var errorMsg = 'Thiếu trang tính nguồn: "' + requiredSheets[i] + '". Vui lòng kiểm tra lại cấu trúc bảng tính!';
+      Logger.log(errorMsg);
+      try {
+        SpreadsheetApp.getUi().alert('Lỗi Dữ Liệu', errorMsg, SpreadsheetApp.getUi().ButtonSet.OK);
+      } catch (e) {}
+      return;
+    }
+  }
+
+  try {
+    var calcSheet = taoHoacLamMoiSheet(ss, 'Calc_Data');
+    thietLapTrangCalcData(calcSheet);
+
+    var dashSheet = taoHoacLamMoiSheet(ss, '📊 Dashboard');
+    ss.setActiveSheet(dashSheet);
+    ss.moveActiveSheet(1);
+
+    thietLapGiaoDienDashboard(dashSheet);
+
+    SpreadsheetApp.flush();
+
+    veBieuDoDashboard(dashSheet, calcSheet);
+
+    try {
+      SpreadsheetApp.getUi().alert(
+        'Thành Công',
+        'Đã cập nhật và làm mới Dashboard Tổng Quan thành công!',
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
+    } catch (e) {}
+
+  } catch (err) {
+    Logger.log('Lỗi trong quá trình khởi tạo Dashboard: ' + err.toString());
+    try {
+      SpreadsheetApp.getUi().alert('Lỗi', 'Không thể khởi tạo Dashboard: ' + err.message, SpreadsheetApp.getUi().ButtonSet.OK);
+    } catch (e) {}
+  }
+}
+
+function taoHoacLamMoiSheet(ss, sheetName) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (sheet) {
+    sheet.clear();
+    sheet.clearNotes();
+    var charts = sheet.getCharts();
+    for (var i = 0; i < charts.length; i++) {
+      sheet.removeChart(charts[i]);
+    }
+  } else {
+    sheet = ss.insertSheet(sheetName);
+  }
+  return sheet;
+}
+
+function thietLapTrangCalcData(sheet) {
+  sheet.getRange('A1:B1').setValues([['Tên Danh Mục', 'Doanh Thu']]).setFontWeight('bold');
+  
+  var categoryFormulas = [];
+  for (var r = 4; r <= 10; r++) {
+    categoryFormulas.push([
+      '=DanhMuc_BT7!B' + r,
+      '=SUM(IFERROR(FILTER(ChiTietDonHang_BT7!H$4:H; ISNUMBER(MATCH(ChiTietDonHang_BT7!C$4:C; FILTER(SanPham_BT7!A$4:A; SanPham_BT7!C$4:C=DanhMuc_BT7!A' + r + '); 0))); 0))'
+    ]);
+  }
+  sheet.getRange(2, 1, categoryFormulas.length, 2).setFormulas(categoryFormulas);
+  sheet.getRange('B2:B8').setNumberFormat('#,##0');
+
+  var top10QueryFormula = '=QUERY(ChiTietDonHang_BT7!D4:F; "SELECT D, SUM(F) WHERE D IS NOT NULL GROUP BY D ORDER BY SUM(F) DESC LIMIT 10 LABEL D \'Tên Sản Phẩm\', SUM(F) \'Số Lượng Đã Bán\'")';
+  sheet.getRange('D1').setFormula(top10QueryFormula);
+
+  SpreadsheetApp.flush();
+}
+
+function thietLapGiaoDienDashboard(sheet) {
+  sheet.setColumnWidth(1, 130); sheet.setColumnWidth(2, 130);
+  sheet.setColumnWidth(3, 130); sheet.setColumnWidth(4, 130);
+  sheet.setColumnWidth(5, 130); sheet.setColumnWidth(6, 130);
+  sheet.setColumnWidth(7, 135); sheet.setColumnWidth(8, 135);
+
+  sheet.setRowHeight(1, 55);
+  sheet.getRange('A1:H1').merge()
+    .setValue('🏪 TECH HUB STORE - DASHBOARD QUẢN LÝ')
+    .setBackground('#0f4c81').setFontColor('#ffffff').setFontSize(18).setFontWeight('bold')
+    .setHorizontalAlignment('center').setVerticalAlignment('middle');
+
+  sheet.setRowHeight(2, 10);
+  sheet.setRowHeight(3, 25);
+  var timeStr = Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm:ss');
+  sheet.getRange('A3:H3').merge()
+    .setValue('📅 Dữ liệu cập nhật tự động lúc: ' + timeStr)
+    .setFontColor('#627d98').setFontSize(10).setFontStyle('italic')
+    .setHorizontalAlignment('center').setVerticalAlignment('middle');
+
+  sheet.setRowHeight(4, 12);
+  sheet.setRowHeight(5, 28);
+  sheet.setRowHeight(6, 32);
+  sheet.setRowHeight(7, 32);
+
+  // KPI 1
+  sheet.getRange('A5:B5').merge().setValue('💰 TỔNG DOANH THU').setBackground('#e8f0fe').setFontColor('#1a73e8').setFontSize(11).setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('A6:B7').merge().setFormula('=SUM(DonHang_BT7!E4:E)').setBackground('#e8f0fe').setFontColor('#174ea6').setFontSize(16).setFontWeight('bold').setNumberFormat('#,##0 "VNĐ"').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('A5:B7').setBorder(true, true, true, true, false, false, '#8ab4f8', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 2
+  sheet.getRange('C5:D5').merge().setValue('📦 TỔNG ĐƠN HÀNG').setBackground('#e6f4ea').setFontColor('#137333').setFontSize(11).setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('C6:D7').merge().setFormula('=COUNTA(DonHang_BT7!A4:A)').setBackground('#e6f4ea').setFontColor('#0d652d').setFontSize(16).setFontWeight('bold').setNumberFormat('#,##0 " đơn"').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('C5:D7').setBorder(true, true, true, true, false, false, '#81c995', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 3
+  sheet.getRange('E5:F5').merge().setValue('👥 TỔNG KHÁCH HÀNG').setBackground('#f3e8fd').setFontColor('#7627bb').setFontSize(11).setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('E6:F7').merge().setFormula('=COUNTA(KhachHang_BT7!A4:A)').setBackground('#f3e8fd').setFontColor('#52188c').setFontSize(16).setFontWeight('bold').setNumberFormat('#,##0 " khách"').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('E5:F7').setBorder(true, true, true, true, false, false, '#c58af9', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  // KPI 4
+  sheet.getRange('G5:H5').merge().setValue('⚠️ CẢNH BÁO TỒN KHO').setBackground('#fce8e6').setFontColor('#c5221f').setFontSize(11).setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('G6:H7').merge().setFormula('=SUMPRODUCT((SanPham_BT7!A4:A<>"")*(SanPham_BT7!F4:F<SanPham_BT7!G4:G))').setBackground('#fce8e6').setFontColor('#a50e0e').setFontSize(16).setFontWeight('bold').setNumberFormat('0 " sản phẩm"').setHorizontalAlignment('center').setVerticalAlignment('middle');
+  sheet.getRange('G5:H7').setBorder(true, true, true, true, false, false, '#f28b82', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+
+  sheet.setRowHeight(8, 15);
+}
+
+function veBieuDoDashboard(dashSheet, calcSheet) {
+  var pieRange = calcSheet.getRange('A1:B8');
+  var pieChart = dashSheet.newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(pieRange)
+    .setNumHeaders(1)
+    .setPosition(9, 1, 0, 0)
+    .setOption('title', '📊 TỶ LỆ DOANH THU THEO DANH MỤC')
+    .setOption('titleTextStyle', { fontSize: 13, bold: true, color: '#0f4c81' })
+    .setOption('pieSliceText', 'percentage')
+    .setOption('legend', { position: 'right', textStyle: { fontSize: 11, color: '#334e68' } })
+    .setOption('width', 490)
+    .setOption('height', 360)
+    .build();
+  dashSheet.insertChart(pieChart);
+
+  var colRange = calcSheet.getRange('D1:E11');
+  var colChart = dashSheet.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(colRange)
+    .setNumHeaders(1)
+    .setPosition(9, 5, 0, 0)
+    .setOption('title', '🏆 TOP 10 SẢN PHẨM BÁN CHẠY NHẤT')
+    .setOption('titleTextStyle', { fontSize: 13, bold: true, color: '#0f4c81' })
+    .setOption('colors', ['#1a73e8'])
+    .setOption('legend', { position: 'none' })
+    .setOption('hAxis', {
+      title: 'Tên Sản Phẩm',
+      slantedText: true,
+      slantedTextAngle: 30,
+      textStyle: { fontSize: 9, color: '#334e68' }
+    })
+    .setOption('vAxis', {
+      title: 'Số Lượng Đã Bán',
+      minValue: 0,
+      textStyle: { fontSize: 10, color: '#334e68' }
+    })
+    .setOption('width', 560)
+    .setOption('height', 360)
+    .build();
+  dashSheet.insertChart(colChart);
+}

@@ -1,3 +1,26 @@
+Prompt:
+ QUY TẮC BẮT BUỘC KHI SINH CODE APPS SCRIPT: file đính kèm
+Hãy thực hiện yêu cầu sau đây:
+Tôi muốn bạn viết một đoạn mã Google Apps Script để tạo Menu tùy chỉnh trên thanh công cụ của Google Sheets.
+Khi tôi mở file bảng tính này lên, hãy tự động xuất hiện một Menu mới tên là "🏪 Tech Hub Store" gồm các mục chọn sau:
+1. "📊 Dashboard Tổng Quan" (khi bấm vào sẽ chạy chức năng làm mới Dashboard)
+2. Một đường gạch ngang phân cách
+3. "🛍️ Quản Lý Sản Phẩm" (khi bấm vào sẽ mở ra giao diện quản lý sản phẩm)
+4. "👥 Quản Lý Khách Hàng" (khi bấm vào sẽ mở ra giao diện quản lý khách hàng)
+5. "📦 Quản Lý Đơn Hàng" (khi bấm vào sẽ mở ra giao diện tạo và quản lý đơn hàng)
+6. Một đường gạch ngang phân cách
+7. "🔄 Làm Mới Dashboard" (khi bấm vào sẽ chạy chức năng cập nhật lại số liệu Dashboard)
+8. "❓ Hướng Dẫn Sử Dụng" (khi bấm vào sẽ hiện một bảng thông báo nhỏ hướng dẫn sơ lược cách dùng)
+
+Yêu cầu thiết lập kích thước các cửa sổ giao diện khi mở ra:
+- Cửa sổ Sản phẩm: rộng 920px, cao 660px.
+- Cửa sổ Khách hàng: rộng 920px, cao 660px.
+- Cửa sổ Đơn hàng: rộng 1020px, cao 720px.
+
+
+
+
+kết quả:
 /** 
  * 🏪 TECH HUB STORE - HỆ THỐNG QUẢN LÝ BÁN HÀNG & DASHBOARD 
  */
