@@ -5,24 +5,43 @@
 
 ## I. 10 NGUYÊN TẮC KỸ THUẬT VÀNG (BẮT BUỘC AI PHẢI TUÂN THỦ)
 
-### 1. Phân biệt rõ Hệ tọa độ (1-Indexed vs 0-Indexed)
+### 1. Phân biệt rõ Hệ tọa độ (1-Indexed vs 0-Indexed) & Khai Báo Hằng Số Cột
 * **Google Sheets API:** Sử dụng tọa độ đếm từ **1** (Dòng 1, Cột 1 là ô `A1`).
   * Cú pháp: `sheet.getRange(startRow, startCol, numRows, numCols)`.
 * **Mảng JavaScript:** Sử dụng chỉ mục đếm từ **0**.
-  * Dữ liệu lấy từ dòng 4 của Sheet thì `data[0]` trong JS tương ứng với dòng 4. Cột A là `data[i][0]`, Cột B là `data[i][1]`, Cột L (cột 12) là `data[i][11]`.
+  * Dữ liệu lấy từ dòng 4 của Sheet thì `data[0]` trong JS tương ứng với dòng 4. Cột A là index 0, Cột B là index 1, Cột C là index 2, Cột L là index 11.
+* **BẮT BUỘC KHAI BÁO BIẾN HẰNG SỐ CỘT (CHỐNG LỖI MẤT INDEX):**
+  * Để chống triệt để lỗi gõ thiếu index hoặc lỗi trình duyệt AI nuốt mất số `[1]`, `[2]` khi copy, AI **bắt buộc** phải khai báo các hằng số chỉ mục cột trước vòng lặp và truy xuất qua biến:
+  ```javascript
+  // BẮT BUỘC KHAI BÁO HẰNG SỐ CỘT:
+  var COL_CODE   = 0;  // Cột A: Mã chi nhánh
+  var COL_NAME   = 1;  // Cột B: Tên chi nhánh
+  var COL_REGION = 2;  // Cột C: Khu vực
+  var COL_TOTAL  = 11; // Cột L: Tổng tuần
+  
+  for (var i = 0; i < data.length; i++) {
+    // ĐÚNG (Rõ nghĩa và không bao giờ bị nuốt index):
+    var branchCode = String(data[i][COL_CODE] || '').trim();
+    var branchName = String(data[i][COL_NAME] || '').trim();
+    var region     = String(data[i][COL_REGION] || '').trim();
+    var weekTotal  = Number(data[i][COL_TOTAL]) || 0;
+    
+    // TUYỆT ĐỐI CẤM dùng data[i] làm giá trị đơn lẻ (Ví dụ: String(data[i]) là SAI).
+  }
+  ```
 
 ---
 
 ### 2. Chuẩn Locale Việt Nam trong Công thức (`setFormulas`)
 * **Dấu phân cách tham số:** Bảng tính Google Sheets cài đặt vùng Việt Nam bắt buộc dùng dấu **chấm phẩy (`;`)** để ngăn cách tham số trong hàm (Ví dụ: `=SPARKLINE(D4:J4; ...)`, `=IF(A4>0; "Có"; "Không")`), tuyệt đối **KHÔNG** dùng dấu phẩy (`,`).
-* **Ký tự ngăn cách trong Mảng Literal:** Trong công thức như `=SPARKLINE(D4:J4; {"charttype"\"line"; "color"\"#1a73e8"})`, dấu gạch chéo ngược `\` được dùng để ngăn cách key-value.
-* **Quy tắc Escape trong Code JS:** Khi gán chuỗi công thức trong Apps Script, ký tự `\` phải được escape thành `\\`:
+* **Ký tự trong ô tính Google Sheets:** Trong ô tính chỉ chứa **1 dấu gạch chéo đơn `\`** (Ví dụ: `=SPARKLINE(D4:J4; {"charttype"\"line"; "color"\"#1a73e8"})`).
+* **Quy tắc viết trong Code JavaScript (Apps Script):** Trong chuỗi JS, chỉ cần dùng **2 dấu `\\`** để sinh ra đúng **1 dấu `\`** trong ô tính:
   ```javascript
-  // ĐÚNG:
-  sparklineFormulas.push(['=SPARKLINE(D' + r + ':J' + r + '; {"charttype"\\\\"line"; "color"\\\\"#1a73e8"})']);
+  // ĐÚNG (Trong chuỗi JS dùng 2 dấu \\ để ô tính nhận đúng 1 dấu \):
+  sparklineFormulas.push(['=SPARKLINE(D' + r + ':J' + r + '; {"charttype"\\"line"; "color"\\"#1a73e8"})']);
   
-  // SAI (gây lỗi #ERROR hoặc lỗi biên dịch JS):
-  sparklineFormulas.push(['=SPARKLINE(D' + r + ':J' + r + ', {"charttype","line"})']);
+  // SAI (Dùng 4 dấu \\\\ sẽ làm ô tính bị dư thành 2 dấu \\ gây lỗi #ERROR!):
+  // SAI: sparklineFormulas.push(['=SPARKLINE(... {"charttype"\\\\"line"...})']);
   ```
 
 ---

@@ -18,29 +18,30 @@ COURSE_DATA.push(
       { icon: "ph-clock-countdown", title: "4. Hẹn Giờ 08:00 Sáng", desc: "Tự động kích hoạt hàng ngày" }
     ],
 
-    masterPrompt: `[VAI TRÒ]: Bạn là Chuyên gia tự động hóa Google Sheets và Google Apps Script.
-[BỐI CẢNH & NHIỆM VỤ]: Tôi có trang tính tên "DoanhThu_BT1" ghi nhận doanh thu 7 ngày (từ cột D đến J) từ dòng 4 trở đi của các chi nhánh. Hãy viết một đoạn mã Apps Script hoàn chỉnh để tự động hóa toàn bộ quy trình sau:
+    masterPrompt: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia tự động hóa Google Sheets & Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ các nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-1. TỰ ĐỘNG ĐIỀN CÔNG THỨC:
-   - Cột L (Tổng tuần): Tự động điền công thức tính tổng =SUM(D4:J4) cho tất cả các dòng có dữ liệu.
-   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương. Vì Google Sheets đang cài đặt tiếng Việt, hãy dùng chính xác cú pháp phân cách bằng dấu chấm phẩy và gạch chéo:
-     =SPARKLINE(D4:J4; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})
+[BỐI CẢNH & DỮ LIỆU]: Tôi có trang tính tên "DoanhThu_BT1". Dữ liệu bắt đầu từ dòng 4, trong đó:
+- Cột D đến cột J: Doanh thu 7 ngày trong tuần (từ Thứ 2 đến Chủ nhật) của các chi nhánh.
+- Cột K: Cột biểu đồ xu hướng (Sparkline).
+- Cột L: Cột tổng doanh thu cả tuần.
 
-2. TỔNG HỢP SỐ LIỆU & BÁO CÁO:
-   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh có doanh thu cao nhất.
-   - Tự động soạn email định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật và Bảng chi tiết doanh thu (định dạng tiền tệ VNĐ).
-   - Gửi email tới "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+[YÊU CẦU NGHIỆP VỤ]:
+1. Tự động điền công thức & vẽ biểu đồ:
+   - Cột L (Tổng tuần): Tự động tính tổng doanh thu 7 ngày (từ cột D đến cột J) cho tất cả các dòng có dữ liệu.
+   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương thể hiện xu hướng tăng giảm 7 ngày.
 
-3. TIỆN ÍCH SỬ DỤNG & TỰ ĐỘNG HÓA:
-   - Tạo Menu tiện ích "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trực tiếp trên thanh công cụ của Sheets để người dùng bấm chạy bất cứ lúc nào.
-   - Tạo chức năng hẹn giờ tự động chạy và gửi email lúc 08:00 sáng mỗi ngày.
-   - Hiển thị thông báo "Thành công!" trên màn hình sau khi hoàn thành.
+2. Tổng hợp số liệu & Gửi email báo cáo:
+   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh đạt doanh thu cao nhất tuần.
+   - Soạn email báo cáo định dạng HTML chuyên nghiệp với tông màu xanh Navy (#0f172a) sang trọng, hiển thị nổi bật 2 Thẻ KPI (Tổng doanh thu, Chi nhánh xuất sắc nhất) và Bảng chi tiết doanh thu các chi nhánh (định dạng tiền tệ VNĐ rõ ràng).
+   - Gửi email đến địa chỉ "giamdoc@congty.com" với tiêu đề: "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
 
-[QUY TẮC KỸ THUẬT BẮT BUỘC]:
-- CHỈ DÙNG API GOOGLE: Dùng hàm chuẩn setFormulas(), tuyệt đối không dùng cú pháp của Excel như setFormulasLocal.
-- DẤU PHÂN CÁCH THAM SỐ (;): Bảng tính tiếng Việt bắt buộc dùng dấu chấm phẩy (;) để phân cách các tham số trong hàm (ví dụ trong SPARKLINE), tuyệt đối KHÔNG dùng dấu phẩy (,).
-- ESCAPE CÔNG THỨC: Escape dấu gạch chéo ngược (\\) thành (\\\\) trong chuỗi code JavaScript.
-- CODE SẴN SÀNG: Chỉ xuất 1 khối mã code duy nhất hoàn chỉnh, không giải thích dài dòng, sẵn sàng copy dùng ngay.`,
+3. Tiện ích sử dụng & Hẹn giờ:
+   - Tạo menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên thanh công cụ của Google Sheets để người dùng bấm chạy bất cứ lúc nào.
+   - Tạo hàm hẹn giờ tự động chạy và gửi email vào lúc 08:00 sáng mỗi ngày.
+   - Hiển thị hộp thoại thông báo "Thành công!" trên màn hình sau khi hoàn tất.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất 1 khối mã Google Apps Script (.gs) hoàn chỉnh, sẵn sàng sao chép vào Apps Script để sử dụng ngay mà không cần chỉnh sửa thủ công.`,
 
     businessScenario: {
       story: "Bạn là Trợ lý Ban Giám Đốc hoặc Trưởng nhóm Kinh doanh tại chuỗi bán lẻ 10 chi nhánh toàn quốc. Mỗi sáng lúc 08:30, Ban Giám Đốc sẽ họp giao ban đầu ngày để đánh giá tốc độ bán hàng và điều phối hàng hóa giữa các vùng miền.",
@@ -113,54 +114,99 @@ Tôi cần bạn thực hiện kiểm kê tổng quát về cấu trúc của fi
       },
       {
         badge: "04",
-        title: "Dán Master Prompt & Lấy Code Chuẩn Locale VN",
-        desc: "Sao chép câu **Master Prompt** tại Tab 1, gửi cho AI (Gemini hoặc AI Agent) để AI tự động thiết kế mã nguồn.",
-        promptBox: `[VAI TRÒ]: Bạn là Chuyên gia tự động hóa Google Sheets và Google Apps Script.
-[BỐI CẢNH & NHIỆM VỤ]: Tôi có trang tính tên "DoanhThu_BT1" ghi nhận doanh thu 7 ngày (từ cột D đến J) từ dòng 4 trở đi của các chi nhánh. Hãy viết một đoạn mã Apps Script hoàn chỉnh để tự động hóa toàn bộ quy trình sau:
+        title: "Module 1: Điền Công Thức & Biểu Đồ Sparkline",
+        desc: "Đính kèm file <code>QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md</code> và gửi câu lệnh để AI viết hàm chèn công thức Tổng tuần (cột L) và biểu đồ mini Sparkline (cột K).",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-1. TỰ ĐỘNG ĐIỀN CÔNG THỨC:
-   - Cột L (Tổng tuần): Tự động điền công thức tính tổng =SUM(D4:J4) cho tất cả các dòng có dữ liệu.
-   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương. Vì Google Sheets đang cài đặt tiếng Việt, hãy dùng chính xác cú pháp phân cách bằng dấu chấm phẩy và gạch chéo:
-     =SPARKLINE(D4:J4; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})
+[BỐI CẢNH & DỮ LIỆU]: Tôi có trang tính "DoanhThu_BT1". Dữ liệu bắt đầu từ dòng 4, trong đó cột D đến cột J là doanh thu 7 ngày (Thứ 2 đến Chủ nhật) của các chi nhánh.
 
-2. TỔNG HỢP SỐ LIỆU & BÁO CÁO:
-   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh có doanh thu cao nhất.
-   - Tự động soạn email định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật và Bảng chi tiết doanh thu (định dạng tiền tệ VNĐ).
-   - Gửi email tới "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+[YÊU CẦU NGHIỆP VỤ 1 - CÔNG THỨC & BIỂU ĐỒ]:
+Hãy viết hàm insertFormulasAndSparkline() trong Apps Script:
+- Cột L (Tổng tuần): Tự động điền công thức tính tổng doanh thu 7 ngày (cột D đến cột J) cho tất cả dòng có dữ liệu.
+- Cột K (Xu hướng): Tự động chèn biểu đồ mini Sparkline dạng đường màu xanh dương thể hiện xu hướng tăng giảm 7 ngày.
 
-3. TIỆN ÍCH SỬ DỤNG & TỰ ĐỘNG HÓA:
-   - Tạo Menu tiện ích "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trực tiếp trên thanh công cụ của Sheets để người dùng bấm chạy bất cứ lúc nào.
-   - Tạo chức năng hẹn giờ tự động chạy và gửi email lúc 08:00 sáng mỗi ngày.
-   - Hiển thị thông báo "Thành công!" trên màn hình sau khi hoàn thành.
-
-[QUY TẮC KỸ THUẬT BẮT BUỘC]:
-- CHỈ DÙNG API GOOGLE: Dùng hàm chuẩn setFormulas(), tuyệt đối không dùng cú pháp của Excel như setFormulasLocal.
-- DẤU PHÂN CÁCH THAM SỐ (;): Bảng tính tiếng Việt bắt buộc dùng dấu chấm phẩy (;) để phân cách các tham số trong hàm (ví dụ trong SPARKLINE), tuyệt đối KHÔNG dùng dấu phẩy (,).
-- ESCAPE CÔNG THỨC: Escape dấu gạch chéo ngược (\\) thành (\\\\) trong chuỗi code JavaScript.
-- CODE SẴN SÀNG: Chỉ xuất 1 khối mã code duy nhất hoàn chỉnh, không giải thích dài dòng, sẵn sàng copy dùng ngay.`,
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh, chạy thử nghiệm ngay trên Google Sheets.`,
         expectedResult: {
           image: "assets/gemini_paste_prompt.jpg",
-          imageTitle: "Gửi prompt cho Gemini và nhận code Apps Script"
+          imageTitle: "Gửi prompt Module 1 cho AI và chạy thử trên Sheet"
         }
       },
       {
         badge: "05",
-        title: "Dán Code Vào Apps Script & Chạy Thử",
-        desc: "Dán mã nguồn vào tệp <code>Code.gs</code>, chọn hàm <code>runDailyReport</code> hoặc dùng menu <b>🚀 BÁO CÁO ➔ Chạy Báo Cáo Ngay</b> trên Google Sheets để chạy thử nghiệm.",
-        promptBox: `Sau khi dán mã nguồn vào Code.gs, chọn hàm runDailyReport trong danh sách hàm và bấm nút Chạy (Run) để kiểm tra gửi báo cáo ngay lập tức.`,
+        title: "Module 2: Phân Tích KPI & Gửi Email HTML Sang Trọng",
+        desc: "Gửi tiếp câu lệnh để AI viết hàm phân tích KPI (Tổng doanh thu hệ thống, Chi nhánh xuất sắc nhất) và gửi email báo cáo HTML đẹp mắt.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[BỐI CẢNH & DỮ LIỆU]: Trang tính "DoanhThu_BT1" có dữ liệu từ dòng 4 gồm:
+- Cột A: Mã chi nhánh
+- Cột B: Tên chi nhánh
+- Cột C: Khu vực
+- Cột L: Tổng doanh thu tuần
+
+[YÊU CẦU NGHIỆP VỤ 2 - PHÂN TÍCH KPI & GỬI EMAIL]:
+Hãy viết hàm sendDailyRevenueEmail():
+1. Quét dữ liệu từ dòng 4 để tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh đạt doanh thu cao nhất tuần.
+2. Soạn email báo cáo định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật (Tổng doanh thu, Chi nhánh dẫn đầu) và Bảng chi tiết doanh thu các chi nhánh (định dạng tiền tệ VNĐ).
+3. Gửi email tới "giamdoc@congty.com" với tiêu đề: "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh để kết hợp vào dự án.`,
         expectedResult: {
-          image: "assets/appscript_run_code.jpg",
-          imageTitle: "Dán mã Code.gs và bấm nút Chạy thử nghiệm"
+          image: "assets/gmail_received_report.jpg",
+          imageTitle: "Kiểm tra email báo cáo HTML gửi về hộp thư"
         }
       },
       {
         badge: "06",
-        title: "Kích Hoạt Lịch Hẹn Giờ 08:00 Sáng",
-        desc: "Chọn hàm <code>setupDailyTrigger</code> trong danh sách hàm và bấm <b>▷ Chạy</b> để thiết lập lịch gửi email tự động mỗi sáng. Kiểm tra hộp thư Gmail để nhận kết quả email HTML được thiết kế sang trọng.",
-        promptBox: `Hãy thiết lập trigger tự động gửi báo cáo vào lúc 08:00 AM hàng ngày bằng cách chạy hàm setupDailyTrigger hoặc thiết lập thủ công trong phần Triggers.`,
+        title: "Module 3: Tạo Menu Nút Bấm & Hẹn Giờ 08:00 Sáng",
+        desc: "Yêu cầu AI tạo Menu tùy chỉnh trên thanh công cụ để người dùng bấm chạy bất cứ lúc nào và hàm kích hoạt Trigger tự động mỗi sáng.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Tuân thủ nghiêm ngặt tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[YÊU CẦU NGHIỆP VỤ 3 - MENU TIỆN ÍCH & TỰ ĐỘNG HÓA]:
+Hãy viết các hàm tiện ích và tự động hóa:
+1. Hàm onOpen(): Tạo menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên thanh công cụ của Sheets để bấm chạy toàn bộ quy trình.
+2. Hàm setupDailyTrigger(): Thiết lập Trigger kích hoạt tự động chạy và gửi email vào lúc 08:00 sáng mỗi ngày.
+3. Hiển thị hộp thoại thông báo "Thành công!" trên màn hình sau khi hoàn tất.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh.`,
         expectedResult: {
-          image: "assets/gmail_received_report.jpg",
-          imageTitle: "Nhận báo cáo doanh thu HTML định dạng Navy tuyệt đẹp trong Gmail"
+          image: "assets/appscript_run_code.jpg",
+          imageTitle: "Kiểm tra Menu tùy chỉnh trên Google Sheets và thiết lập Trigger"
+        }
+      },
+      {
+        badge: "07",
+        title: "Tùy Chọn: Master Prompt Trọn Gói 1-Click",
+        desc: "Nếu muốn gộp chung toàn bộ 3 module trên vào 1 câu lệnh duy nhất để AI sinh trọn bộ hệ thống trong 1 lần.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia tự động hóa Google Sheets & Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ các nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[BỐI CẢNH & DỮ LIỆU]: Tôi có trang tính tên "DoanhThu_BT1". Dữ liệu bắt đầu từ dòng 4, trong đó:
+- Cột D đến cột J: Doanh thu 7 ngày trong tuần (từ Thứ 2 đến Chủ nhật) của các chi nhánh.
+- Cột K: Cột biểu đồ xu hướng (Sparkline).
+- Cột L: Cột tổng doanh thu cả tuần.
+
+[YÊU CẦU NGHIỆP VỤ]:
+1. Tự động điền công thức & vẽ biểu đồ:
+   - Cột L (Tổng tuần): Tự động tính tổng doanh thu 7 ngày (từ cột D đến cột J) cho tất cả các dòng có dữ liệu.
+   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương thể hiện xu hướng tăng giảm 7 ngày.
+
+2. Tổng hợp số liệu & Gửi email báo cáo:
+   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh đạt doanh thu cao nhất tuần.
+   - Soạn email báo cáo định dạng HTML chuyên nghiệp với tông màu xanh Navy (#0f172a) sang trọng, hiển thị nổi bật 2 Thẻ KPI (Tổng doanh thu, Chi nhánh xuất sắc nhất) và Bảng chi tiết doanh thu các chi nhánh (định dạng tiền tệ VNĐ rõ ràng).
+   - Gửi email đến địa chỉ "giamdoc@congty.com" với tiêu đề: "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+3. Tiện ích sử dụng & Hẹn giờ:
+   - Tạo menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên thanh công cụ của Google Sheets để người dùng bấm chạy bất cứ lúc nào.
+   - Tạo hàm hẹn giờ tự động chạy và gửi email vào lúc 08:00 sáng mỗi ngày.
+   - Hiển thị hộp thoại thông báo "Thành công!" trên màn hình sau khi hoàn tất.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất 1 khối mã Google Apps Script (.gs) hoàn chỉnh, sẵn sàng sao chép vào Apps Script để sử dụng ngay mà không cần chỉnh sửa thủ công.`,
+        expectedResult: {
+          image: "assets/gemini_paste_prompt.jpg",
+          imageTitle: "Nhận trọn bộ mã nguồn hoàn chỉnh với Master Prompt 1-Click"
         }
       }
     ],

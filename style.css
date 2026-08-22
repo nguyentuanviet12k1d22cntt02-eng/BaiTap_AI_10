@@ -748,6 +748,29 @@ html, body {
   border-radius: 50%;
 }
 
+.workflow-image-wrapper {
+  margin-bottom: 20px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.workflow-image-wrapper:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.workflow-infographic-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
 .workflow-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

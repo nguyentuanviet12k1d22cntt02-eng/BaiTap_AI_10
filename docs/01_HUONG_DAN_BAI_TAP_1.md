@@ -10,29 +10,87 @@
 
 ---
 
-### 🪄 2. Master Prompt Chuẩn Locale Việt Nam (Dán vào Gemini / AI Agent)
+### 🪄 2. Các Prompt Thực Hành Theo Từng Nghiệp Vụ (Micro-Prompting)
 
+> **Phương pháp khuyên dùng:** Tách nhỏ bài toán thành 3 module riêng biệt giúp dễ kiểm soát, dễ chạy thử từng phần và sửa lỗi nhanh chóng.
+
+#### 📌 Module 1: Điền Công Thức & Biểu Đồ Mini Sparkline
 ```text
-[VAI TRÒ]: Bạn là Lập trình viên Google Apps Script.
-[NHIỆM VỤ]: Viết 1 đoạn code Apps Script (.gs) hoàn chỉnh cho tab "DoanhThu_BT1". Không giải thích, chỉ xuất khối mã code.
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[RÀNG BUỘC CÔNG THỨC NGHIÊM NGẠT - CHUẨN LOCALE VIỆT NAM]:
-1. Cột L (Col 12): Chèn công thức '=SUM(D4:J4)' từ dòng 4 đến lastRow.
-2. Cột K (Col 11): Chèn công thức SPARKLINE chuẩn Việt Nam từ dòng 4 đến lastRow. 
-   BẮT BỘC dùng chính xác cú pháp này (Dùng dấu ';' và dấu '\'):
-   =SPARKLINE(D4:J4; {"charttype"\"line"; "color"\"#1a73e8"; "linewidth"\2})
-   
-*LƯU Ý KỸ THUẬT KHI ĐƯA VÀO APPS SCRIPT:*
-- Không dùng dấu phẩy (,) trong mảng thuộc tính Sparkline.
-- Không thêm dấu gạch chéo ngược (\) trước dấu # của mã màu.
-- Trong JS String, escape dấu nháy kép chuẩn: \"charttype\"\"line\"...
+[BỐI CẢNH & DỮ LIỆU]: Tôi có trang tính "DoanhThu_BT1". Dữ liệu bắt đầu từ dòng 4, trong đó cột D đến cột J là doanh thu 7 ngày (Thứ 2 đến Chủ nhật) của các chi nhánh.
 
-[TÍNH NĂNG ĐỒNG BỘ]:
-- Quét dữ liệu Cột L để tính Tổng Doanh Thu Hệ Thống và Chi Nhánh Cao Nhất.
-- Soạn email HTML màu Navy (#0f172a) sang trọng có Thẻ KPI + Bảng chi tiết (định dạng VNĐ) gửi đến "giamdoc@congty.com" với tiêu đề "[BÁO CÁO DOANH THU] - Cập nhật ngày " + dd/MM/yyyy.
-- Thêm hàm onOpen() tạo Menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên Sheet.
-- Thêm hàm setupDailyTrigger() đặt lịch 08:00 AM hàng ngày.
-- Hiện Browser.msgBox("Thành công!") khi chạy xong.
+[YÊU CẦU NGHIỆP VỤ 1 - CÔNG THỨC & BIỂU ĐỒ]:
+Hãy viết hàm insertFormulasAndSparkline() trong Apps Script:
+- Cột L (Tổng tuần): Tự động điền công thức tính tổng doanh thu 7 ngày (cột D đến cột J) cho tất cả dòng có dữ liệu.
+- Cột K (Xu hướng): Tự động chèn biểu đồ mini Sparkline dạng đường màu xanh dương thể hiện xu hướng tăng giảm 7 ngày.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh, chạy thử nghiệm ngay trên Google Sheets.
+```
+
+#### 📌 Module 2: Phân Tích KPI & Soạn Email Báo Cáo HTML
+```text
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[BỐI CẢNH & DỮ LIỆU]: Trang tính "DoanhThu_BT1" có dữ liệu từ dòng 4 gồm:
+- Cột A: Mã chi nhánh
+- Cột B: Tên chi nhánh
+- Cột C: Khu vực
+- Cột L: Tổng doanh thu tuần
+
+[YÊU CẦU NGHIỆP VỤ 2 - PHÂN TÍCH KPI & GỬI EMAIL]:
+Hãy viết hàm sendDailyRevenueEmail():
+1. Quét dữ liệu từ dòng 4 để tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh đạt doanh thu cao nhất tuần.
+2. Soạn email báo cáo định dạng HTML màu xanh Navy (#0f172a) sang trọng, hiển thị 2 Thẻ KPI nổi bật (Tổng doanh thu, Chi nhánh dẫn đầu) và Bảng chi tiết doanh thu các chi nhánh (định dạng tiền tệ VNĐ).
+3. Gửi email tới "giamdoc@congty.com" với tiêu đề: "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh để kết hợp vào dự án.
+```
+
+#### 📌 Module 3: Tạo Menu Nút Bấm Trên Sheet & Hẹn Giờ 08:00
+```text
+[TIÊU CHUẨN KỸ THUẬT]: Tuân thủ nghiêm ngặt tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[YÊU CẦU NGHIỆP VỤ 3 - MENU TIỆN ÍCH & TỰ ĐỘNG HÓA]:
+Hãy viết các hàm tiện ích và tự động hóa:
+1. Hàm onOpen(): Tạo menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên thanh công cụ của Sheets để bấm chạy toàn bộ quy trình.
+2. Hàm setupDailyTrigger(): Thiết lập Trigger kích hoạt tự động chạy và gửi email vào lúc 08:00 sáng mỗi ngày.
+3. Hiển thị hộp thoại thông báo "Thành công!" trên màn hình sau khi hoàn tất.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh.
+```
+
+---
+
+#### 🌟 Tùy Chọn: Master Prompt Trọn Gói 1-Click (Gộp 3 Module)
+```text
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia tự động hóa Google Sheets & Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ các nguyên tắc kỹ thuật trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[BỐI CẢNH & DỮ LIỆU]: Tôi có trang tính tên "DoanhThu_BT1". Dữ liệu bắt đầu từ dòng 4, trong đó:
+- Cột D đến cột J: Doanh thu 7 ngày trong tuần (từ Thứ 2 đến Chủ nhật) của các chi nhánh.
+- Cột K: Cột biểu đồ xu hướng (Sparkline).
+- Cột L: Cột tổng doanh thu cả tuần.
+
+[YÊU CẦU NGHIỆP VỤ]:
+1. Tự động điền công thức & vẽ biểu đồ:
+   - Cột L (Tổng tuần): Tự động tính tổng doanh thu 7 ngày (từ cột D đến cột J) cho tất cả các dòng có dữ liệu.
+   - Cột K (Xu hướng): Tự động vẽ biểu đồ mini Sparkline dạng đường màu xanh dương thể hiện xu hướng tăng giảm 7 ngày.
+
+2. Tổng hợp số liệu & Gửi email báo cáo:
+   - Tự động tính Tổng doanh thu toàn hệ thống và tìm Chi nhánh đạt doanh thu cao nhất tuần.
+   - Soạn email báo cáo định dạng HTML chuyên nghiệp với tông màu xanh Navy (#0f172a) sang trọng, hiển thị nổi bật 2 Thẻ KPI (Tổng doanh thu, Chi nhánh xuất sắc nhất) và Bảng chi tiết doanh thu các chi nhánh (định dạng tiền tệ VNĐ rõ ràng).
+   - Gửi email đến địa chỉ "giamdoc@congty.com" với tiêu đề: "[BÁO CÁO DOANH THU] - Cập nhật ngày " + ngày hiện tại.
+
+3. Tiện ích sử dụng & Hẹn giờ:
+   - Tạo menu "🚀 BÁO CÁO" > "Chạy Báo Cáo Ngay" trên thanh công cụ của Google Sheets để người dùng bấm chạy bất cứ lúc nào.
+   - Tạo hàm hẹn giờ tự động chạy và gửi email vào lúc 08:00 sáng mỗi ngày.
+   - Hiển thị hộp thoại thông báo "Thành công!" trên màn hình sau khi hoàn tất.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất 1 khối mã Google Apps Script (.gs) hoàn chỉnh, sẵn sàng sao chép vào Apps Script để sử dụng ngay mà không cần chỉnh sửa thủ công.
 ```
 
 ---
@@ -84,7 +142,7 @@ function runDailyReport() {
   
   for (var r = 4; r <= lastRow; r++) {
     // Công thức SPARKLINE chuẩn Locale Việt Nam: dùng ; và \ trong mảng thuộc tính
-    sparklineFormulas.push(['=SPARKLINE(D' + r + ':J' + r + '; {"charttype"\\\\"line"; "color"\\\\"#1a73e8"; "linewidth"\\\\2})']);
+    sparklineFormulas.push(['=SPARKLINE(D' + r + ':J' + r + '; {"charttype"\\"line"; "color"\\"#1a73e8"; "linewidth"\\2})']);
     sumFormulas.push(['=SUM(D' + r + ':J' + r + ')']);
   }
   
