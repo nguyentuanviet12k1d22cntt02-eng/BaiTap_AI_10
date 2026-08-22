@@ -10,6 +10,9 @@ COURSE_DATA.push(
     tags: ["Gemini in Sheets", "Sparkline Prompt", "Gmail Automation", "No-Code"],
     desc: "Cách viết Prompt ra lệnh cho Gemini/AI Agent tự động viết công thức Sparkline vẽ biểu đồ mini trong ô và lập lịch tự động gửi email báo cáo HTML lúc 08:00 sáng mỗi ngày.",
     csvFile: "bai_tap_1_doanh_thu_sparkline.xlsx",
+    youtubeVideoId: "2wPLhMXbRhE",
+    youtubeVideoTitle: "Video Hướng Dẫn Thực Hành Bài 1: Báo Cáo Doanh Thu & Sparkline Gửi Email",
+    videoPoster: "assets/thumbnail_bai_1_youtube.jpg",
     
     workflow: [
       { icon: "ph-chat-circle-dots", title: "1. Viết Master Prompt", desc: "Mô tả nghiệp vụ & dữ liệu cho Gemini" },

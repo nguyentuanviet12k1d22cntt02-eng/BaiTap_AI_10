@@ -26,6 +26,7 @@ const businessRequirements = document.getElementById("businessRequirements");
 const dataTableContainer = document.getElementById("dataTableContainer");
 const tableRowCount = document.getElementById("tableRowCount");
 const stepsTimelineContainer = document.getElementById("stepsTimelineContainer");
+const videoTutorialContainer = document.getElementById("videoTutorialContainer");
 const triggerGuideContainer = document.getElementById("triggerGuideContainer");
 const checklistContainer = document.getElementById("checklistContainer");
 const btnMarkComplete = document.getElementById("btnMarkComplete");
@@ -173,6 +174,44 @@ function switchExercise(id) {
   tableHtml += `</tbody></table>`;
   dataTableContainer.innerHTML = tableHtml;
   tableRowCount.textContent = `Xem trước ${ex.tableRows.length} dòng dữ liệu mẫu`;
+
+  // Render Video Tutorial (Lite YouTube Player with High-Res Thumbnail)
+  if (videoTutorialContainer) {
+    if (ex.youtubeVideoId) {
+      const customPoster = ex.videoPoster || 'assets/thumbnail_bai_1_youtube.jpg';
+      
+      videoTutorialContainer.innerHTML = `
+        <div class="video-tutorial-card">
+          <div class="video-card-header">
+            <div class="video-card-title">
+              <i class="ph-fill ph-youtube-logo" style="color: #ef4444; font-size: 24px;"></i>
+              <div>
+                <h4>${ex.youtubeVideoTitle || 'Video Hướng Dẫn Thực Hành Trực Quan'}</h4>
+                <span>Xem từng bước hướng dẫn chi tiết (1080p HD)</span>
+              </div>
+            </div>
+            <a href="https://www.youtube.com/watch?v=${ex.youtubeVideoId}" target="_blank" class="btn-watch-youtube" title="Mở xem trên YouTube">
+              <i class="ph-bold ph-arrow-square-out"></i> Mở Trên YouTube
+            </a>
+          </div>
+          <div class="video-poster-wrapper" id="videoPosterWrapper" onclick="playYouTubeVideo('${ex.youtubeVideoId}')" title="Bấm để phát video hướng dẫn">
+            <img src="${customPoster}" alt="${ex.youtubeVideoTitle || 'Video hướng dẫn'}" class="video-poster-img" onerror="this.src='https://img.youtube.com/vi/${ex.youtubeVideoId}/hqdefault.jpg'">
+            <div class="video-play-overlay">
+              <div class="custom-play-btn">
+                <svg viewBox="0 0 68 48" class="yt-play-svg">
+                  <path class="yt-play-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#ff0000"></path>
+                  <path d="M 45,24 27,14 27,34" fill="#ffffff"></path>
+                </svg>
+              </div>
+              <span class="video-play-hint">Nhấp để phát video HD</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      videoTutorialContainer.innerHTML = "";
+    }
+  }
 
   // Render Tab 3: Steps Timeline
   stepsTimelineContainer.innerHTML = ex.steps.map(step => `
@@ -374,6 +413,24 @@ btnDownloadAllExcel.addEventListener("click", () => {
 mobileMenuBtn.addEventListener("click", () => {
   sidebar.classList.toggle("open");
 });
+
+// Play YouTube Video Lite Handler
+window.playYouTubeVideo = function(videoId) {
+  const wrapper = document.getElementById("videoPosterWrapper");
+  if (!wrapper) return;
+  
+  wrapper.className = "video-embed-wrapper";
+  wrapper.onclick = null;
+  wrapper.innerHTML = `
+    <iframe 
+      src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" 
+      title="Video hướng dẫn thực hành" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+      allowfullscreen>
+    </iframe>
+  `;
+};
 
 // Initialize on Load
 document.addEventListener("DOMContentLoaded", () => {
