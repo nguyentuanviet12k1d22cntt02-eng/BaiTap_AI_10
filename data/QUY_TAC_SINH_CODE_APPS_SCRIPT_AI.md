@@ -133,9 +133,20 @@
 
 ---
 
-### 10. Định dạng Code đầu ra (Output Standard)
+### 11. Kiến Trúc Phản Ứng Dữ Liệu Tự Động Thời Gian Thực (Universal Real-Time Reactive Pipeline)
+* **Nguyên tắc Chuỗi Nạp Tự Động (Pipeline Chaining):** 
+  - Dữ liệu đi theo 1 chiều khép kín: `Quét Gmail` ➔ *Tự động nạp vào* ➔ `Mail_Log` ➔ *Tự động chuyển tiếp dòng mới sang* ➔ `Giao_Dich` ➔ *Tự động làm mới* ➔ `Calc_Data & Dashboard`.
+  - Mọi hàm ghi dữ liệu backend (nạp mail, nhập form) **BẮT BUỘC** gọi hàm làm mới Dashboard ở bước cuối cùng trước khi kết thúc.
+* **Nguyên tắc Lắng Nghe Sự Kiện Người Dùng (`onEdit` Reactive Listener):**
+  - Luôn tích hợp hàm `onEdit(e)` an toàn để khi người dùng gõ phím, sửa dữ liệu hoặc dán thêm dòng mới trực tiếp vào Sheet nguồn (`Giao_Dich` hoặc `Mail_Log`), hệ thống tự động nhận biết và kích hoạt làm mới Dashboard & các biểu đồ liên quan ngay lập tức.
+* **Nguyên tắc Công Thức Dải Ô Mở (Open Range Formula):**
+  - Mọi công thức tổng hợp (`SUMIFS`, `COUNTIFS`, `AVERAGEIFS`, `FILTER`) trong bảng tính phụ `Calc_Data` hoặc ô báo cáo **BẮT BUỘC** sử dụng dải ô mở đến vô tận (ví dụ: `Giao_Dich!J3:J`, `Giao_Dich!C3:C`, tuyệt đối KHÔNG viết cứng `J3:J50`) để khi dữ liệu tăng lên hàng nghìn dòng, Google Sheets tự động cộng dồn số liệu tức thì 100%.
+
+---
+
+### 12. Định dạng Code đầu ra (Output Standard)
 * AI chỉ xuất **1 khối mã code duy nhất** (Single Code Block).
-* Có chú thích rõ ràng bằng tiếng Việt ở từng phần (Khởi tạo Menu, Đọc dữ liệu, Xử lý logic, Ghi kết quả / Gửi mail).
+* Có chú thích rõ ràng bằng tiếng Việt ở từng phần (Khởi tạo Menu, Đọc dữ liệu, Xử lý logic, Ghi kết quả / Gửi mail, Lắng nghe sự kiện onEdit).
 * Không cắt xén code dạng `// ... thêm code của bạn vào đây ...`, toàn bộ code phải hoàn chỉnh copy là chạy được ngay.
 
 ---
@@ -146,13 +157,15 @@
 
 ```text
 [QUY TẮC KỸ THUẬT APPS SCRIPT BẮT BUỘC]:
-1. CHỈ DÙNG API GOOGLE APPS SCRIPT: Tuyệt đối không dùng cú pháp của Excel (như setFormulasLocal, WorksheetFunction).
-2. CHUẨN LOCALE VIỆT NAM: Nếu có dùng công thức trên Sheet (như SPARKLINE, IF, SUMIFS), bắt buộc dùng dấu chấm phẩy (;) phân cách tham số, dấu gạch chéo ngược (\) cho mảng và escape thành (\\) trong chuỗi code JavaScript.
+1. CHỈ DÙNG API GOOGLE APPS SCRIPT CHUẨN: Tuyệt đối không dùng cú pháp ảo/Excel. Muốn ẩn/hiện lưới bắt buộc dùng sheet.setHiddenGridlines(true/false).
+2. CHUẨN LOCALE VIỆT NAM: Nếu dùng công thức trên Sheet (như SPARKLINE, IF, SUMIFS), bắt buộc dùng dấu chấm phẩy (;) phân cách tham số, dấu gạch chéo ngược (\) cho mảng và escape thành (\\) trong chuỗi code JavaScript.
 3. TỐI ƯU HIỆU NĂNG (BATCH OPERATIONS): Không gọi getValue()/setValue() trong vòng lặp for. Đọc toàn bộ dữ liệu 1 lần bằng getValues(), xử lý trong mảng RAM và ghi 1 lần bằng setValues().
-4. AN TOÀN RANH GIỚI: Luôn kiểm tra lastRow có dữ liệu trước khi gọi getRange() để tránh lỗi phạm vi rỗng.
-5. TRIGGER AN TOÀN: Khi tạo Trigger hẹn giờ, luôn xóa các trigger cũ của hàm trước khi tạo trigger mới.
-6. XỬ LÝ LỖI UI: Bọc các lệnh Browser.msgBox/alert trong try...catch để code chạy an toàn khi kích hoạt ngầm qua Trigger.
-7. XUẤT CODE HOÀN CHỈNH: Chỉ xuất 1 khối mã code duy nhất, đầy đủ từ đầu đến cuối, có comment tiếng Việt rõ ràng, sẵn sàng copy dùng ngay.
+4. DẢI Ô MỞ LINH HOẠT: Công thức SUMIFS/COUNTIFS phải dùng dải ô mở (như J3:J, C3:C) để tự động co giãn theo dữ liệu mới.
+5. PHẢN ỨNG THỜI GIAN THỰC (REACTIVE): Tích hợp hàm onEdit(e) và cơ chế tự động gọi làm mới Dashboard mỗi khi có dòng mới được thêm vào từ Form, Email hoặc gõ trực tiếp.
+6. AN TOÀN RANH GIỚI: Luôn kiểm tra lastRow có dữ liệu trước khi gọi getRange() để tránh lỗi phạm vi rỗng.
+7. TRIGGER AN TOÀN: Khi tạo Trigger hẹn giờ, luôn xóa các trigger cũ của hàm trước khi tạo trigger mới.
+8. XỬ LÝ LỖI UI: Bọc các lệnh Browser.msgBox/alert trong try...catch để code chạy an toàn khi kích hoạt ngầm qua Trigger.
+9. XUẤT CODE HOÀN CHỈNH: Chỉ xuất 1 khối mã code duy nhất, đầy đủ từ đầu đến cuối, có comment tiếng Việt rõ ràng, sẵn sàng copy dùng ngay.
 ```
 
 ---
