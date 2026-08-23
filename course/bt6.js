@@ -734,38 +734,44 @@ Hãy viết mã cho file độc lập "6_BackendService.gs" xử lý việc lưu
       },
       {
         badge: "07",
-        title: "Bước 7: Tạo File 7_DocThuEmail_Bank.gs (Đọc Thử Email Ra Bảng Mail_Log)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>7_DocThuEmail_Bank.gs</code> ➔ Dán mã quét thử email ngân hàng ra tab Mail_Log.",
+        title: "Bước 7: Tạo File test.gs (Quét Dữ Liệu Email Thô Ra Bảng Test_Email_Raw)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>test.gs</code> (hoặc <code>7_DocThoEmail_Raw.gs</code>) ➔ Dán mã quét và đổ toàn bộ nội dung email thô ra sheet Test_Email_Raw để quan sát cấu trúc.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
-Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để quét thử email ngân hàng và xuất kết quả ra bảng kiểm tra:
+[YÊU CẦU NGHIỆP VỤ - FILE test.gs / 7_DocThoEmail_Raw.gs]:
+Hãy viết mã cho file độc lập "test.gs" để quét các email ngân hàng trong Gmail và đổ toàn bộ nội dung thư thô ra bảng tính:
 
-1. Tìm các email có tiêu đề chứa "Biên lai chuyển tiền" trong Gmail.
-2. Bóc tách các trường thông tin: Ngày giao dịch, Tháng/Năm, Mã số lệnh, Loại (Thu/Chi), Người liên quan, Kênh thanh toán, Số tiền và Nội dung.
-3. Tạo trang tính tên "Mail_Log" và xuất toàn bộ danh sách email đọc được vào bảng này để người dùng xem trước và kiểm tra.
+1. Tìm kiếm trong Gmail các email có tiêu đề chứa "Biên lai chuyển tiền" hoặc "BIDV".
+2. Tạo một trang tính tên là "Test_Email_Raw" gồm 6 cột: ['STT', 'Ngày Giờ Nhận', 'Tiêu Đề Email', 'Người Gửi (From)', 'Nội Dung Email Thô (Plain Body)', 'Message ID'].
+3. Ghi toàn bộ nội dung nguyên bản (Plain Text) của email xuống trang tính để người dùng và AI cùng mở ra quan sát chính xác từng dòng nhãn và số liệu thực tế trước khi viết hàm bóc tách.
+4. Tối ưu hiệu năng: Sử dụng Batch Operations (getValues / setValues) và bật chế độ Wrap text (tự động xuống dòng) cho cột nội dung.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã hoàn chỉnh cho file "7_DocThuEmail_Bank.gs", có thông báo số lượng email đã đọc thành công.`
+- Xuất khối mã hoàn chỉnh cho file "test.gs", có hộp thoại popup thông báo số lượng email thô đã quét được.`
       },
       {
         badge: "08",
-        title: "Bước 8: Tinh Chỉnh Làm Sạch Số Liệu & Chống Nạp Trùng Email",
-        desc: "Thao tác: Gửi câu lệnh phản hồi bên dưới cho AI để cập nhật lại file <code>7_DocThuEmail_Bank.gs</code> với bộ lọc làm sạch rác và chống trùng.",
-        promptBox: `[YÊU CẦU TINH CHỈNH VÀ LÀM SẠCH DỮ LIỆU EMAIL]:
-Dựa vào kết quả đọc thử email ở Bước 7, hãy tối ưu hóa lại file "7_DocThuEmail_Bank.gs" với các yêu cầu thực tế sau:
+        title: "Bước 8: Tạo File 7_DocThuEmail_Bank.gs (Bóc Tách Dữ Liệu Email BIDV Ra Bảng Mail_Log)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>7_DocThuEmail_Bank.gs</code> ➔ Dán mã bóc tách đa dòng từ cấu trúc thực tế ra tab Mail_Log.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-1. Làm sạch ký tự rác:
-   - Tên người gửi/nhận: Cắt bỏ các chữ tiếng Anh thừa ("Remitter's name...", "Tài khoản..."), chỉ giữ lại tên người hoặc công ty.
-   - Số tiền: Chuẩn hóa thành số nguyên sạch (ví dụ: 15000000) để cộng trừ tính toán.
-   - Nội dung: Cắt bỏ các câu cảm ơn hoặc lời chào cuối thư.
-2. Tự động phân loại:
-   - Nhận tiền -> Loại "Thu", trạng thái "Đã thu".
-   - Chuyển đi -> Loại "Chi", trạng thái "Đã chi".
-   - Tự động nhận diện Nhóm chi tiêu theo từ khóa: Ăn uống (ăn, cafe, tiec), Nhà ở (tiền điện, nước, nhà), Mua sắm (quần áo, siêu thị), Đi lại (xăng, grab, xe).
-3. Cơ chế chống trùng lặp: Trước khi thêm dòng, kiểm tra xem Mã số lệnh giao dịch đã có trong bảng chưa. Nếu đã có rồi thì bỏ qua ngay để không bao giờ bị ghi đúp tiền.
+[YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
+Dựa vào cấu trúc nội dung email ngân hàng thực tế đã quan sát được từ trang tính "Test_Email_Raw" ở Bước 7:
 
-Hãy xuất lại toàn bộ đoạn mã file "7_DocThuEmail_Bank.gs" đã được tinh chỉnh hoàn hảo.`
+Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách chính xác từng trường thông tin và xuất ra bảng "Mail_Log":
+1. Bóc tách an toàn (Safe Regex Engine) xử lý cấu trúc đa dòng (Multi-line table):
+   - Ngày giao dịch và Tháng/Năm (từ dòng "Ngày, giờ giao dịch")
+   - Mã số lệnh giao dịch (từ dòng "Số lệnh giao dịch")
+   - Phân loại Thu/Chi: Đọc trực tiếp từ ô "Loại giao dịch" (Thu/Nhận tiền -> "Thu", Chuyển tiền -> "Chi")
+   - Số tiền giao dịch: Bóc tách số tiền sạch (ví dụ: 320,000 VND -> 320000)
+   - Người liên quan: Nếu Thu -> lấy "Người chuyển tiền", Nếu Chi -> lấy "Người nhận tiền"
+   - Kênh thanh toán: Lấy từ dòng "Kênh thanh toán"
+   - Nội dung chuyển tiền: Lấy từ dòng "Nội dung chuyển tiền"
+2. Tạo trang tính "Mail_Log" gồm 10 cột: ['STT', 'Ngày GD', 'Tháng/Năm', 'Mã GD', 'Loại GD', 'Số Tiền', 'Người Liên Quan', 'Kênh Thanh Toán', 'Nội Dung', 'Trạng Thái Nạp'].
+3. Khởi tạo cột "Trạng Thái Nạp" mặc định là "Chưa nạp".
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã hoàn chỉnh cho file "7_DocThuEmail_Bank.gs", sẵn sàng kết nối sang bước nạp sổ quỹ.`
       },
       {
         badge: "09",
@@ -776,7 +782,7 @@ Hãy xuất lại toàn bộ đoạn mã file "7_DocThuEmail_Bank.gs" đã đư�
 [YÊU CẦU NGHIỆP VỤ - FILE 8_NapGiaoDich_Bank.gs]:
 Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
 
-1. Cơ chế tự động đồng bộ khép kín: Lấy các dòng giao dịch mới trong bảng "Mail_Log" nạp sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác.
+1. Cơ chế tự động đồng bộ khép kín: Lấy các dòng có trạng thái "Chưa nạp" trong bảng "Mail_Log" chuyển sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác (A đến L).
 2. Kiểm tra cột Ghi chú trên bảng Giao_Dich để đảm bảo không nạp trùng các mã giao dịch đã có.
 3. Đánh dấu trạng thái trên Mail_Log là "Đã nạp vào Giao_Dich" và đánh dấu email trên Gmail là đã đọc.
 4. Tự động kích hoạt làm mới 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.

@@ -210,53 +210,53 @@ Hãy viết mã Apps Script xử lý việc ghi nhận một khoản thu hoặc 
 
 ---
 
-### 🔍 BƯỚC 7: ĐỌC THỬ EMAIL NGÂN HÀNG RA BẢNG MAIL_LOG ĐỂ KIỂM TRA
+### 🔍 BƯỚC 7: QUÉT DỮ LIỆU EMAIL THÔ RA BẢNG TEST_EMAIL_RAW ĐỂ QUAN SÁT CẤU TRÚC
 
-* **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `7_DocThuEmail_Bank.gs`.
+* **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `test.gs` (hoặc `7_DocThoEmail_Raw.gs`).
 * **Câu Prompt Bước 7:**
 
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - ĐỌC THỬ EMAIL BIÊN LAI NGÂN HÀNG]:
-Hãy viết mã Apps Script quét email ngân hàng và xuất kết quả đọc được ra bảng kiểm tra:
+[YÊU CẦU NGHIỆP VỤ - FILE test.gs / 7_DocThoEmail_Raw.gs]:
+Hãy viết mã cho file độc lập "test.gs" để quét các email ngân hàng trong Gmail và đổ toàn bộ nội dung thư thô ra bảng tính:
 
-1. Tìm kiếm các email có tiêu đề chứa "Biên lai chuyển tiền" trong Gmail.
-2. Tự động bóc tách các thông tin:
-   - Ngày giao dịch và Tháng/Năm
-   - Mã số lệnh giao dịch
-   - Loại giao dịch: Nhận tiền (Thu) hoặc Chuyển đi (Chi)
-   - Người chuyển / Người nhận tiền
-   - Kênh thanh toán / Ngân hàng
-   - Số tiền và Nội dung chuyển tiền
-3. Tạo trang tính tên là "Mail_Log" và xuất toàn bộ các dòng email đọc được vào bảng này để người dùng xem trước và kiểm chứng.
+1. Tìm kiếm trong Gmail các email có tiêu đề chứa "Biên lai chuyển tiền" hoặc "BIDV".
+2. Tạo một trang tính tên là "Test_Email_Raw" gồm 6 cột: ['STT', 'Ngày Giờ Nhận', 'Tiêu Đề Email', 'Người Gửi (From)', 'Nội Dung Email Thô (Plain Body)', 'Message ID'].
+3. Ghi toàn bộ nội dung nguyên bản (Plain Text) của email xuống trang tính để người dùng và AI cùng mở ra quan sát chính xác từng dòng nhãn và số liệu thực tế trước khi viết hàm bóc tách.
+4. Tối ưu hiệu năng: Sử dụng Batch Operations (getValues / setValues) và bật chế độ Wrap text (tự động xuống dòng) cho cột nội dung.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, có hộp thoại thông báo số lượng email đã đọc thành công.
+- Xuất khối mã hoàn chỉnh cho file "test.gs", có hộp thoại popup thông báo số lượng email thô đã quét được.
 ```
 
 ---
 
-### 🧹 BƯỚC 8: TINH CHỈNH LÀM SẠCH SỐ LIỆU & CHỐNG NẠP TRÙNG EMAIL
+### 📊 BƯỚC 8: BÓC TÁCH DỮ LIỆU EMAIL BIDV RA BẢNG MAIL_LOG
 
-* **Thao tác:** Gửi prompt phản hồi tinh chỉnh trực tiếp cho AI.
+* **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `7_DocThuEmail_Bank.gs`.
 * **Câu Prompt Bước 8:**
 
 ```text
-[YÊU CẦU TINH CHỈNH VÀ LÀM SẠCH DỮ LIỆU EMAIL]:
-Dựa vào kết quả đọc thử email ở Bước 7, hãy tối ưu hóa lại đoạn mã với các yêu cầu thực tế sau:
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-1. Làm sạch ký tự rác:
-   - Tên người gửi/nhận: Cắt bỏ các chữ tiếng Anh thừa ("Remitter's name...", "Tài khoản..."), chỉ giữ lại tên người hoặc công ty.
-   - Số tiền: Chuẩn hóa thành số nguyên sạch (ví dụ: 15000000) để cộng trừ tính toán.
-   - Nội dung: Cắt bỏ các câu cảm ơn hoặc lời chào cuối thư.
-2. Tự động phân loại:
-   - Nhận tiền -> Loại "Thu", trạng thái "Đã thu".
-   - Chuyển đi -> Loại "Chi", trạng thái "Đã chi".
-   - Tự động nhận diện Nhóm chi tiêu theo từ khóa: Ăn uống (ăn, cafe, tiec), Nhà ở (tiền điện, nước, nhà), Mua sắm (quần áo, siêu thị), Đi lại (xăng, grab, xe).
-3. Cơ chế chống trùng lặp: Trước khi thêm dòng, kiểm tra xem Mã số lệnh giao dịch đã có trong bảng chưa. Nếu đã có rồi thì bỏ qua ngay để không bao giờ bị ghi đúp tiền.
+[YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
+Dựa vào cấu trúc nội dung email ngân hàng thực tế đã quan sát được từ trang tính "Test_Email_Raw" ở Bước 7:
 
-Hãy xuất lại toàn bộ đoạn mã đã được tinh chỉnh hoàn hảo.
+Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách chính xác từng trường thông tin và xuất ra bảng "Mail_Log":
+1. Bóc tách an toàn (Safe Regex Engine) xử lý cấu trúc đa dòng (Multi-line table):
+   - Ngày giao dịch và Tháng/Năm (từ dòng "Ngày, giờ giao dịch")
+   - Mã số lệnh giao dịch (từ dòng "Số lệnh giao dịch")
+   - Phân loại Thu/Chi: Đọc trực tiếp từ ô "Loại giao dịch" (Thu/Nhận tiền -> "Thu", Chuyển tiền -> "Chi")
+   - Số tiền giao dịch: Bóc tách số tiền sạch (ví dụ: 320,000 VND -> 320000)
+   - Người liên quan: Nếu Thu -> lấy "Người chuyển tiền", Nếu Chi -> lấy "Người nhận tiền"
+   - Kênh thanh toán: Lấy từ dòng "Kênh thanh toán"
+   - Nội dung chuyển tiền: Lấy từ dòng "Nội dung chuyển tiền"
+2. Tạo trang tính "Mail_Log" gồm 10 cột: ['STT', 'Ngày GD', 'Tháng/Năm', 'Mã GD', 'Loại GD', 'Số Tiền', 'Người Liên Quan', 'Kênh Thanh Toán', 'Nội Dung', 'Trạng Thái Nạp'].
+3. Khởi tạo cột "Trạng Thái Nạp" mặc định là "Chưa nạp".
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã hoàn chỉnh cho file "7_DocThuEmail_Bank.gs", sẵn sàng kết nối sang bước nạp sổ quỹ.
 ```
 
 ---
