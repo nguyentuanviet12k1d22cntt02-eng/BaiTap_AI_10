@@ -46,9 +46,12 @@
 
 ---
 
-### 3. Tuyệt đối chỉ dùng API Google Apps Script (Không dùng VBA/Excel)
-* **CẤM** các hàm không tồn tại trong GAS như: `setFormulasLocal()`, `Range.Select()`, `ActiveSheet`, `WorksheetFunction...`.
-* **DÙNG CHUẨN:** `setFormulas()`, `getValues()`, `setValues()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
+### 3. Tuyệt đối chỉ dùng API Google Apps Script Chuẩn (CẤM hàm ảo/VBA)
+* **CẤM** các hàm không tồn tại hoặc do AI bịa đặt:
+  - ❌ `sheet.setGridlines(false)` hoặc `sheet.showGridlines(false)` ➔ BẮT BUỘC DÙNG: `sheet.setHiddenGridlines(true)` (để ẩn lưới) hoặc `sheet.setHiddenGridlines(false)` (để hiện lưới).
+  - ❌ `sheet.moveSheet(1)` hoặc `sheet.setIndex(1)` ➔ BẮT BUỘC DÙNG: `ss.setActiveSheet(sheet); ss.moveActiveSheet(1);`.
+  - ❌ `setFormulasLocal()`, `Range.Select()`, `ActiveSheet`, `WorksheetFunction...`.
+* **DÙNG CHUẨN:** `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
 
 ---
 
