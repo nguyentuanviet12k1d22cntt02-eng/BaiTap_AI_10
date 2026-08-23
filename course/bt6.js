@@ -602,26 +602,26 @@ function huyTriggerQuetGmail() {
     steps: [
       {
         badge: "00",
-        title: "Bước 0: AI Tự Đọc & Nắm Rõ Cấu Trúc Sheet Giao_Dich",
-        desc: "Gửi link Google Sheets để AI tự động quét cấu trúc 12 cột dữ liệu trang Giao_Dich trước khi bắt đầu lập trình.",
-        promptBox: `Link Google Sheets: [Dán đường link bảng tính của bạn vào đây]
+        title: "Bước 0: AI Trinh Sát & Kiểm Kê Cấu Trúc Sheet Giao_Dich",
+        desc: "Gửi link Google Sheets để AI tự động kiểm kê 12 cột dữ liệu và phạm vi bảng tính trước khi bắt đầu viết code.",
+        promptBox: `[YÊU CẦU TRINH SÁT BẢNG TÍNH]:
+Hãy truy cập vào file Google Sheets này: [Dán đường link bảng tính của bạn vào đây]
 
-Tôi đang có một file bảng tính quản lý giao dịch thu chi "Giao_Dich" ở đường link trên.
-Nhiệm vụ của bạn ở bước này:
-1. Hãy truy cập vào link bảng tính và đọc kỹ trang tính "Giao_Dich".
-2. Nắm rõ: tên các cột dữ liệu (từ Cột A đến Cột L), dòng tiêu đề (Dòng 2), dòng bắt đầu có dữ liệu thực tế (Dòng 3) và các loại giao dịch (Thu / Chi).
-3. Tóm tắt ngắn gọn lại những gì bạn đã đọc được để tôi biết bạn đã hiểu đúng cấu trúc dữ liệu.
+Tôi đang có trang tính "Giao_Dich" quản lý thu chi. Bạn hãy kiểm kê tổng quát:
+1. Liệt kê tên và ý nghĩa 12 cột dữ liệu (từ cột A đến cột L).
+2. Xác định dòng tiêu đề và dòng bắt đầu có dữ liệu thực tế.
+3. Tóm tắt ngắn gọn cấu trúc để xác nhận bạn đã hiểu đúng bảng tính.
 
 ⚠️ Lưu ý: Chưa viết bất kỳ dòng code nào ở bước này.`
       },
       {
         badge: "01",
-        title: "Bước 1: Tạo Menu Quản Lý Thu Chi Trên Google Sheets",
-        desc: "Yêu cầu AI viết mã tạo thanh Menu tiện ích khi mở trang tính để dễ dàng thao tác các tính năng quản lý sổ quỹ.",
+        title: "Bước 1: Tạo File 1_Menu_ThuChi.gs (Menu Điều Khiển Trung Tâm)",
+        desc: "Thao tác: Mở Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>1_Menu_ThuChi.gs</code> ➔ Dán mã AI sinh ra vào.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - TẠO MENU QUẢN LÝ THU CHI]:
-Dựa vào bảng tính thu chi đã phân tích ở trên, hãy viết hàm onOpen() để tự động tạo một Menu tên là "Quản Lý Thu Chi" trên thanh công cụ Google Sheets với các mục sau:
+[YÊU CẦU NGHIỆP VỤ - FILE 1_Menu_ThuChi.gs]:
+Dựa vào bảng tính thu chi đã phân tích ở Bước 0, hãy viết mã cho file độc lập "1_Menu_ThuChi.gs" chứa hàm onOpen() để tạo Menu "Quản Lý Thu Chi" trên thanh công cụ Google Sheets:
 
 1. Dashboard Sổ Quỹ
 2. Đọc Thử Email Ra Bảng Mail_Log (kiểm tra trước khi nạp)
@@ -632,133 +632,127 @@ Dựa vào bảng tính thu chi đã phân tích ở trên, hãy viết hàm onO
 7. Hướng Dẫn Sử Dụng
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, có bọc khối kiểm tra an toàn (nếu chức năng nào đang trong quá trình thiết lập thì hiện thông báo nhắc nhở, không để báo lỗi đỏ).`
+- Xuất khối mã hoàn chỉnh cho file "1_Menu_ThuChi.gs", có bọc kiểm tra an toàn nếu các hàm ở bước sau chưa được tạo.`
       },
       {
         badge: "02",
-        title: "Bước 2: Tạo Trang Dashboard & 4 Thẻ Tổng Quan Thu Chi",
-        desc: "Khởi tạo trang Dashboard Sổ Quỹ ở đầu bảng tính, tạo banner tiêu đề và 4 thẻ tổng quan tài chính (Tổng Thu, Tổng Chi, Số Dư Quỹ, Tỷ Lệ Chi/Thu).",
+        title: "Bước 2: Tạo File 2_Dashboard_KPI.gs (Trang Dashboard & 4 Thẻ Tổng Quan)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>2_Dashboard_KPI.gs</code> ➔ Dán mã tạo trang Dashboard và 4 thẻ tổng quan.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - THIẾT LẬP DASHBOARD SỔ QUỸ]:
-Hãy viết mã Google Apps Script để xây dựng giao diện Dashboard sổ quỹ dòng tiền:
+[YÊU CẦU NGHIỆP VỤ - FILE 2_Dashboard_KPI.gs]:
+Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" để xây dựng giao diện Dashboard:
 
-1. Khởi tạo trang tính tên là "Dashboard Sổ Quỹ" nằm ở vị trí đầu tiên (nếu đã có trang này thì làm sạch nội dung cũ để tạo mới).
-2. Thiết kế Banner tiêu đề:
-   - Dòng 1: Tiêu đề nổi bật "SỔ QUỸ THU CHI & QUẢN TRỊ DÒNG TIỀN 2026" (nền xanh navy đậm #0f4c81, chữ trắng in đậm).
-   - Dòng 3: Hiển thị ngày giờ cập nhật dữ liệu tự động.
-3. Thiết kế 4 ô thông tin tổng quan (từ Hàng 5 đến Hàng 7):
-   - Tổng Thu: Tính tổng cột "Tổng Sau Thuế" của các khoản "Thu" từ bảng Giao_Dich (định dạng tiền tệ VNĐ).
-   - Tổng Chi: Tính tổng cột "Tổng Sau Thuế" của các khoản "Chi" từ bảng Giao_Dich (định dạng tiền tệ VNĐ).
-   - Số Dư Quỹ Thực Tế: Lấy Tổng Thu trừ Tổng Chi (định dạng tiền tệ VNĐ).
-   - Tỷ Lệ Chi / Thu: Tính tỷ lệ % giữa Tổng Chi trên Tổng Thu (định dạng 0.0%).
+1. Tạo trang tính mới tên "Dashboard Sổ Quỹ" nằm ở vị trí đầu tiên (nếu đã có thì làm sạch nội dung cũ để làm mới).
+2. Banner tiêu đề:
+   - Dòng 1: "SỔ QUỸ THU CHI & QUẢN TRỊ DÒNG TIỀN 2026" (nền xanh navy #0f4c81, chữ trắng in đậm).
+   - Dòng 3: Hiển thị ngày giờ cập nhật tự động.
+3. 4 thẻ tổng quan tài chính (Hàng 5 đến Hàng 7):
+   - Tổng Thu: Tính tổng cột "Tổng Sau Thuế" của các khoản Thu từ bảng Giao_Dich (định dạng VNĐ).
+   - Tổng Chi: Tính tổng cột "Tổng Sau Thuế" của các khoản Chi từ bảng Giao_Dich (định dạng VNĐ).
+   - Số Dư Quỹ: Lấy Tổng Thu trừ Tổng Chi (định dạng VNĐ).
+   - Tỷ Lệ Chi / Thu: Tính tỷ lệ % Tổng Chi trên Tổng Thu (định dạng 0.0%).
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, có hàm điều phối tự động kết nối các biểu đồ khi các bước sau hoàn thành.`
+- Xuất khối mã hoàn chỉnh cho file "2_Dashboard_KPI.gs", có hàm điều phối tự động kết nối biểu đồ khi các bước sau hoàn thành.`
       },
       {
         badge: "03",
-        title: "Bước 3: Tạo Bảng Phụ Gom Nhóm Số Liệu Biểu Đồ",
-        desc: "Tạo trang tính phụ Calc_Data tính toán gom nhóm chi tiêu theo Nhóm ngành hàng và theo Kênh thanh toán để làm nguồn vẽ biểu đồ.",
+        title: "Bước 3: Tạo File 3_CalcData_ThuChi.gs (Bảng Phụ Gom Nhóm Cho Biểu Đồ)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>3_CalcData_ThuChi.gs</code> ➔ Dán mã tính toán 2 bảng gom nhóm chi tiêu.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - TẠO BẢNG TÍNH PHỤ CHO BIỂU ĐỒ]:
-Hãy viết mã Apps Script tạo trang tính phụ tên là "Calc_Data" để tổng hợp số liệu nguồn vẽ biểu đồ:
+[YÊU CẦU NGHIỆP VỤ - FILE 3_CalcData_ThuChi.gs]:
+Hãy viết mã cho file độc lập "3_CalcData_ThuChi.gs" tạo trang tính phụ tên "Calc_Data" để tổng hợp dữ liệu nguồn cho biểu đồ:
 
-1. Bảng tổng hợp theo Nhóm chi tiêu (bắt đầu từ cột A, dòng 1):
+1. Bảng chi tiêu theo Nhóm ngành hàng (bắt đầu từ cột A, dòng 1):
    - Tiêu đề: "Nhóm Chi Tiêu" và "Tổng Chi Sau Thuế".
-   - Liệt kê 8 nhóm: Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác.
+   - 8 nhóm: Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác.
    - Dùng công thức tự động tính tổng tiền chi theo từng nhóm từ bảng Giao_Dich.
 
-2. Bảng tổng hợp theo Kênh thanh toán (bắt đầu từ cột D, dòng 1):
+2. Bảng chi tiêu theo Kênh thanh toán (bắt đầu từ cột D, dòng 1):
    - Tiêu đề: "Kênh Thanh Toán" và "Tổng Chi".
-   - Liệt kê 4 kênh: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng.
+   - 4 kênh: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng.
    - Dùng công thức tự động tính tổng tiền chi theo từng kênh.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, giữ bảng tính hiển thị sạch sẽ để biểu đồ đọc dữ liệu ổn định.`
+- Xuất khối mã hoàn chỉnh cho file "3_CalcData_ThuChi.gs", giữ tab Calc_Data hiển thị bình thường để biểu đồ đọc dữ liệu ổn định.`
       },
       {
         badge: "04",
-        title: "Bước 4: Tự Động Vẽ Biểu Đồ Tròn Cơ Cấu Chi Tiêu",
-        desc: "Tự động vẽ biểu đồ tròn thể hiện tỷ lệ % chi tiêu theo từng nhóm (Ăn uống, Đi lại, Nhà ở...) đặt trên trang Dashboard.",
+        title: "Bước 4: Tạo File 4_PieChart_ChiTieu.gs (Biểu Đồ Tròn Cơ Cấu Chi Tiêu)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>4_PieChart_ChiTieu.gs</code> ➔ Dán mã tự động vẽ biểu đồ tròn lên Dashboard.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - VẼ BIỂU ĐỒ TRÒN CƠ CẤU CHI TIÊU]:
-Hãy viết mã Apps Script tự động vẽ Biểu đồ tròn trên trang "Dashboard Sổ Quỹ":
+[YÊU CẦU NGHIỆP VỤ - FILE 4_PieChart_ChiTieu.gs]:
+Hãy viết mã cho file độc lập "4_PieChart_ChiTieu.gs" để tự động vẽ Biểu đồ tròn trên trang "Dashboard Sổ Quỹ":
 
-1. Nguồn dữ liệu: Lấy từ bảng Nhóm chi tiêu trên trang Calc_Data.
-2. Vị trí đặt biểu đồ: Đặt tại Hàng 9 Cột A trên trang Dashboard (kích thước vừa vặn khoảng 490px x 360px).
+1. Nguồn dữ liệu: Lấy từ bảng Nhóm chi tiêu trên trang Calc_Data (dải ô A1:B9).
+2. Vị trí đặt: Tại Hàng 9 Cột A trên Dashboard (kích thước vừa vặn khoảng 490px x 360px).
 3. Định dạng biểu đồ:
-   - Tiêu đề biểu đồ: "CƠ CẤU CHI TIÊU THEO TỪNG NHÓM" (màu xanh navy sang trọng).
-   - Hiển thị rõ tỷ lệ phần trăm (%) trên từng lát cắt và có chú thích danh mục rõ ràng bên phải.
+   - Tiêu đề: "CƠ CẤU CHI TIÊU THEO TỪNG NHÓM" (màu xanh navy sang trọng).
+   - Hiển thị tỷ lệ % trên từng lát cắt và có chú thích danh mục rõ ràng bên phải.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, tự động xóa biểu đồ cũ nếu đã tồn tại trước khi vẽ mới.`
+- Xuất khối mã hoàn chỉnh cho file "4_PieChart_ChiTieu.gs", tự động xóa biểu đồ cũ nếu đã có trước khi vẽ mới.`
       },
       {
         badge: "05",
-        title: "Bước 5: Tự Động Vẽ Biểu Đồ Cột Kênh Thanh Toán",
-        desc: "Tự động vẽ biểu đồ cột so sánh mức chi tiêu giữa các kênh Tiền mặt, Chuyển khoản, Ví điện tử và Thẻ ngân hàng.",
+        title: "Bước 5: Tạo File 5_BarChart_KenhTT.gs (Biểu Đồ Cột Kênh Thanh Toán)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>5_BarChart_KenhTT.gs</code> ➔ Dán mã vẽ biểu đồ cột so sánh chi tiêu.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - VẼ BIỂU ĐỒ CỘT KÊNH THANH TOÁN]:
-Hãy viết mã Apps Script tự động vẽ Biểu đồ cột trên trang "Dashboard Sổ Quỹ":
+[YÊU CẦU NGHIỆP VỤ - FILE 5_BarChart_KenhTT.gs]:
+Hãy viết mã cho file độc lập "5_BarChart_KenhTT.gs" để tự động vẽ Biểu đồ cột trên trang "Dashboard Sổ Quỹ":
 
-1. Nguồn dữ liệu: Lấy từ bảng Kênh thanh toán trên trang Calc_Data.
-2. Vị trí đặt biểu đồ: Đặt tại Hàng 9 Cột E trên trang Dashboard (nằm song song bên phải Biểu đồ tròn, kích thước khoảng 560px x 360px).
+1. Nguồn dữ liệu: Lấy từ bảng Kênh thanh toán trên trang Calc_Data (dải ô D1:E5).
+2. Vị trí đặt: Tại Hàng 9 Cột E trên Dashboard (nằm song song bên phải Biểu đồ tròn, kích thước khoảng 560px x 360px).
 3. Định dạng biểu đồ:
    - Tiêu đề: "CHI TIÊU THEO KÊNH THANH TOÁN" (cột màu xanh dương hiện đại).
    - Trục ngang thể hiện các kênh thanh toán, trục đứng thể hiện số tiền chi.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, đảm bảo 2 biểu đồ hiển thị song song cân đối bên dưới 4 thẻ tổng quan.`
+- Xuất khối mã hoàn chỉnh cho file "5_BarChart_KenhTT.gs", đảm bảo 2 biểu đồ hiển thị song song cân đối bên dưới 4 thẻ tổng quan.`
       },
       {
         badge: "06",
-        title: "Bước 6: Viết Chức Năng Lưu Giao Dịch Mới Vào Sổ Quỹ",
-        desc: "Viết chức năng nhận thông tin giao dịch, tự động tính thuế VAT, tính tổng sau thuế và ghi vào dòng mới nhất của bảng Giao_Dich.",
+        title: "Bước 6: Tạo File 6_BackendService.gs (Chức Năng Lưu Giao Dịch Mới)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>6_BackendService.gs</code> ➔ Dán mã xử lý tính thuế VAT và lưu dòng mới.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - LƯU GIAO DỊCH MỚI]:
-Hãy viết mã Apps Script xử lý việc ghi nhận một khoản thu hoặc chi mới vào sổ quỹ:
+[YÊU CẦU NGHIỆP VỤ - FILE 6_BackendService.gs]:
+Hãy viết mã cho file độc lập "6_BackendService.gs" xử lý việc lưu một giao dịch thu chi mới vào sổ quỹ:
 
-1. Tiếp nhận các thông tin giao dịch: Ngày, Tháng/Năm, Loại (Thu/Chi), Nhóm chi tiêu, Mô tả, Người liên quan, Kênh thanh toán, Số tiền, Thuế VAT, Trạng thái và Ghi chú.
+1. Nhận thông tin giao dịch: Ngày, Tháng/Năm, Loại (Thu/Chi), Nhóm chi tiêu, Mô tả, Người liên quan, Kênh thanh toán, Số tiền, Thuế VAT, Trạng thái, Ghi chú.
 2. Tự động tính: Tổng tiền sau thuế = Số tiền * (1 + VAT).
 3. Thêm một dòng mới vào cuối bảng "Giao_Dich" với đúng thứ tự 12 cột (A đến L).
-4. Tự động cập nhật lại số liệu trên trang Dashboard ngay sau khi lưu thành công.
+4. Tự động gọi cập nhật lại số liệu trên Dashboard ngay sau khi lưu thành công.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, có phản hồi thông báo thành công sau khi ghi dữ liệu.`
+- Xuất khối mã hoàn chỉnh cho file "6_BackendService.gs", có phản hồi kết quả thành công để thông báo cho người dùng.`
       },
       {
         badge: "07",
-        title: "Bước 7: Đọc Thử Email Ngân Hàng Ra Bảng Mail_Log Để Kiểm Tra",
-        desc: "Quét email biên lai ngân hàng, tự động trích xuất các thông tin quan trọng và xuất ra bảng tạm Mail_Log để kiểm tra trước khi nạp chính thức.",
+        title: "Bước 7: Tạo File 7_DocThuEmail_Bank.gs (Đọc Thử Email Ra Bảng Mail_Log)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>7_DocThuEmail_Bank.gs</code> ➔ Dán mã quét thử email ngân hàng ra tab Mail_Log.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - ĐỌC THỬ EMAIL BIÊN LAI NGÂN HÀNG]:
-Hãy viết mã Apps Script quét email ngân hàng và xuất kết quả đọc được ra bảng kiểm tra:
+[YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
+Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để quét thử email ngân hàng và xuất kết quả ra bảng kiểm tra:
 
-1. Tìm kiếm các email có tiêu đề chứa "Biên lai chuyển tiền" trong Gmail.
-2. Tự động bóc tách các thông tin:
-   - Ngày giao dịch và Tháng/Năm
-   - Mã số lệnh giao dịch
-   - Loại giao dịch: Nhận tiền (Thu) hoặc Chuyển đi (Chi)
-   - Người chuyển / Người nhận tiền
-   - Kênh thanh toán / Ngân hàng
-   - Số tiền và Nội dung chuyển tiền
-3. Tạo trang tính tên là "Mail_Log" và xuất toàn bộ các dòng email đọc được vào bảng này để người dùng xem trước và kiểm chứng.
+1. Tìm các email có tiêu đề chứa "Biên lai chuyển tiền" trong Gmail.
+2. Bóc tách các trường thông tin: Ngày giao dịch, Tháng/Năm, Mã số lệnh, Loại (Thu/Chi), Người liên quan, Kênh thanh toán, Số tiền và Nội dung.
+3. Tạo trang tính tên "Mail_Log" và xuất toàn bộ danh sách email đọc được vào bảng này để người dùng xem trước và kiểm tra.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, có hộp thoại thông báo số lượng email đã đọc thành công.`
+- Xuất khối mã hoàn chỉnh cho file "7_DocThuEmail_Bank.gs", có thông báo số lượng email đã đọc thành công.`
       },
       {
         badge: "08",
         title: "Bước 8: Tinh Chỉnh Làm Sạch Số Liệu & Chống Nạp Trùng Email",
-        desc: "Yêu cầu AI lọc sạch các ký tự tiếng Anh thừa, chuẩn hóa số tiền thành số nguyên và kích hoạt cơ chế chống nạp trùng mã giao dịch.",
+        desc: "Thao tác: Gửi câu lệnh phản hồi bên dưới cho AI để cập nhật lại file <code>7_DocThuEmail_Bank.gs</code> với bộ lọc làm sạch rác và chống trùng.",
         promptBox: `[YÊU CẦU TINH CHỈNH VÀ LÀM SẠCH DỮ LIỆU EMAIL]:
-Dựa vào kết quả đọc thử email ở Bước 7, hãy tối ưu hóa lại đoạn mã với các yêu cầu thực tế sau:
+Dựa vào kết quả đọc thử email ở Bước 7, hãy tối ưu hóa lại file "7_DocThuEmail_Bank.gs" với các yêu cầu thực tế sau:
 
 1. Làm sạch ký tự rác:
    - Tên người gửi/nhận: Cắt bỏ các chữ tiếng Anh thừa ("Remitter's name...", "Tài khoản..."), chỉ giữ lại tên người hoặc công ty.
@@ -770,16 +764,16 @@ Dựa vào kết quả đọc thử email ở Bước 7, hãy tối ưu hóa l�
    - Tự động nhận diện Nhóm chi tiêu theo từ khóa: Ăn uống (ăn, cafe, tiec), Nhà ở (tiền điện, nước, nhà), Mua sắm (quần áo, siêu thị), Đi lại (xăng, grab, xe).
 3. Cơ chế chống trùng lặp: Trước khi thêm dòng, kiểm tra xem Mã số lệnh giao dịch đã có trong bảng chưa. Nếu đã có rồi thì bỏ qua ngay để không bao giờ bị ghi đúp tiền.
 
-Hãy xuất lại toàn bộ đoạn mã đã được tinh chỉnh hoàn hảo.`
+Hãy xuất lại toàn bộ đoạn mã file "7_DocThuEmail_Bank.gs" đã được tinh chỉnh hoàn hảo.`
       },
       {
         badge: "09",
-        title: "Bước 9: Nạp Giao Dịch Email Vào Sổ Quỹ & Cập Nhật Dashboard",
-        desc: "Tự động chuyển các dòng giao dịch mới từ bảng Mail_Log sang bảng chính Giao_Dich (chuẩn 12 cột) và tự động làm mới Dashboard.",
+        title: "Bước 9: Tạo File 8_NapGiaoDich_Bank.gs (Nạp Email Vào Sổ Quỹ & Nhảy Dashboard)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>8_NapGiaoDich_Bank.gs</code> ➔ Dán mã tự động chuyển dữ liệu từ Mail_Log sang Giao_Dich.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - NẠP CHÍNH THỨC VÀO SỔ QUỸ]:
-Hãy viết mã Apps Script để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
+[YÊU CẦU NGHIỆP VỤ - FILE 8_NapGiaoDich_Bank.gs]:
+Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
 
 1. Lấy các dòng giao dịch mới trong bảng "Mail_Log" nạp sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác.
 2. Kiểm tra cột Ghi chú trên bảng Giao_Dich để đảm bảo không nạp trùng các mã giao dịch đã có.
@@ -787,16 +781,16 @@ Hãy viết mã Apps Script để tự động nạp giao dịch từ bảng "Ma
 4. Tự động cập nhật lại 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, kèm thông báo tổng số giao dịch đã nạp thành công.`
+- Xuất khối mã hoàn chỉnh cho file "8_NapGiaoDich_Bank.gs", kèm thông báo tổng số giao dịch đã nạp thành công.`
       },
       {
         badge: "10",
-        title: "Bước 10: Bật Tự Động Quét Email Chạy Ngầm Mỗi 5 Phút",
-        desc: "Thiết lập lịch tự động chạy ngầm mỗi 5 phút một lần để hệ thống tự động quét và nạp tiền vào sổ quỹ 24/7 mà không cần mở máy.",
+        title: "Bước 10: Tạo File 9_Trigger_AutoSync.gs (Cài Đặt Tự Động Quét Email Mỗi 5 Phút)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>9_Trigger_AutoSync.gs</code> ➔ Dán mã thiết lập tự động quét email chạy ngầm 24/7.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - CÀI ĐẶT TỰ ĐỘNG CHẠY NGẦM 24/7]:
-Hãy viết mã Apps Script quản lý việc tự động chạy ngầm theo thời gian:
+[YÊU CẦU NGHIỆP VỤ - FILE 9_Trigger_AutoSync.gs]:
+Hãy viết mã cho file độc lập "9_Trigger_AutoSync.gs" để quản lý việc tự động chạy ngầm theo thời gian:
 
 1. Chức năng bật tự động:
    - Tự động kích hoạt hàm nạp giao dịch chạy ngầm định kỳ mỗi 5 phút một lần (Time-driven Trigger).
@@ -806,29 +800,29 @@ Hãy viết mã Apps Script quản lý việc tự động chạy ngầm theo th
    - Tìm và xóa bỏ toàn bộ lịch chạy ngầm khi người dùng muốn tạm dừng.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, an toàn và dễ sử dụng.`
+- Xuất khối mã hoàn chỉnh cho file "9_Trigger_AutoSync.gs", an toàn và dễ sử dụng.`
       },
       {
         badge: "11",
-        title: "Bước 11: Thiết Kế Cửa Sổ Nhập Giao Dịch Nhanh",
-        desc: "Thiết kế giao diện biểu mẫu pop-up nhập nhanh giao dịch Thu/Chi tiện lợi, tự động tính tiền thuế VAT và ghi thẳng vào sổ quỹ.",
-        promptBox: `[YÊU CẦU THIẾT KẾ - GIAO DIỆN BIỂU MẪU NHẬP NHANH]:
-Hãy thiết kế mã nguồn giao diện HTML cho cửa sổ nhập nhanh giao dịch thu chi:
+        title: "Bước 11: Tạo File GiaoDichForm.html (Giao Diện Pop-up Nhập Nhanh Giao Dịch)",
+        desc: "Thao tác: Bấm dấu (+) chọn HTML ➔ Đặt tên file là <code>GiaoDichForm.html</code> ➔ Dán mã giao diện form nhập nhanh thu chi.",
+        promptBox: `[YÊU CẦU THIẾT KẾ - TỆP GIAO DIỆN GiaoDichForm.html]:
+Hãy thiết kế mã nguồn giao diện HTML cho file "GiaoDichForm.html" để người dùng nhập nhanh giao dịch:
 
 1. Phong cách thiết kế:
    - Giao diện hiện đại, trực quan, bo góc trang nhã, phông chữ dễ đọc.
 2. Các trường nhập liệu thông minh:
-   - Ngày phát sinh (mặc định là ngày hôm nay) và Tháng/Năm.
+   - Ngày phát sinh (mặc định là hôm nay) và Tháng/Năm.
    - Loại giao dịch: Chọn "Thu" hoặc "Chi".
-   - Nhóm chi tiêu: Danh sách chọn (Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác).
+   - Nhóm chi tiêu: Danh sách chọn 8 nhóm (Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác).
    - Mô tả giao dịch và Người liên quan.
    - Kênh thanh toán: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng.
-   - Số tiền, Tùy chọn thuế VAT (0%, 8%, 10%) và Ô hiển thị Tổng sau thuế (tự động tính ngay khi nhập tiền).
+   - Số tiền, Tùy chọn thuế VAT (0%, 8%, 10%) và Ô Tổng sau thuế (tự động tính ngay khi nhập tiền).
    - Trạng thái và Ghi chú thêm.
-3. Nút "Lưu Giao Dịch": Kết nối trực tiếp với chức năng lưu dữ liệu để ghi vào bảng Giao_Dich và cập nhật lại Dashboard.
+3. Nút "Lưu Giao Dịch": Kết nối trực tiếp với file 6_BackendService.gs để ghi vào bảng Giao_Dich và cập nhật lại Dashboard.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất trọn vẹn mã HTML/CSS/JavaScript hoàn chỉnh để sử dụng trên Google Sheets.`
+- Xuất trọn vẹn mã HTML/CSS/JavaScript hoàn chỉnh cho file "GiaoDichForm.html".`
       }
     ],
     checklist: [
