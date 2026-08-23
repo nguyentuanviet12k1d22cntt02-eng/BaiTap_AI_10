@@ -48,12 +48,13 @@
 
 ### 3. Tuyệt đối chỉ dùng API Google Apps Script Chuẩn (CẤM hàm ảo/VBA)
 * **CẤM** các hàm và Enum không tồn tại hoặc do AI bịa đặt:
-  - ❌ `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined (reading 'PIE')`) ➔ BẮT BUỘC DÙNG: `Charts.ChartType.PIE`, `Charts.ChartType.COLUMN`, `Charts.ChartType.BAR`, `Charts.ChartType.LINE`. (Enum `ChartType` thuộc dịch vụ toàn cục `Charts`, KHÔNG nằm trong `SpreadsheetApp`).
+  - ❌ Dùng `setChartType()` chung chung khiến biểu đồ tròn/cột bị trắng ruột ➔ BẮT BUỘC DÙNG hàm khởi tạo chuyên dụng: `dashSheet.newChart().asPieChart()` (đối với biểu đồ tròn) hoặc `.asColumnChart()`, `.asBarChart()`, `.asLineChart()`.
   - ❌ Quên khai báo `.setNumHeaders(1)` khi vẽ biểu đồ (Lỗi biểu đồ bị trắng ruột / rỗng ruột) ➔ BẮT BUỘC DÙNG: `.setNumHeaders(1)` ngay sau `.addRange(dataRange)` khi bảng có dòng 1 là tiêu đề.
+  - ❌ `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined (reading 'PIE')`) ➔ BẮT BUỘC DÙNG: `.asPieChart()` hoặc `Charts.ChartType.PIE`.
   - ❌ `sheet.setGridlines(false)` hoặc `sheet.showGridlines(false)` ➔ BẮT BUỘC DÙNG: `sheet.setHiddenGridlines(true)` (để ẩn lưới) hoặc `sheet.setHiddenGridlines(false)` (để hiện lưới).
   - ❌ `sheet.moveSheet(1)` hoặc `sheet.setIndex(1)` ➔ BẮT BUỘC DÙNG: `ss.setActiveSheet(sheet); ss.moveActiveSheet(1);`.
   - ❌ `setFormulasLocal()`, `Range.Select()`, `ActiveSheet`, `WorksheetFunction...`.
-* **DÙNG CHUẨN:** `Charts.ChartType.PIE`, `Charts.ChartType.COLUMN`, `setNumHeaders(1)`, `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
+* **DÙNG CHUẨN:** `.asPieChart()`, `.asColumnChart()`, `setNumHeaders(1)`, `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
 
 ---
 
