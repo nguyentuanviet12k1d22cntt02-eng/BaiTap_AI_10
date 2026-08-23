@@ -400,6 +400,18 @@ if (btnDownloadRules) {
   });
 }
 
+// Download Docs/Word Template Rules
+const btnDownloadTemplateRules = document.getElementById("btnDownloadTemplateRules");
+if (btnDownloadTemplateRules) {
+  btnDownloadTemplateRules.addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = "data/QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md";
+    a.download = "QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md";
+    a.click();
+    showToast("Đang tải xuống Quy Tắc Thiết Kế Biểu Mẫu Docs/Word...");
+  });
+}
+
 // Download All Excel
 btnDownloadAllExcel.addEventListener("click", () => {
   const a = document.createElement("a");

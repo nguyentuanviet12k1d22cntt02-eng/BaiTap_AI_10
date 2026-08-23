@@ -31,131 +31,61 @@ Tôi cần bạn thực hiện kiểm kê tổng quát về cấu trúc của fi
 ```
 * **💡 Lưu ý quan trọng:** Đảm bảo file Google Sheets của bạn đã được bật chế độ chia sẻ (Share) là *"Bất kỳ ai có đường liên kết đều có thể xem"* để AI có thể đọc trực tiếp.
 
-* **🎯 Kết quả phản hồi mẫu từ SPARK để đối chiếu:**
-```text
-Có, tôi đã truy cập và kiểm kê chi tiết cấu trúc tệp Google Sheets Du_Lieu_Mau_Tong_Hop.
-
-1. Danh sách các Sheet:
-   - DoanhThu_BT1: Báo cáo doanh thu chi nhánh.
-   - DonHang_BT2: Bảng quản lý đơn hàng đa sản phẩm.
-   - BangLuong_BT3: Bảng lương nhân viên.
-   - DonNghiPhep_BT4: Đơn nghỉ phép.
-   - RawData_BT5: Dữ liệu giao dịch thô.
-
-2. Cấu trúc chi tiết sheet DonHang_BT2:
-   - Tiêu đề: Nằm tại Dòng 3 (Cột A đến L).
-   - Dữ liệu: Bắt đầu từ Dòng 4.
-   - Các cột: Mã Đơn, Ngày Đặt, Tên Khách Hàng, Số Điện Thoại, Địa Chỉ, Sản Phẩm, ĐVT, Số Lượng, Đơn Giá, Thành Tiền, Trạng Thái, Link PDF.
-```
-
 ---
 
-#### 📍 BƯỚC 2: Ra Lệnh Cho AI Tạo Biểu Mẫu Google Docs / Word Chuẩn ("Siêu Prompt")
-* **Mục đích:** Sao chép kết quả kiểm kê cấu trúc dữ liệu từ Bước 1, gửi vào Gemini hoặc ChatGPT kèm yêu cầu thiết kế để AI tự động xuất ra mẫu Word/Docs *"Phiếu xuất kho kiêm giao hàng"* chuẩn in ấn với các placeholder `{{...}}` theo đúng quy tắc chuẩn hóa.
+#### 📍 BƯỚC 2: Thiết Kế Biểu Mẫu Tự Nhiên Bằng AI (Dữ Liệu Thật)
+* **Mục đích:** Yêu cầu AI dựa trên tài liệu quy tắc thiết kế biểu mẫu để tạo mẫu *"Phiếu xuất kho kiêm giao hàng"* chuẩn in ấn A4, tự động co giãn vừa khít lề trang giấy.
 * **Câu Prompt gửi cho Gemini / ChatGPT:**
 ```text
-Dưới đây là kết quả kiểm kê cấu trúc của tệp Google Sheet bai_tap_2_don_hang:
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia soạn thảo văn bản. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md" đính kèm.
 
-1. Danh sách các Sheet (Tab):
-   - Số lượng: 1 sheet duy nhất.
-   - Tên sheet: Sheet1 (Gid: 110030286).
+[YÊU CẦU NGHIỆP VỤ]: Dựa vào thông tin đơn hàng đã phân tích ở trên, hãy thiết kế cho tôi mẫu "Phiếu xuất kho kiêm giao hàng" chuyên nghiệp trên Google Docs / Word.
 
-2. Mô tả cấu trúc của Sheet1:
-   - Dòng 1: Tiêu đề khối dữ liệu gộp ô (A1:L1): DỮ LIỆU THỰC HÀNH: DONHANG_BT2.
-   - Dòng 2: Dòng trống ngăn cách.
-   - Dòng 3: Dòng tiêu đề cột chính (chứa 12 cột từ A đến L).
-   - Dữ liệu: Bắt đầu từ dòng 4 đến dòng 20 (tổng cộng 17 dòng dữ liệu chi tiết, tương ứng với 7 đơn hàng từ DH-2026-001 đến DH-2026-007).
-   - Đặc điểm tổ chức: Các đơn hàng có nhiều sản phẩm được gộp ô (merge cells) ở các cột thông tin chung (Mã đơn, Ngày đặt, Khách hàng, SĐT, Địa chỉ, Trạng thái, Link PDF). Các cột chi tiết mặt hàng hiển thị trên từng dòng riêng lẻ.
+Yêu cầu biểu mẫu có đầy đủ:
+1. Thông tin công ty phát hành và thông tin khách hàng nhận hàng.
+2. Bảng danh mục sản phẩm (STT, Tên hàng, ĐVT, Số lượng, Đơn giá, Thành tiền) điền sẵn 2-3 dòng sản phẩm mẫu thực tế.
+3. Tổng tiền, số tiền bằng chữ và 3 chữ ký (Người lập, Người giao, Người nhận).
 
-3. Bảng tổng hợp cấu trúc các cột trong Sheet1:
-   - Cột A: Mã Đơn (Văn bản / Text - Mã định danh đơn hàng, ví dụ: DH-2026-001. Gộp ô theo đơn)
-   - Cột B: Ngày Đặt (Ngày tháng / Date - Định dạng dd/MM/yyyy, ví dụ: 10/08/2026. Gộp ô theo đơn)
-   - Cột C: Tên Khách Hàng (Văn bản - Họ tên người mua, ví dụ: Nguyễn Văn An. Gộp ô theo đơn)
-   - Cột D: Số Điện Thoại (Văn bản - SĐT người mua, ví dụ: 0988123456. Gộp ô theo đơn)
-   - Cột E: Địa Chỉ Giao Hàng (Văn bản - Địa chỉ nhận hàng, ví dụ: 12 Hoàng Hoa Thám, Ba Đình, Hà Nội. Gộp ô theo đơn)
-   - Cột F: Tên Sản Phẩm (Văn bản - Tên mặt hàng / thiết bị trong đơn, ví dụ: Laptop Dell XPS 15 9530)
-   - Cột G: ĐVT (Văn bản - Đơn vị tính của sản phẩm, ví dụ: Chiếc, Bộ, Sợi)
-   - Cột H: Số Lượng (Số nguyên / Integer, ví dụ: 1, 2)
-   - Cột I: Đơn Giá (Số / Tiền tệ, ví dụ: 32.000.000)
-   - Cột J: Thành Tiền (Số / Tiền tệ, ví dụ: 32.000.000)
-   - Cột K: Trạng Thái (Văn bản - Chờ xuất, Đã xuất. Gộp ô theo đơn)
-   - Cột L: Link File PDF (Đường dẫn liên kết URL đến file phiếu giao hàng)
-
-Dựa vào kết quả kiểm kê cấu trúc trên, hãy thiết kế cho tôi mẫu 'Phiếu xuất kho kiêm giao hàng' (file Word/Docs) đảm bảo tính thẩm mỹ, chuyên nghiệp và tối ưu cho việc in ấn.
-
-Yêu cầu chi tiết:
-
-1. Bố cục tài liệu:
-   - Đầu trang: Thông tin Đơn vị phát hành (Tên công ty, MST, Địa chỉ, Hotline, Email).
-   - Giữa trang: Tiêu đề phiếu, Thông tin chi tiết đơn hàng và khách hàng.
-   - Thân trang: Bảng danh mục hàng hóa (STT, Mã hàng/SKU, Tên sản phẩm, ĐVT, Số lượng, Đơn giá, Thành tiền).
-   - Cuối trang: Tổng cộng thanh toán, số tiền bằng chữ và khu vực chữ ký các bên liên quan dàn đều theo chiều ngang.
-
-2. Quy tắc về biến (placeholder):
-   - Mọi vị trí cần điền dữ liệu tự động phải được đặt trong cặp ngoặc nhọn {{ }}.
-   - Tên biến bên trong ngoặc phải viết liền, không dấu, dùng dấu gạch dưới _ (Ví dụ: {{Ten_San_Pham}}, {{So_Tien_Bang_Chu}}).
-   - Hãy tự động ánh xạ các trường thông tin từ bảng dữ liệu phía trên thành các biến tương ứng.
-
-3. Trình bày:
-   - Bảng danh mục hàng hóa cần có kẻ khung rõ ràng, các cột số lượng, đơn giá và thành tiền căn lề phải.
-   - Ngôn ngữ lịch sự, rõ ràng, thiết kế trang nhã tối ưu in ấn trên khổ A4.
+Hãy trình bày dưới dạng văn bản tài liệu rõ ràng, trang nhã để tôi copy vào Google Docs làm mẫu in.
 ```
-* **💡 Lưu ý:** Đảm bảo giữ nguyên các placeholder dạng `{{...}}` để Apps Script nhận diện và điền dữ liệu tự động.
-* **🎯 Kết quả đối chiếu:** Tệp mẫu `Phiếu xuất kho kiêm giao hàng` do AI tạo ra trên Google Docs / Word với bố cục chuyên nghiệp.
+* **🎯 Kết quả đối chiếu:** Mẫu biểu với dữ liệu thực tế mẫu xuất hiện trực quan trên Docs, bảng vừa khít lề trang giấy A4.
 
 ---
 
-#### 📍 BƯỚC 3: Ra Lệnh Cho AI Viết Mã Google Apps Script Tự Động Hóa Xuất PDF
-* **Mục đích:** Dán Siêu Prompt kỹ thuật 5 thành tố vào SPARK / AI Agent để sinh mã Apps Script hoàn chỉnh: tự động gom nhóm sản phẩm theo mã đơn (xử lý gộp ô), điền thông tin vào mẫu Docs, xuất PDF lưu Drive, cập nhật trạng thái "Đã xuất" và link PDF vào Sheet.
-* **Câu Prompt gửi cho SPARK:**
+#### 📍 BƯỚC 3: Chuyển Đổi Dữ Liệu Thành Biến Tự Động Hóa {{...}}
+* **Mục đích:** Sau khi đã ướm thử mẫu ưng ý trên Google Docs, gửi tiếp câu lệnh ngắn để AI tự động chuyển các thông tin cụ thể thành các biến `{{Ten_Bien}}` phục vụ cho việc tự động hóa.
+* **Câu Prompt gửi cho Gemini / ChatGPT:**
 ```text
-Bạn là một Chuyên gia Lập trình Google Apps Script và Tự động hóa Google Workspace.
+Mẫu biểu rất đẹp! Bây giờ hãy tự động chuyển đổi toàn bộ các giá trị dữ liệu cụ thể trong mẫu này thành các biến đặt trong cặp ngoặc nhọn {{...}} (ví dụ: {{Ma_Don}}, {{Ten_Khach_Hang}}, {{Ten_San_Pham}}, {{Tong_Tien}}...) để tôi dùng làm mẫu tự động hóa.
 
-DỰ ÁN: TỰ ĐỘNG XUẤT PHIẾU XUẤT KHO KIÊM GIAO HÀNG PDF ĐA SẢN PHẨM TỪ GOOGLE SHEETS
-
-Tôi đã có:
-1. Google Sheet: Trang tính tên "DonHang_BT2" chứa dữ liệu từ dòng 4 gồm 12 cột:
-   - Cột A: Mã Đơn (ví dụ: DH-2026-001 - một mã đơn có thể gồm nhiều dòng do có nhiều sản phẩm, các dòng sau có thể bị để trống do gộp ô)
-   - Cột B: Ngày Đặt (dd/MM/yyyy)
-   - Cột C: Tên Khách Hàng
-   - Cột D: Số Điện Thoại
-   - Cột E: Địa Chỉ Giao Hàng
-   - Cột F: Tên Sản Phẩm
-   - Cột G: ĐVT (Đơn vị tính)
-   - Cột H: Số Lượng
-   - Cột I: Đơn Giá (VNĐ)
-   - Cột J: Thành Tiền (VNĐ)
-   - Cột K: Trạng Thái ("Chờ xuất" hoặc "Đã xuất")
-   - Cột L: Link File PDF
-
-2. Google Docs Template: File mẫu tên "PHIẾU XUẤT KHO KIÊM GIAO HÀNG - Template" (hoặc ID file) chứa:
-   - Các biến thông tin chung: {{Mã Đơn}}, {{Ngày Đặt}}, {{Tên Khách Hàng}}, {{Số Điện Thoại}}, {{Địa Chỉ Giao Hàng}}, {{Tổng Tiền}}
-   - Một Bảng sản phẩm gồm dòng tiêu đề và dòng mẫu chứa placeholder: {{STT}}, {{Tên Sản Phẩm}}, {{ĐVT}}, {{Số Lượng}}, {{Đơn Giá}}, {{Thành Tiền}}
-
-HÃY VIẾT MÃ GOOGLE APPS SCRIPT HOÀN CHỈNH THỰC HIỆN CÁC YÊU CẦU SAU:
-
-1. THUẬT TOÁN GOM NHÓM & LỌC DỮ LIỆU:
-   - Đọc dữ liệu từ dòng 4 của sheet "DonHang_BT2".
-   - Tự động nhận diện các dòng con thuộc cùng một đơn hàng (xử lý trường hợp ô Mã Đơn, Tên KH bị trống do gộp ô bằng cách ghi nhớ mã đơn gần nhất).
-   - Chỉ xử lý các đơn hàng có Trạng Thái là "Chờ xuất". Bỏ qua các đơn "Đã xuất".
-
-2. QUY TRÌNH XUẤT TỪNG PHIẾU GIAO HÀNG:
-   Với mỗi đơn hàng cần xuất:
-   a. Tìm file Docs Template theo tên (hoặc ID cấu hình) và tạo một bản sao tạm.
-   b. Thay thế toàn bộ các biến thông tin chung ({{Mã Đơn}}, {{Tên Khách Hàng}}, {{Ngày Đặt}}...) bằng dữ liệu thật.
-   c. Tìm bảng sản phẩm trong Docs: Duyệt qua tất cả các mặt hàng thuộc đơn đó, chèn từng dòng vào bảng với STT tự tăng từ 1, Đơn Giá và Thành Tiền được định dạng tiền tệ VNĐ (ví dụ: 32.000.000). Sau đó xóa dòng placeholder mẫu.
-   d. Tính Tổng tiền của đơn và điền vào biến {{Tổng Tiền}} (có format VNĐ).
-   e. Lưu và đóng tài liệu tạm, chuyển đổi thành file PDF với tên: "PhieuXuatKho_[Mã Đơn]_[Tên Khách Hàng].pdf".
-   f. Lưu file PDF vào một thư mục trên Google Drive tên "HoaDon_PDF" (nếu chưa có thư mục thì tự động tạo mới).
-   g. Xóa file Docs tạm sau khi đã xuất PDF để tránh rác Drive.
-   h. Cập nhật ngược lại Google Sheet: Đổi cột K thành "Đã xuất" và dán link xem PDF vào cột L cho tất cả các dòng thuộc đơn hàng đó.
-
-3. GIAO DIỆN & TRẢI NGHIỆM NGƯỜI DÙNG:
-   - Hàm onOpen() tự động thêm Menu tùy chỉnh "🚀 Tự Động Hóa Kho" > "📄 Xuất Phiếu Giao Hàng PDF" lên thanh menu Google Sheets khi mở file.
-   - Hiển thị hộp thoại Toast hoặc Alert thông báo rõ số lượng đơn hàng đã xuất thành công khi chạy xong.
-   - Code viết theo chuẩn ES6 sạch sẽ, có khối try-catch bắt lỗi và chú thích tiếng Việt chi tiết từng hàm.
+Hãy xuất lại toàn bộ văn bản mẫu Google Docs đã gắn đầy đủ các thẻ biến {{...}} này nhé.
 ```
-* **💡 Bí quyết:** Siêu Prompt này giải quyết triệt để 3 bài toán khó: xử lý ô gộp Merge Cells trên Sheets, chèn bảng động nhiều dòng trong Google Docs và tự động dọn dẹp file tạm trên Drive.
+* **🎯 Kết quả đối chiếu:** Mẫu Google Docs Template hoàn chỉnh đã gắn đầy đủ placeholder `{{...}}`.
+
+---
+
+#### 📍 BƯỚC 4: Ra Lệnh Cho AI Viết Mã Google Apps Script Tự Động Hóa Xuất PDF
+* **Mục đích:** Dán câu lệnh yêu cầu viết mã vào AI (kèm file Quy Tắc Kỹ Thuật) để AI tự động tạo mã nguồn hoàn chỉnh: gom nhóm sản phẩm theo mã đơn (xử lý gộp ô), điền vào template Docs, xuất PDF lưu Drive và cập nhật link vào Sheet.
+* **Câu Prompt gửi cho AI Agent:**
+```text
+[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[BỐI CẢNH & DỮ LIỆU]: Trang tính "DonHang_BT2" có dữ liệu từ dòng 4 gồm các cột:
+- Mã đơn, Ngày đặt, Tên khách hàng, Số điện thoại, Địa chỉ giao hàng
+- Tên sản phẩm, ĐVT, Số lượng, Đơn giá, Thành tiền
+- Trạng thái, Link file PDF
+
+[YÊU CẦU NGHIỆP VỤ - XUẤT PHIẾU GIAO HÀNG PDF LƯU DRIVE]:
+Hãy viết mã Google Apps Script hoàn chỉnh:
+1. Gom nhóm các sản phẩm có cùng mã đơn và chỉ xuất các đơn có trạng thái "Chờ xuất" (xử lý trường hợp mã đơn bị gộp ô trên sheet).
+2. Điền thông tin đơn hàng và danh mục sản phẩm vào mẫu Google Docs.
+3. Xuất file PDF lưu vào thư mục Google Drive, cập nhật trạng thái đơn thành "Đã xuất" và dán link xem PDF vào bảng tính.
+4. Tạo Menu nút bấm trên Google Sheets để người dùng bấm xuất phiếu nhanh.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã Apps Script hoàn chỉnh, có khai báo phần cấu hình ID ở đầu file để dễ thay thế.
+```
+* **💡 Bí quyết:** Toàn bộ thuật toán khó (xử lý ô gộp Merge Cells, điền bảng động nhiều dòng trong Docs, dọn dẹp file tạm trên Drive) đã được giải quyết tự động nhờ File Quy Tắc Kỹ Thuật!
 
 * **🎯 Mã nguồn Apps Script sinh ra từ SPARK Agent để đối chiếu:**
 ```javascript
