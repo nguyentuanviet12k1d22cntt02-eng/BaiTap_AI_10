@@ -244,17 +244,21 @@ Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ng
 [YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
 Dựa vào nội dung các email ngân hàng đang có ở trang tính "Test_Email_Raw":
 
-Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách thông tin từ các email đó và xuất kết quả ra trang tính "Mail_Log" gồm đúng 10 cột sau:
+Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách thông tin từ các email đó và xuất kết quả ra trang tính "Mail_Log" gồm đúng các cột sau:
 1. STT
 2. Ngày GD (DD/MM/YYYY)
 3. Tháng/Năm (MM/YYYY)
 4. Mã GD (Số lệnh giao dịch)
 5. Loại GD (Thu / Chi)
-6. Số Tiền (Định dạng VNĐ)
-7. Người Liên Quan (Đối tác nhận hoặc chuyển)
-8. Kênh Thanh Toán
-9. Nội Dung Chuyển Tiền
-10. Trạng Thái Nạp (Mặc định là "Chưa nạp")
+6. Nhóm Chi Tiêu (Tự động nhận diện: Ăn uống, Đi lại, Mua sắm, Nhà ở, Khác...)
+7. Mô Tả (Nội dung chuyển tiền)
+8. Người Liên Quan (Đối tác nhận hoặc chuyển)
+9. Kênh Thanh Toán
+10. Số Tiền (Định dạng VNĐ)
+11. VAT (%) (Mặc định 0.00%)
+12. Tổng Sau Thuế (Số Tiền * (1 + VAT), định dạng VNĐ)
+13. Trạng Thái Nạp (Mặc định là "Chưa nạp")
+14. Ghi Chú
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã bóc tách thành công.
