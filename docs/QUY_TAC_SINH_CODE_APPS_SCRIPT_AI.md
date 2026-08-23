@@ -48,17 +48,30 @@
 
 ### 3. Tuyệt đối chỉ dùng API Google Apps Script Chuẩn (CẤM hàm ảo/VBA)
 * **CẤM** các hàm và Enum không tồn tại hoặc do AI bịa đặt:
-  - ❌ Dùng `setChartType()` chung chung khiến biểu đồ tròn/cột bị trắng ruột ➔ BẮT BUỘC DÙNG hàm khởi tạo chuyên dụng: `dashSheet.newChart().asPieChart()` (đối với biểu đồ tròn) hoặc `.asColumnChart()`, `.asBarChart()`, `.asLineChart()`.
-  - ❌ Quên khai báo `.setNumHeaders(1)` khi vẽ biểu đồ (Lỗi biểu đồ bị trắng ruột / rỗng ruột) ➔ BẮT BUỘC DÙNG: `.setNumHeaders(1)` ngay sau `.addRange(dataRange)` khi bảng có dòng 1 là tiêu đề.
-  - ❌ `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined (reading 'PIE')`) ➔ BẮT BUỘC DÙNG: `.asPieChart()` hoặc `Charts.ChartType.PIE`.
   - ❌ `sheet.setGridlines(false)` hoặc `sheet.showGridlines(false)` ➔ BẮT BUỘC DÙNG: `sheet.setHiddenGridlines(true)` (để ẩn lưới) hoặc `sheet.setHiddenGridlines(false)` (để hiện lưới).
   - ❌ `sheet.moveSheet(1)` hoặc `sheet.setIndex(1)` ➔ BẮT BUỘC DÙNG: `ss.setActiveSheet(sheet); ss.moveActiveSheet(1);`.
   - ❌ `setFormulasLocal()`, `Range.Select()`, `ActiveSheet`, `WorksheetFunction...`.
-* **DÙNG CHUẨN:** `.asPieChart()`, `.asColumnChart()`, `setNumHeaders(1)`, `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
+* **DÙNG CHUẨN:** `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
 
 ---
 
-### 4. Quy tắc Batch Operations (Xử lý hàng loạt - Chống Timeout)
+### 4. Quy Tắc Sinh Biểu Đồ Chuẩn Google Sheets (Embedded Charts Master Rules)
+* **BẮT BUỘC DÙNG BUILDER CHUYÊN DỤNG (Chống lỗi trắng ruột & lỗi undefined):**
+  - Biểu đồ tròn: `dashSheet.newChart().asPieChart()`
+  - Biểu đồ cột: `dashSheet.newChart().asColumnChart()`
+  - Biểu đồ thanh: `dashSheet.newChart().asBarChart()`
+  - Biểu đồ đường: `dashSheet.newChart().asLineChart()`
+  - ❌ **CẤM:** Không dùng `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined reading 'PIE'`) và không dùng `setChartType()` chung chung.
+* **BẮT BUỘC KHAI BÁO `.setNumHeaders(1)` (Chống lỗi biểu đồ rỗng/trắng tinh):**
+  - Khi dải dữ liệu nguồn có Dòng 1 là tiêu đề (ví dụ `A1:B9`), bắt buộc gọi `.setNumHeaders(1)` ngay sau `.addRange(dataRange)` để Google Sheets phân biệt nhãn và giá trị số.
+* **BẮT BUỘC GỌI `SpreadsheetApp.flush()` TRƯỚC KHI ĐỌC DỮ LIỆU VẼ:**
+  - Ép Google Sheets hoàn thành việc tính toán công thức `SUMIFS` trên bảng phụ `Calc_Data` trước khi lấy `getRange()` nạp vào biểu đồ.
+* **CƠ CHẾ XÓA BIỂU ĐỒ CŨ (CHỐNG VẼ ĐÈ/CHỒNG LẤN):**
+  - Trước khi `insertChart()`, bắt buộc quét qua `sheet.getCharts()` và xóa biểu đồ cũ theo tiêu đề hoặc toạ độ ô neo (`anchorRow`, `anchorCol`).
+
+---
+
+### 5. Quy tắc Batch Operations (Xử lý hàng loạt - Chống Timeout)
 * **CẤM** gọi `sheet.getRange().getValue()` hoặc `setValue()` bên trong vòng lặp `for` (Gây chậm và dính lỗi *Exceeded maximum execution time*).
 * **QUY TRÌNH BẮT BUỘC:**
   1. Đọc toàn bộ vùng dữ liệu 1 lần vào RAM: `var data = sheet.getRange(...).getValues();`
