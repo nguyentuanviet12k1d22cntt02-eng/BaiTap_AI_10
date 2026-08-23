@@ -95,7 +95,16 @@
 
 ---
 
-### 6. Xử lý kiểu dữ liệu an toàn (Data Cleansing)
+### 6. Xử lý kiểu dữ liệu an toàn & Bóc tách Regex (Data Cleansing & Safe Regex)
+* **Quy tắc bóc tách Regex an toàn (`string.match`):**
+  - Hàm `match()` trong JavaScript trả về một **Mảng (Array)**, trong đó `match[0]` là chuỗi khớp toàn bộ và `match[1]` là nội dung trong dấu ngoặc đơn `()`.
+  - ❌ **CẤM:** Gọi `match.trim()` trực tiếp trên mảng (Gây lỗi crash `TypeError: match.trim is not a function`).
+  - ✅ **BẮT BUỘC:** Kiểm tra tồn tại và truy xuất phần tử `match[1]` trước khi `.trim()`:
+    ```javascript
+    // ĐÚNG CHUẨN AN TOÀN:
+    var codeMatch = body.match(/Lệnh GD[\s:]*([0-9A-Za-z]+)/i);
+    var maGD = (codeMatch && codeMatch[1]) ? codeMatch[1].trim() : "MÃ_MẶC_ĐỊNH";
+    ```
 * **Số và tiền tệ:** Tránh lỗi cộng chuỗi ký tự (`"12500000"` + `"500000"` thành `"12500000500000"`):
   ```javascript
   var revenue = Number(data[i][3]) || 0; // Luôn ép kiểu Number và fallback về 0
@@ -180,10 +189,11 @@
 3. TỐI ƯU HIỆU NĂNG (BATCH OPERATIONS): Không gọi getValue()/setValue() trong vòng lặp for. Đọc toàn bộ dữ liệu 1 lần bằng getValues(), xử lý trong mảng RAM và ghi 1 lần bằng setValues().
 4. DẢI Ô MỞ LINH HOẠT: Công thức SUMIFS/COUNTIFS phải dùng dải ô mở (như J3:J, C3:C) để tự động co giãn theo dữ liệu mới.
 5. PHẢN ỨNG THỜI GIAN THỰC (REACTIVE): Tích hợp hàm onEdit(e) và cơ chế tự động gọi làm mới Dashboard mỗi khi có dòng mới được thêm vào từ Form, Email hoặc gõ trực tiếp.
-6. AN TOÀN RANH GIỚI: Luôn kiểm tra lastRow có dữ liệu trước khi gọi getRange() để tránh lỗi phạm vi rỗng.
-7. TRIGGER AN TOÀN: Khi tạo Trigger hẹn giờ, luôn xóa các trigger cũ của hàm trước khi tạo trigger mới.
-8. XỬ LÝ LỖI UI: Bọc các lệnh Browser.msgBox/alert trong try...catch để code chạy an toàn khi kích hoạt ngầm qua Trigger.
-9. XUẤT CODE HOÀN CHỈNH: Chỉ xuất 1 khối mã code duy nhất, đầy đủ từ đầu đến cuối, có comment tiếng Việt rõ ràng, sẵn sàng copy dùng ngay.
+6. BÓC TÁCH REGEX AN TOÀN: Khi dùng match(regex), luôn kiểm tra (match && match[1]) trước khi lấy chuỗi .trim() (CẤM gọi match.trim() trực tiếp trên mảng).
+7. AN TOÀN RANH GIỚI: Luôn kiểm tra lastRow có dữ liệu trước khi gọi getRange() để tránh lỗi phạm vi rỗng.
+8. TRIGGER AN TOÀN: Khi tạo Trigger hẹn giờ, luôn xóa các trigger cũ của hàm trước khi tạo trigger mới.
+9. XỬ LÝ LỖI UI: Bọc các lệnh Browser.msgBox/alert trong try...catch để code chạy an toàn khi kích hoạt ngầm qua Trigger.
+10. XUẤT CODE HOÀN CHỈNH: Chỉ xuất 1 khối mã code duy nhất, đầy đủ từ đầu đến cuối, có comment tiếng Việt rõ ràng, sẵn sàng copy dùng ngay.
 ```
 
 ---
