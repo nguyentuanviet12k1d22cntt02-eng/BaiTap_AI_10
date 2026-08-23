@@ -734,7 +734,26 @@ Hãy viết mã cho file độc lập "6_BackendService.gs" xử lý việc lưu
       },
       {
         badge: "07",
-        title: "Bước 7: Tạo File test.gs (Đọc Tiêu Đề & Nội Dung Email Ra Sheet Test)",
+        title: "Bước 7: Tạo File 0_GuiEmailGiaLap_Bank.gs (Gửi 3 Email Biên Lai HTML Mẫu Để Test)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>0_GuiEmailGiaLap_Bank.gs</code> ➔ Dán mã và chạy hàm để tự động gửi 3 email biên lai BIDV (HTML Table chuẩn) vào Gmail làm dữ liệu thực hành.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+[YÊU CẦU NGHIỆP VỤ - FILE 0_GuiEmailGiaLap_Bank.gs]:
+Hãy viết mã cho file công cụ độc lập "0_GuiEmailGiaLap_Bank.gs" để người dùng gửi các email biên lai ngân hàng mẫu vào Gmail của chính mình nhằm kiểm thử hệ thống:
+
+1. Tự động lấy email người dùng đang thao tác qua Session.getActiveUser().getEmail().
+2. Tạo hàm "guiBoEmailBienLaiMauDeTest" gửi tự động 3 email biên lai BIDV có định dạng bảng HTML đẹp mắt:
+   - Email 1 (Chi Ăn uống): Tiêu đề "BIDV Biên lai chuyển tiền qua tài khoản - Lệnh GD 18492015839", Đối tác "PHUC LONG COFFEE & TEA", Số tiền "185,000 VND".
+   - Email 2 (Thu Hoàn tiền): Tiêu đề "BIDV Biên lai chuyển tiền qua tài khoản - Lệnh GD 19582014632", Đối tác "NGAN HANG BIDV", Số tiền "320,000 VND".
+   - Email 3 (Chi Đi lại): Tiêu đề "BIDV Biên lai chuyển tiền qua tài khoản - Lệnh GD 17892014821", Đối tác "PETROLIMEX CUA HANG XANG DAU SO 12", Số tiền "500,000 VND".
+3. Gửi email qua GmailApp.sendEmail() với tham số { htmlBody: htmlContent }.
+
+[YÊU CẦU ĐẦU RA]:
+- Xuất khối mã hoàn chỉnh cho file "0_GuiEmailGiaLap_Bank.gs", có thông báo popup xác nhận đã gửi thành công.`
+      },
+      {
+        badge: "08",
+        title: "Bước 8: Tạo File test.gs (Đọc Tiêu Đề & Nội Dung Email Ra Sheet Test)",
         desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>test.gs</code> ➔ Dán mã đọc tiêu đề và nội dung email thô ra sheet để xem trước cấu trúc thư.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -751,8 +770,8 @@ Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ng
 - Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã đọc.`
       },
       {
-        badge: "08",
-        title: "Bước 8: Tạo File 7_DocThuEmail_Bank.gs (Bóc Tách Dữ Liệu Ra Bảng Mail_Log)",
+        badge: "09",
+        title: "Bước 9: Tạo File 7_DocThuEmail_Bank.gs (Bóc Tách Dữ Liệu Ra Bảng Mail_Log)",
         desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>7_DocThuEmail_Bank.gs</code> ➔ Dán mã bóc tách dữ liệu từ nội dung email thô sang bảng Mail_Log.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -779,8 +798,8 @@ Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách t
 - Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã bóc tách thành công.`
       },
       {
-        badge: "09",
-        title: "Bước 9: Tạo File 8_NapGiaoDich_Bank.gs (Nạp Email Vào Sổ Quỹ & Nhảy Dashboard)",
+        badge: "10",
+        title: "Bước 10: Tạo File 8_NapGiaoDich_Bank.gs (Nạp Email Vào Sổ Quỹ & Nhảy Dashboard)",
         desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>8_NapGiaoDich_Bank.gs</code> ➔ Dán mã nạp các dòng 'Chưa nạp' từ Mail_Log sang Giao_Dich.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -808,8 +827,8 @@ Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để chuyển d�
 - Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng giao dịch đã nạp thành công.`
       },
       {
-        badge: "10",
-        title: "Bước 10: Tạo File 9_Trigger_AutoSync.gs (Cài Đặt Tự Động Quét Email Mỗi 5 Phút)",
+        badge: "11",
+        title: "Bước 11: Tạo File 9_Trigger_AutoSync.gs (Cài Đặt Tự Động Quét Email Mỗi 5 Phút)",
         desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>9_Trigger_AutoSync.gs</code> ➔ Dán mã thiết lập tự động quét email chạy ngầm 24/7.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -827,8 +846,8 @@ Hãy viết mã cho file độc lập "9_Trigger_AutoSync.gs" để quản lý v
 - Xuất khối mã hoàn chỉnh cho file "9_Trigger_AutoSync.gs", an toàn và dễ sử dụng.`
       },
       {
-        badge: "11",
-        title: "Bước 11: Tạo File GiaoDichForm.html (Giao Diện Pop-up Nhập Nhanh Giao Dịch)",
+        badge: "12",
+        title: "Bước 12: Tạo File GiaoDichForm.html (Giao Diện Pop-up Nhập Nhanh Giao Dịch)",
         desc: "Thao tác: Bấm dấu (+) chọn HTML ➔ Đặt tên file là <code>GiaoDichForm.html</code> ➔ Dán mã giao diện form nhập nhanh thu chi.",
         promptBox: `[YÊU CẦU THIẾT KẾ - TỆP GIAO DIỆN GiaoDichForm.html]:
 Hãy thiết kế mã nguồn giao diện HTML cho file "GiaoDichForm.html" để người dùng nhập nhanh giao dịch:
