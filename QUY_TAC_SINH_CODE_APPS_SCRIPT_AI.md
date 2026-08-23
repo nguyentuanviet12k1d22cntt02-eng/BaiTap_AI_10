@@ -62,8 +62,10 @@
   - Biểu đồ thanh: `dashSheet.newChart().asBarChart()`
   - Biểu đồ đường: `dashSheet.newChart().asLineChart()`
   - ❌ **CẤM:** Không dùng `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined reading 'PIE'`) và không dùng `setChartType()` chung chung.
+* **BẮT BUỘC KHAI BÁO `.setOption("useFirstColumnAsDomain", true)` CHO BIỂU ĐỒ CỘT/THANH/ĐƯỜNG:**
+  - Để Google Sheets nhận diện Cột đầu tiên (Cột Tên/Kênh) làm Trục Hoành X (Domain), chống lỗi hiểu nhầm Text thành cột số liệu dẫn đến biểu đồ rỗng.
 * **BẮT BUỘC KHAI BÁO `.setNumHeaders(1)` (Chống lỗi biểu đồ rỗng/trắng tinh):**
-  - Khi dải dữ liệu nguồn có Dòng 1 là tiêu đề (ví dụ `A1:B9`), bắt buộc gọi `.setNumHeaders(1)` ngay sau `.addRange(dataRange)` để Google Sheets phân biệt nhãn và giá trị số.
+  - Khi dải dữ liệu nguồn có Dòng 1 là tiêu đề (ví dụ `A1:B9`, `D1:E5`), bắt buộc gọi `.setNumHeaders(1)` ngay sau `.addRange(dataRange)` để Google Sheets phân biệt nhãn và giá trị số.
 * **BẮT BUỘC GỌI `SpreadsheetApp.flush()` TRƯỚC KHI ĐỌC DỮ LIỆU VẼ:**
   - Ép Google Sheets hoàn thành việc tính toán công thức `SUMIFS` trên bảng phụ `Calc_Data` trước khi lấy `getRange()` nạp vào biểu đồ.
 * **CƠ CHẾ XÓA BIỂU ĐỒ CŨ (CHỐNG VẼ ĐÈ/CHỒNG LẤN):**
