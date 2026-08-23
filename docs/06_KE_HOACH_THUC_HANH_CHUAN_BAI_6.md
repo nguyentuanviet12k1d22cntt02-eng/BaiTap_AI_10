@@ -210,24 +210,25 @@ Hãy viết mã Apps Script xử lý việc ghi nhận một khoản thu hoặc 
 
 ---
 
-### 🔍 BƯỚC 7: QUÉT DỮ LIỆU EMAIL THÔ RA BẢNG TEST_EMAIL_RAW ĐỂ QUAN SÁT CẤU TRÚC
+### 🔍 BƯỚC 7: ĐỌC TIÊU ĐỀ & NỘI DUNG EMAIL RA SHEET TEST ĐỂ XEM CẤU TRÚC
 
-* **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `test.gs` (hoặc `7_DocThoEmail_Raw.gs`).
+* **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `test.gs`.
 * **Câu Prompt Bước 7:**
 
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - FILE test.gs / 7_DocThoEmail_Raw.gs]:
-Hãy viết mã cho file độc lập "test.gs" để quét các email ngân hàng trong Gmail và đổ toàn bộ nội dung thư thô ra bảng tính:
+[YÊU CẦU NGHIỆP VỤ - FILE test.gs]:
+Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ngân hàng:
 
-1. Tìm kiếm trong Gmail các email có tiêu đề chứa "Biên lai chuyển tiền" hoặc "BIDV".
-2. Tạo một trang tính tên là "Test_Email_Raw" gồm 6 cột: ['STT', 'Ngày Giờ Nhận', 'Tiêu Đề Email', 'Người Gửi (From)', 'Nội Dung Email Thô (Plain Body)', 'Message ID'].
-3. Ghi toàn bộ nội dung nguyên bản (Plain Text) của email xuống trang tính để người dùng và AI cùng mở ra quan sát chính xác từng dòng nhãn và số liệu thực tế trước khi viết hàm bóc tách.
-4. Tối ưu hiệu năng: Sử dụng Batch Operations (getValues / setValues) và bật chế độ Wrap text (tự động xuống dòng) cho cột nội dung.
+1. Tìm các email có tiêu đề chứa "BIDV" hoặc "Biên lai chuyển tiền" trong Gmail.
+2. Lấy 2 thông tin chính:
+   - Tiêu đề email
+   - Toàn bộ nội dung thư (Plain Body)
+3. Tạo trang tính "Test_Email_Raw" và đổ danh sách email đọc được vào bảng để người dùng xem trực tiếp nội dung thư.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã hoàn chỉnh cho file "test.gs", có hộp thoại popup thông báo số lượng email thô đã quét được.
+- Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã đọc.
 ```
 
 ---

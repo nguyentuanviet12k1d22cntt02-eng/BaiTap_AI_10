@@ -734,20 +734,21 @@ Hãy viết mã cho file độc lập "6_BackendService.gs" xử lý việc lưu
       },
       {
         badge: "07",
-        title: "Bước 7: Tạo File test.gs (Quét Dữ Liệu Email Thô Ra Bảng Test_Email_Raw)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>test.gs</code> (hoặc <code>7_DocThoEmail_Raw.gs</code>) ➔ Dán mã quét và đổ toàn bộ nội dung email thô ra sheet Test_Email_Raw để quan sát cấu trúc.",
+        title: "Bước 7: Tạo File test.gs (Đọc Tiêu Đề & Nội Dung Email Ra Sheet Test)",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>test.gs</code> ➔ Dán mã đọc tiêu đề và nội dung email thô ra sheet để xem trước cấu trúc thư.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - FILE test.gs / 7_DocThoEmail_Raw.gs]:
-Hãy viết mã cho file độc lập "test.gs" để quét các email ngân hàng trong Gmail và đổ toàn bộ nội dung thư thô ra bảng tính:
+[YÊU CẦU NGHIỆP VỤ - FILE test.gs]:
+Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ngân hàng:
 
-1. Tìm kiếm trong Gmail các email có tiêu đề chứa "Biên lai chuyển tiền" hoặc "BIDV".
-2. Tạo một trang tính tên là "Test_Email_Raw" gồm 6 cột: ['STT', 'Ngày Giờ Nhận', 'Tiêu Đề Email', 'Người Gửi (From)', 'Nội Dung Email Thô (Plain Body)', 'Message ID'].
-3. Ghi toàn bộ nội dung nguyên bản (Plain Text) của email xuống trang tính để người dùng và AI cùng mở ra quan sát chính xác từng dòng nhãn và số liệu thực tế trước khi viết hàm bóc tách.
-4. Tối ưu hiệu năng: Sử dụng Batch Operations (getValues / setValues) và bật chế độ Wrap text (tự động xuống dòng) cho cột nội dung.
+1. Tìm các email có tiêu đề chứa "BIDV" hoặc "Biên lai chuyển tiền" trong Gmail.
+2. Lấy 2 thông tin chính:
+   - Tiêu đề email
+   - Toàn bộ nội dung thư (Plain Body)
+3. Tạo trang tính "Test_Email_Raw" và đổ danh sách email đọc được vào bảng để người dùng xem trực tiếp nội dung thư.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã hoàn chỉnh cho file "test.gs", có hộp thoại popup thông báo số lượng email thô đã quét được.`
+- Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã đọc.`
       },
       {
         badge: "08",
