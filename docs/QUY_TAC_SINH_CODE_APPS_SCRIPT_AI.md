@@ -47,11 +47,12 @@
 ---
 
 ### 3. Tuyệt đối chỉ dùng API Google Apps Script Chuẩn (CẤM hàm ảo/VBA)
-* **CẤM** các hàm không tồn tại hoặc do AI bịa đặt:
+* **CẤM** các hàm và Enum không tồn tại hoặc do AI bịa đặt:
+  - ❌ `SpreadsheetApp.ChartType.PIE` (Lỗi `Cannot read properties of undefined (reading 'PIE')`) ➔ BẮT BUỘC DÙNG: `Charts.ChartType.PIE`, `Charts.ChartType.COLUMN`, `Charts.ChartType.BAR`, `Charts.ChartType.LINE`. (Enum `ChartType` thuộc dịch vụ toàn cục `Charts`, KHÔNG nằm trong `SpreadsheetApp`).
   - ❌ `sheet.setGridlines(false)` hoặc `sheet.showGridlines(false)` ➔ BẮT BUỘC DÙNG: `sheet.setHiddenGridlines(true)` (để ẩn lưới) hoặc `sheet.setHiddenGridlines(false)` (để hiện lưới).
   - ❌ `sheet.moveSheet(1)` hoặc `sheet.setIndex(1)` ➔ BẮT BUỘC DÙNG: `ss.setActiveSheet(sheet); ss.moveActiveSheet(1);`.
   - ❌ `setFormulasLocal()`, `Range.Select()`, `ActiveSheet`, `WorksheetFunction...`.
-* **DÙNG CHUẨN:** `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
+* **DÙNG CHUẨN:** `Charts.ChartType.PIE`, `Charts.ChartType.COLUMN`, `setFormulas()`, `getValues()`, `setValues()`, `setHiddenGridlines()`, `SpreadsheetApp.getActiveSpreadsheet()`, `SpreadsheetApp.flush()`.
 
 ---
 
@@ -157,7 +158,7 @@
 
 ```text
 [QUY TẮC KỸ THUẬT APPS SCRIPT BẮT BUỘC]:
-1. CHỈ DÙNG API GOOGLE APPS SCRIPT CHUẨN: Tuyệt đối không dùng cú pháp ảo/Excel. Muốn ẩn/hiện lưới bắt buộc dùng sheet.setHiddenGridlines(true/false).
+1. CHỈ DÙNG API GOOGLE APPS SCRIPT CHUẨN: Tuyệt đối không dùng cú pháp ảo/Excel. Muốn ẩn/hiện lưới dùng sheet.setHiddenGridlines(true/false). Biểu đồ bắt buộc dùng Charts.ChartType.PIE / Charts.ChartType.COLUMN (CẤM dùng SpreadsheetApp.ChartType).
 2. CHUẨN LOCALE VIỆT NAM: Nếu dùng công thức trên Sheet (như SPARKLINE, IF, SUMIFS), bắt buộc dùng dấu chấm phẩy (;) phân cách tham số, dấu gạch chéo ngược (\) cho mảng và escape thành (\\) trong chuỗi code JavaScript.
 3. TỐI ƯU HIỆU NĂNG (BATCH OPERATIONS): Không gọi getValue()/setValue() trong vòng lặp for. Đọc toàn bộ dữ liệu 1 lần bằng getValues(), xử lý trong mảng RAM và ghi 1 lần bằng setValues().
 4. DẢI Ô MỞ LINH HOẠT: Công thức SUMIFS/COUNTIFS phải dùng dải ô mở (như J3:J, C3:C) để tự động co giãn theo dữ liệu mới.
