@@ -1,5 +1,6 @@
 # HƯỚNG DẪN BÀI THỰC HÀNH 2 (PROMPT-DRIVEN)
 ## RA LỆNH CHO AI AGENT XUẤT PHIẾU GIAO HÀNG PDF ĐA SẢN PHẨM & LƯU VÀO GOOGLE DRIVE
+> 📺 **Video Hướng Dẫn Thực Hành (1080p HD):** [https://www.youtube.com/watch?v=dwE3CSlV6tY](https://www.youtube.com/watch?v=dwE3CSlV6tY)
 
 ---
 

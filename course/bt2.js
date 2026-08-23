@@ -10,6 +10,9 @@ COURSE_DATA.push(
     tags: ["Google Docs Template", "PDF Export", "Multi-Item Invoice", "Google Drive", "No-Code Workflow"],
     desc: "Cách viết Prompt ra lệnh cho AI Agent tự động gom nhóm các đơn hàng 'Chờ xuất' có nhiều sản phẩm, tự động chèn bảng danh mục hàng hóa vào mẫu Docs và xuất file PDF lưu vào Google Drive.",
     csvFile: "bai_tap_2_don_hang.xlsx",
+    youtubeVideoId: "dwE3CSlV6tY",
+    youtubeVideoTitle: "Video Hướng Dẫn Thực Hành Bài 2: Tự Động Gom Nhóm Đơn Hàng & Xuất Phiếu Giao Hàng PDF Lưu Drive",
+    videoPoster: "assets/thumbnail_bai_2_youtube.jpg",
     scriptFile: "BaiTap2_XuatHoaDonPDF_Drive.gs",
     scriptContent: `/**
  * BÀI TẬP 2: TỰ ĐỘNG XUẤT HÓA ĐƠN PDF ĐA SẢN PHẨM TỪ GOOGLE DOCS MẪU
