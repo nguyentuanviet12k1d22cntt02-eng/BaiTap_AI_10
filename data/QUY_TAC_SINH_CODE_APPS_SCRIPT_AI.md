@@ -175,7 +175,7 @@
 
 ```text
 [QUY TẮC KỸ THUẬT APPS SCRIPT BẮT BUỘC]:
-1. CHỈ DÙNG API GOOGLE APPS SCRIPT CHUẨN: Tuyệt đối không dùng cú pháp ảo/Excel. Muốn ẩn/hiện lưới dùng sheet.setHiddenGridlines(true/false). Biểu đồ bắt buộc dùng Charts.ChartType.PIE / Charts.ChartType.COLUMN (CẤM dùng SpreadsheetApp.ChartType).
+1. CHỈ DÙNG API GOOGLE APPS SCRIPT CHUẨN: Tuyệt đối không dùng cú pháp ảo/Excel. Muốn ẩn/hiện lưới dùng sheet.setHiddenGridlines(true/false). Biểu đồ bắt buộc dùng Builder chuyên dụng .asPieChart() / .asColumnChart(), khai báo .setNumHeaders(1) và bắt buộc có .setOption('useFirstColumnAsDomain', true) cho biểu đồ cột/thanh/đường (CẤM dùng SpreadsheetApp.ChartType).
 2. CHUẨN LOCALE VIỆT NAM: Nếu dùng công thức trên Sheet (như SPARKLINE, IF, SUMIFS), bắt buộc dùng dấu chấm phẩy (;) phân cách tham số, dấu gạch chéo ngược (\) cho mảng và escape thành (\\) trong chuỗi code JavaScript.
 3. TỐI ƯU HIỆU NĂNG (BATCH OPERATIONS): Không gọi getValue()/setValue() trong vòng lặp for. Đọc toàn bộ dữ liệu 1 lần bằng getValues(), xử lý trong mảng RAM và ghi 1 lần bằng setValues().
 4. DẢI Ô MỞ LINH HOẠT: Công thức SUMIFS/COUNTIFS phải dùng dải ô mở (như J3:J, C3:C) để tự động co giãn theo dữ liệu mới.
