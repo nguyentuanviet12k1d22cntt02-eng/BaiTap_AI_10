@@ -266,7 +266,7 @@ Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách t
 
 ---
 
-### 📥 BƯỚC 9: NẠP GIAO DỊCH EMAIL VÀO SỔ QUỸ & CẬP NHẬT DASHBOARD
+### 📥 BƯỚC 9: NẠP GIAO DỊCH TỪ MAIL_LOG VÀO BẢNG GIAO_DICH & CẬP NHẬT DASHBOARD
 
 * **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `8_NapGiaoDich_Bank.gs`.
 * **Câu Prompt Bước 9:**
@@ -274,16 +274,28 @@ Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách t
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
-[YÊU CẦU NGHIỆP VỤ - NẠP CHÍNH THỨC VÀO SỔ QUỸ]:
-Hãy viết mã Apps Script để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
+[YÊU CẦU NGHIỆP VỤ - FILE 8_NapGiaoDich_Bank.gs]:
+Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để chuyển dữ liệu từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
 
-1. Lấy các dòng giao dịch mới trong bảng "Mail_Log" nạp sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác.
-2. Kiểm tra cột Ghi chú trên bảng Giao_Dich để đảm bảo không nạp trùng các mã giao dịch đã có.
-3. Đánh dấu trạng thái trên Mail_Log là "Đã nạp vào Giao_Dich" và đánh dấu email trên Gmail là đã đọc.
-4. Tự động cập nhật lại 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.
+1. Tìm các dòng có "Trạng Thái Nạp" là "Chưa nạp" trong bảng "Mail_Log".
+2. Chép toàn bộ thông tin sang cuối bảng "Giao_Dich" với đúng thứ tự 12 cột (A đến L):
+   - Cột A: Ngày GD
+   - Cột B: Tháng/Năm
+   - Cột C: Loại GD (Thu / Chi)
+   - Cột D: Nhóm Chi Tiêu
+   - Cột E: Mô Tả
+   - Cột F: Người Liên Quan
+   - Cột G: Kênh Thanh Toán
+   - Cột H: Số Tiền
+   - Cột I: VAT (%)
+   - Cột J: Tổng Sau Thuế
+   - Cột K: Trạng Thái ("Đã thu" nếu là Thu, "Đã chi" nếu là Chi)
+   - Cột L: Ghi Chú ("Số lệnh: " + Mã GD)
+3. Chống nạp trùng: Kiểm tra nếu Mã GD đã tồn tại ở cột Ghi Chú trên bảng Giao_Dich thì bỏ qua không nạp lại.
+4. Cập nhật đồng bộ: Đổi trạng thái trên Mail_Log thành "Đã nạp" và tự động làm mới Dashboard cùng 2 biểu đồ ngay sau khi nạp.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã Apps Script hoàn chỉnh, kèm thông báo tổng số giao dịch đã nạp thành công.
+- Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng giao dịch đã nạp thành công.
 ```
 
 ---

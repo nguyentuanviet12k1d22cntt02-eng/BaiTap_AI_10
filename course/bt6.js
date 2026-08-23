@@ -781,19 +781,31 @@ Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách t
       {
         badge: "09",
         title: "Bước 9: Tạo File 8_NapGiaoDich_Bank.gs (Nạp Email Vào Sổ Quỹ & Nhảy Dashboard)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>8_NapGiaoDich_Bank.gs</code> ➔ Dán mã tự động chuyển dữ liệu từ Mail_Log sang Giao_Dich.",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>8_NapGiaoDich_Bank.gs</code> ➔ Dán mã nạp các dòng 'Chưa nạp' từ Mail_Log sang Giao_Dich.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - FILE 8_NapGiaoDich_Bank.gs]:
-Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
+Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để chuyển dữ liệu từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
 
-1. Cơ chế tự động đồng bộ khép kín: Lấy các dòng có trạng thái "Chưa nạp" trong bảng "Mail_Log" chuyển sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác (A đến L).
-2. Kiểm tra cột Ghi chú trên bảng Giao_Dich để đảm bảo không nạp trùng các mã giao dịch đã có.
-3. Đánh dấu trạng thái trên Mail_Log là "Đã nạp vào Giao_Dich" và đánh dấu email trên Gmail là đã đọc.
-4. Tự động kích hoạt làm mới 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.
+1. Tìm các dòng có "Trạng Thái Nạp" là "Chưa nạp" trong bảng "Mail_Log".
+2. Chép toàn bộ thông tin sang cuối bảng "Giao_Dich" với đúng thứ tự 12 cột (A đến L):
+   - Cột A: Ngày GD
+   - Cột B: Tháng/Năm
+   - Cột C: Loại GD (Thu / Chi)
+   - Cột D: Nhóm Chi Tiêu
+   - Cột E: Mô Tả
+   - Cột F: Người Liên Quan
+   - Cột G: Kênh Thanh Toán
+   - Cột H: Số Tiền
+   - Cột I: VAT (%)
+   - Cột J: Tổng Sau Thuế
+   - Cột K: Trạng Thái ("Đã thu" nếu là Thu, "Đã chi" nếu là Chi)
+   - Cột L: Ghi Chú ("Số lệnh: " + Mã GD)
+3. Chống nạp trùng: Kiểm tra nếu Mã GD đã tồn tại ở cột Ghi Chú trên bảng Giao_Dich thì bỏ qua không nạp lại.
+4. Cập nhật đồng bộ: Đổi trạng thái trên Mail_Log thành "Đã nạp" và tự động làm mới Dashboard cùng 2 biểu đồ ngay sau khi nạp.
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã hoàn chỉnh cho file "8_NapGiaoDich_Bank.gs", kèm thông báo tổng số giao dịch đã nạp thành công.`
+- Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng giao dịch đã nạp thành công.`
       },
       {
         badge: "10",
