@@ -84,13 +84,20 @@
 
 ### 6. Xử lý kiểu dữ liệu an toàn & Bóc tách Regex (Data Cleansing & Safe Regex)
 * **Quy tắc bóc tách Regex an toàn (`string.match`):**
-  - Hàm `match()` trong JavaScript trả về một **Mảng (Array)**, trong đó `match[0]` là chuỗi khớp toàn bộ và `match[1]` là nội dung trong dấu ngoặc đơn `()`.
+  - Hàm `match()` trong JavaScript trả về một **Mảng (Array)**: `match[0]` là toàn bộ chuỗi khớp (chứa cả nhãn), `match[1]` là nội dung trong dấu ngoặc đơn `()`.
   - ❌ **CẤM:** Gọi `match.trim()` trực tiếp trên mảng (Gây lỗi crash `TypeError: match.trim is not a function`).
-  - ✅ **BẮT BUỘC:** Kiểm tra tồn tại và truy xuất phần tử `match[1]` trước khi `.trim()`:
+  - ❌ **CẤM:** Dùng `String(match)` hoặc ép kiểu trực tiếp trên cả mảng `match` (Khiến JavaScript tự động nối `[match[0], match[1]]` thành chuỗi phân cách bởi dấu phẩy `,` làm dữ liệu bị lặp đôi và dính chữ rác tiếng Anh).
+  - ✅ **BẮT BUỘC:** Kiểm tra tồn tại và truy xuất chính xác phần tử nhóm `match[1]` trước khi `.trim()`:
     ```javascript
-    // ĐÚNG CHUẨN AN TOÀN:
-    var codeMatch = body.match(/Lệnh GD[\s:]*([0-9A-Za-z]+)/i);
-    var maGD = (codeMatch && codeMatch[1]) ? codeMatch[1].trim() : "MÃ_MẶC_ĐỊNH";
+    // ĐÚNG CHUẨN AN TOÀN TUYỆT ĐỐI:
+    function layGiaTriRegex(chuoi, regex, giaTriMacDinh) {
+      if (!chuoi || typeof chuoi !== "string") return giaTriMacDinh || "";
+      var ketQua = chuoi.match(regex);
+      if (ketQua && ketQua.length > 1 && ketQua[1]) {
+        return String(ketQua[1]).trim(); // BẮT BUỘC TRUY XUẤT ketQua[1]
+      }
+      return giaTriMacDinh || "";
+    }
     ```
 * **Số và tiền tệ:** Tránh lỗi cộng chuỗi ký tự (`"12500000"` + `"500000"` thành `"12500000500000"`):
   ```javascript
