@@ -12,7 +12,7 @@ COURSE_DATA.push(
     csvFile: "bai_tap_2_don_hang.xlsx",
     youtubeVideoId: "dwE3CSlV6tY",
     youtubeVideoTitle: "Video Hướng Dẫn Thực Hành Bài 2: Tự Động Gom Nhóm Đơn Hàng & Xuất Phiếu Giao Hàng PDF Lưu Drive",
-    videoPoster: "assets/thumbnail_bai_2_youtube.jpg",
+    videoPoster: "assets/thumbnail_bai_2_youtube.png",
     scriptFile: "BaiTap2_XuatHoaDonPDF_Drive.gs",
     scriptContent: `/**
  * BÀI TẬP 2: TỰ ĐỘNG XUẤT HÓA ĐƠN PDF ĐA SẢN PHẨM TỪ GOOGLE DOCS MẪU
