@@ -223,7 +223,7 @@ function switchExercise(id) {
         ${step.promptBox ? `
           <div class="step-prompt-card">
             <div class="step-prompt-card-header">
-              <span class="prompt-card-label"><i class="ph-bold ph-chat-circle-dots"></i> Câu Lệnh Prompt Gửi AI</span>
+              <span class="prompt-card-label"><i class="ph-bold ${step.boxIcon || 'ph-chat-circle-dots'}"></i> ${step.boxTitle || 'Câu Lệnh Prompt Gửi AI'}</span>
               <button class="btn-copy-step-prompt" onclick="copyStepPrompt(this)">
                 <i class="ph-bold ph-copy"></i> Sao chép
               </button>
