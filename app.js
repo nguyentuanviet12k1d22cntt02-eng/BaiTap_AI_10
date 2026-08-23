@@ -352,17 +352,55 @@ if (btnCopyCode) {
   });
 }
 
-// Helper Download Function
+// Helper Download Function (From String Content)
 function downloadFile(filename, content, mimeType = "text/plain;charset=utf-8") {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
+  a.style.display = "none";
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 300);
+}
+
+// Universal Asset Download Function (From URL / File Path via Blob)
+function downloadAssetFromUrl(url, filename) {
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error("File not found");
+      return response.blob();
+    })
+    .then(blob => {
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 300);
+    })
+    .catch(() => {
+      // Direct link fallback
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+      }, 300);
+    });
 }
 
 // Download Current Script
@@ -376,26 +414,22 @@ if (btnDownloadCurrentScript) {
   });
 }
 
-// Download Current CSV
-btnDownloadCurrentCsv.addEventListener("click", () => {
-  const ex = COURSE_DATA.find(e => e.id === currentExerciseId);
-  if (ex) {
-    const a = document.createElement("a");
-    a.href = `data/${ex.csvFile}`;
-    a.download = ex.csvFile;
-    a.click();
-    showToast(`Đang tải xuống ${ex.csvFile}...`);
-  }
-});
+// Download Current CSV / XLSX
+if (btnDownloadCurrentCsv) {
+  btnDownloadCurrentCsv.addEventListener("click", () => {
+    const ex = COURSE_DATA.find(e => e.id === currentExerciseId);
+    if (ex && ex.csvFile) {
+      downloadAssetFromUrl(`data/${ex.csvFile}`, ex.csvFile);
+      showToast(`Đang tải xuống ${ex.csvFile}...`);
+    }
+  });
+}
 
-// Download AI Rules
+// Download AI Code Rules
 const btnDownloadRules = document.getElementById("btnDownloadRules");
 if (btnDownloadRules) {
   btnDownloadRules.addEventListener("click", () => {
-    const a = document.createElement("a");
-    a.href = "data/QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md";
-    a.download = "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md";
-    a.click();
+    downloadAssetFromUrl("data/QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md", "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md");
     showToast("Đang tải xuống Bộ Quy Tắc AI Apps Script...");
   });
 }
@@ -404,22 +438,18 @@ if (btnDownloadRules) {
 const btnDownloadTemplateRules = document.getElementById("btnDownloadTemplateRules");
 if (btnDownloadTemplateRules) {
   btnDownloadTemplateRules.addEventListener("click", () => {
-    const a = document.createElement("a");
-    a.href = "data/QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md";
-    a.download = "QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md";
-    a.click();
+    downloadAssetFromUrl("data/QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md", "QUY_TAC_THIET_KE_BIEU_MAU_DOCS_WORD_AI.md");
     showToast("Đang tải xuống Quy Tắc Thiết Kế Biểu Mẫu Docs/Word...");
   });
 }
 
-// Download All Excel
-btnDownloadAllExcel.addEventListener("click", () => {
-  const a = document.createElement("a");
-  a.href = "data/Du_Lieu_Mau_Tong_Hop.xlsx";
-  a.download = "Du_Lieu_Mau_Tong_Hop.xlsx";
-  a.click();
-  showToast("Đang tải xuống File Excel mẫu thực hành...");
-});
+// Download All Excel Master Package
+if (btnDownloadAllExcel) {
+  btnDownloadAllExcel.addEventListener("click", () => {
+    downloadAssetFromUrl("data/Du_Lieu_Mau_Tong_Hop.xlsx", "Du_Lieu_Mau_Tong_Hop.xlsx");
+    showToast("Đang tải xuống File Excel mẫu thực hành...");
+  });
+}
 
 // Mobile Sidebar Toggle
 mobileMenuBtn.addEventListener("click", () => {
