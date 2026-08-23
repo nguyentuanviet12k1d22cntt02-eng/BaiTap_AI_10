@@ -96,7 +96,7 @@ Dựa vào bảng tính thu chi đã phân tích ở trên, hãy viết hàm onO
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - THIẾT LẬP DASHBOARD SỔ QUỸ]:
-Hãy viết mã Google Apps Script để xây dựng giao diện Dashboard sổ quỹ dòng tiền:
+Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" để xây dựng giao diện Dashboard và cơ chế tự động cập nhật:
 
 1. Khởi tạo trang tính tên là "Dashboard Sổ Quỹ" nằm ở vị trí đầu tiên (nếu đã có trang này thì làm sạch nội dung cũ để tạo mới).
 2. Thiết kế Banner tiêu đề:
@@ -107,6 +107,7 @@ Hãy viết mã Google Apps Script để xây dựng giao diện Dashboard sổ 
    - Tổng Chi: Tính tổng cột "Tổng Sau Thuế" của các khoản "Chi" từ bảng Giao_Dich (định dạng tiền tệ VNĐ).
    - Số Dư Quỹ Thực Tế: Lấy Tổng Thu trừ Tổng Chi (định dạng tiền tệ VNĐ).
    - Tỷ Lệ Chi / Thu: Tính tỷ lệ % giữa Tổng Chi trên Tổng Thu (định dạng 0.0%).
+4. Lắng nghe thay đổi thời gian thực: Tích hợp hàm onEdit(e) an toàn để khi người dùng sửa hoặc thêm dòng trực tiếp ở sheet "Giao_Dich", Dashboard tự động tính toán lại và nhảy số tức thì.
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất khối mã Apps Script hoàn chỉnh, có hàm điều phối tự động kết nối các biểu đồ khi các bước sau hoàn thành.
@@ -123,17 +124,17 @@ Hãy viết mã Google Apps Script để xây dựng giao diện Dashboard sổ 
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - TẠO BẢNG TÍNH PHỤ CHO BIỂU ĐỒ]:
-Hãy viết mã Apps Script tạo trang tính phụ tên là "Calc_Data" để tổng hợp số liệu nguồn vẽ biểu đồ:
+Hãy viết mã Apps Script tạo trang tính phụ tên là "Calc_Data" để tổng hợp số liệu nguồn cho biểu đồ:
 
 1. Bảng tổng hợp theo Nhóm chi tiêu (bắt đầu từ cột A, dòng 1):
    - Tiêu đề: "Nhóm Chi Tiêu" và "Tổng Chi Sau Thuế".
    - Liệt kê 8 nhóm: Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác.
-   - Dùng công thức tự động tính tổng tiền chi theo từng nhóm từ bảng Giao_Dich.
+   - Dùng công thức SUMIFS với dải ô mở vô tận (như Giao_Dich!J3:J, Giao_Dich!C3:C) để tự động cộng dồn số liệu khi có thêm dòng mới.
 
 2. Bảng tổng hợp theo Kênh thanh toán (bắt đầu từ cột D, dòng 1):
    - Tiêu đề: "Kênh Thanh Toán" và "Tổng Chi".
    - Liệt kê 4 kênh: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng.
-   - Dùng công thức tự động tính tổng tiền chi theo từng kênh.
+   - Dùng công thức SUMIFS với dải ô mở vô tận tính tổng tiền chi theo từng kênh.
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất khối mã Apps Script hoàn chỉnh, giữ bảng tính hiển thị sạch sẽ để biểu đồ đọc dữ liệu ổn định.

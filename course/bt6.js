@@ -637,11 +637,11 @@ Dựa vào bảng tính thu chi đã phân tích ở Bước 0, hãy viết mã 
       {
         badge: "02",
         title: "Bước 2: Tạo File 2_Dashboard_KPI.gs (Trang Dashboard & 4 Thẻ Tổng Quan)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>2_Dashboard_KPI.gs</code> ➔ Dán mã tạo trang Dashboard và 4 thẻ tổng quan.",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>2_Dashboard_KPI.gs</code> ➔ Dán mã tạo trang Dashboard, 4 thẻ KPI và lắng nghe onEdit.",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - FILE 2_Dashboard_KPI.gs]:
-Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" để xây dựng giao diện Dashboard:
+Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" để xây dựng giao diện Dashboard và cơ chế tự động cập nhật:
 
 1. Tạo trang tính mới tên "Dashboard Sổ Quỹ" nằm ở vị trí đầu tiên (nếu đã có thì làm sạch nội dung cũ để làm mới).
 2. Banner tiêu đề:
@@ -652,6 +652,7 @@ Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" đ
    - Tổng Chi: Tính tổng cột "Tổng Sau Thuế" của các khoản Chi từ bảng Giao_Dich (định dạng VNĐ).
    - Số Dư Quỹ: Lấy Tổng Thu trừ Tổng Chi (định dạng VNĐ).
    - Tỷ Lệ Chi / Thu: Tính tỷ lệ % Tổng Chi trên Tổng Thu (định dạng 0.0%).
+4. Lắng nghe thay đổi thời gian thực: Tích hợp hàm onEdit(e) an toàn để khi người dùng sửa hoặc thêm dòng trực tiếp ở sheet "Giao_Dich", Dashboard tự động tính toán lại và nhảy số tức thì.
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất khối mã hoàn chỉnh cho file "2_Dashboard_KPI.gs", có hàm điều phối tự động kết nối biểu đồ khi các bước sau hoàn thành.`
@@ -659,7 +660,7 @@ Hãy viết toàn bộ mã nguồn cho file độc lập "2_Dashboard_KPI.gs" đ
       {
         badge: "03",
         title: "Bước 3: Tạo File 3_CalcData_ThuChi.gs (Bảng Phụ Gom Nhóm Cho Biểu Đồ)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>3_CalcData_ThuChi.gs</code> ➔ Dán mã tính toán 2 bảng gom nhóm chi tiêu.",
+        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là <code>3_CalcData_ThuChi.gs</code> ➔ Dán mã tính toán 2 bảng gom nhóm chi tiêu (dải ô mở).",
         promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - FILE 3_CalcData_ThuChi.gs]:
@@ -668,12 +669,12 @@ Hãy viết mã cho file độc lập "3_CalcData_ThuChi.gs" tạo trang tính p
 1. Bảng chi tiêu theo Nhóm ngành hàng (bắt đầu từ cột A, dòng 1):
    - Tiêu đề: "Nhóm Chi Tiêu" và "Tổng Chi Sau Thuế".
    - 8 nhóm: Ăn uống, Đi lại, Nhà ở, Mua sắm, Y tế, Học tập, Giải trí, Khác.
-   - Dùng công thức tự động tính tổng tiền chi theo từng nhóm từ bảng Giao_Dich.
+   - Dùng công thức SUMIFS với dải ô mở vô tận (như Giao_Dich!J3:J, Giao_Dich!C3:C) để tự động cộng dồn số liệu khi có thêm dòng mới.
 
 2. Bảng chi tiêu theo Kênh thanh toán (bắt đầu từ cột D, dòng 1):
    - Tiêu đề: "Kênh Thanh Toán" và "Tổng Chi".
    - 4 kênh: Tiền mặt, Chuyển khoản, Ví điện tử, Thẻ ngân hàng.
-   - Dùng công thức tự động tính tổng tiền chi theo từng kênh.
+   - Dùng công thức SUMIFS với dải ô mở vô tận tính tổng tiền chi theo từng kênh.
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất khối mã hoàn chỉnh cho file "3_CalcData_ThuChi.gs", giữ tab Calc_Data hiển thị bình thường để biểu đồ đọc dữ liệu ổn định.`
@@ -775,10 +776,10 @@ Hãy xuất lại toàn bộ đoạn mã file "7_DocThuEmail_Bank.gs" đã đư�
 [YÊU CẦU NGHIỆP VỤ - FILE 8_NapGiaoDich_Bank.gs]:
 Hãy viết mã cho file độc lập "8_NapGiaoDich_Bank.gs" để tự động nạp giao dịch từ bảng "Mail_Log" sang bảng chính "Giao_Dich":
 
-1. Lấy các dòng giao dịch mới trong bảng "Mail_Log" nạp sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác.
+1. Cơ chế tự động đồng bộ khép kín: Lấy các dòng giao dịch mới trong bảng "Mail_Log" nạp sang bảng "Giao_Dich" với đầy đủ 12 cột chuẩn xác.
 2. Kiểm tra cột Ghi chú trên bảng Giao_Dich để đảm bảo không nạp trùng các mã giao dịch đã có.
 3. Đánh dấu trạng thái trên Mail_Log là "Đã nạp vào Giao_Dich" và đánh dấu email trên Gmail là đã đọc.
-4. Tự động cập nhật lại 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.
+4. Tự động kích hoạt làm mới 4 thẻ tổng quan và 2 biểu đồ trên trang Dashboard ngay sau khi nạp xong.
 
 [YÊU CẦU ĐẦU RA]:
 - Xuất khối mã hoàn chỉnh cho file "8_NapGiaoDich_Bank.gs", kèm thông báo tổng số giao dịch đã nạp thành công.`
