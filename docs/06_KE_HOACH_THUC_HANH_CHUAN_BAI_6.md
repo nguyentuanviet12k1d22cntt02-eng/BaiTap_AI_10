@@ -233,7 +233,7 @@ Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ng
 
 ---
 
-### 📊 BƯỚC 8: BÓC TÁCH DỮ LIỆU EMAIL BIDV RA BẢNG MAIL_LOG
+### 📊 BƯỚC 8: BÓC TÁCH DỮ LIỆU EMAIL RA BẢNG MAIL_LOG
 
 * **Thao tác:** Mở Apps Script ➔ Bấm dấu `+` ➔ chọn **Script** ➔ Đặt tên file là `7_DocThuEmail_Bank.gs`.
 * **Câu Prompt Bước 8:**
@@ -242,22 +242,22 @@ Hãy viết mã cho file độc lập "test.gs" để đọc thử các email ng
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
 [YÊU CẦU NGHIỆP VỤ - FILE 7_DocThuEmail_Bank.gs]:
-Dựa vào cấu trúc nội dung email ngân hàng thực tế đã quan sát được từ trang tính "Test_Email_Raw" ở Bước 7:
+Dựa vào nội dung các email ngân hàng đang có ở trang tính "Test_Email_Raw":
 
-Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách chính xác từng trường thông tin và xuất ra bảng "Mail_Log":
-1. Bóc tách an toàn (Safe Regex Engine) xử lý cấu trúc đa dòng (Multi-line table):
-   - Ngày giao dịch và Tháng/Năm (từ dòng "Ngày, giờ giao dịch")
-   - Mã số lệnh giao dịch (từ dòng "Số lệnh giao dịch")
-   - Phân loại Thu/Chi: Đọc trực tiếp từ ô "Loại giao dịch" (Thu/Nhận tiền -> "Thu", Chuyển tiền -> "Chi")
-   - Số tiền giao dịch: Bóc tách số tiền sạch (ví dụ: 320,000 VND -> 320000)
-   - Người liên quan: Nếu Thu -> lấy "Người chuyển tiền", Nếu Chi -> lấy "Người nhận tiền"
-   - Kênh thanh toán: Lấy từ dòng "Kênh thanh toán"
-   - Nội dung chuyển tiền: Lấy từ dòng "Nội dung chuyển tiền"
-2. Tạo trang tính "Mail_Log" gồm 10 cột: ['STT', 'Ngày GD', 'Tháng/Năm', 'Mã GD', 'Loại GD', 'Số Tiền', 'Người Liên Quan', 'Kênh Thanh Toán', 'Nội Dung', 'Trạng Thái Nạp'].
-3. Khởi tạo cột "Trạng Thái Nạp" mặc định là "Chưa nạp".
+Hãy viết mã cho file độc lập "7_DocThuEmail_Bank.gs" để bóc tách thông tin từ các email đó và xuất kết quả ra trang tính "Mail_Log" gồm đúng 10 cột sau:
+1. STT
+2. Ngày GD (DD/MM/YYYY)
+3. Tháng/Năm (MM/YYYY)
+4. Mã GD (Số lệnh giao dịch)
+5. Loại GD (Thu / Chi)
+6. Số Tiền (Định dạng VNĐ)
+7. Người Liên Quan (Đối tác nhận hoặc chuyển)
+8. Kênh Thanh Toán
+9. Nội Dung Chuyển Tiền
+10. Trạng Thái Nạp (Mặc định là "Chưa nạp")
 
 [YÊU CẦU ĐẦU RA]:
-- Xuất khối mã hoàn chỉnh cho file "7_DocThuEmail_Bank.gs", sẵn sàng kết nối sang bước nạp sổ quỹ.
+- Xuất 1 khối mã Apps Script hoàn chỉnh, có thông báo số lượng email đã bóc tách thành công.
 ```
 
 ---
