@@ -8,8 +8,10 @@ COURSE_DATA.push(
     level: "Dành Cho Dân Văn Phòng",
     time: "25 phút",
     tags: ["Quản Lý Thu Chi", "Đọc Thử Gmail", "Bóc Tách Mail_Log", "Ngân Hàng Biến Động Số Dư", "Time-driven Trigger"],
-    desc: "Quy trình thiết kế hệ thống Quản lý Sổ Quỹ Thu/Chi và Dashboard dòng tiền tự động hóa trên Google Sheets bằng Apps Script. Hệ thống hỗ trợ: (1) Đọc thử email biên lai BIDV/VCB bóc tách dữ liệu ra sheet Mail_Log để kiểm tra, (2) Nạp chuẩn 12 cột vào sheet Giao_Dich, (3) Cài đặt Trigger tự động ngầm 5 phút, (4) Theo dõi 4 KPI & 2 biểu đồ, (5) Form nhập nhanh tiền mặt.",
     csvFile: "bai6.xlsx",
+    youtubeVideoId: "nXKgJhNeVrQ",
+    youtubeVideoTitle: "Video Hướng Dẫn Thực Hành Bài 6: Tự Động Hóa Quản Lý Sổ Quỹ Thu Chi & Đọc Gmail Ngân Hàng",
+    videoPoster: "assets/thumbnail_bai_6_youtube.png",
     scriptFile: "BaiTap6_QuanLyThuChi_Dashboard.gs",
     scriptContent: `/**
  * ==============================================================================
