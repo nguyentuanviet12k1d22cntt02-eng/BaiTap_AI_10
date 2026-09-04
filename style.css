@@ -1213,6 +1213,11 @@ html, body {
   line-height: 1.5;
 }
 
+.step-note-box > div {
+  flex: 1;
+  min-width: 0;
+}
+
 .step-note-box i {
   color: #F59E0B;
   font-size: 18px;

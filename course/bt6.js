@@ -867,7 +867,47 @@ function guiEmailBienLaiBIDV(params) {
   GmailApp.sendEmail(params.emailNhan, subject, "", {
     htmlBody: htmlBody
   });
-}`
+}
+
+/**
+ * ==============================================================================
+ * HÀM BỔ SUNG: Ép Google hiển thị bảng cấp quyền GmailApp
+ * (Dành cho trường hợp học viên chạy hàm trên không hiện bảng cấp quyền do try-catch)
+ * ==============================================================================
+ */
+function capQuyenGmail() {
+  GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Test", "Test");
+}`,
+        note: `
+          <div style="width: 100%;">
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: #b45309; font-size: 14px; margin-bottom: 6px;">
+              <span>⚠️ CHÚ Ý QUAN TRỌNG: NẾU KHÔNG THẤY HIỆN CỬA SỔ CẤP QUYỀN GMAIL</span>
+            </div>
+            <p style="margin: 0 0 8px 0; color: #78350f; font-size: 13px; line-height: 1.6;">
+              Do hàm chính được bọc trong khối <code>try...catch</code>, trong một số trường hợp khi học viên bấm Chạy lần đầu, Google Apps Script có thể không tự động bật cửa sổ <b>"Yêu cầu cấp quyền" (Authorization Required)</b> mà chỉ âm thầm bắt lỗi trong Log, khiến email biên lai không được gửi đi.<br>
+              👉 <b>Cách khắc phục:</b> Hãy sử dụng hàm bổ sung bên dưới để kích hoạt trang cấp quyền của Google:
+            </p>
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; margin: 10px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #1e293b;">
+                <span style="color: #94a3b8; font-size: 11.5px; font-family: monospace; font-weight: 600;">// Mã bổ sung: Ép hiển thị bảng cấp quyền GmailApp</span>
+                <button onclick="navigator.clipboard.writeText('function capQuyenGmail() {\\n  GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), &quot;Test&quot;, &quot;Test&quot;);\\n}'); if (window.showToast) window.showToast('Đã sao chép hàm capQuyenGmail()!');" style="background: #2563eb; color: #ffffff; border: none; border-radius: 4px; padding: 4px 12px; font-size: 11.5px; cursor: pointer; font-weight: 700;">
+                  Sao chép mã
+                </button>
+              </div>
+              <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #38bdf8; line-height: 1.6; white-space: pre-wrap;"><code>function capQuyenGmail() {
+  GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Test", "Test");
+}</code></pre>
+            </div>
+            <div style="color: #92400e; font-size: 12.5px; line-height: 1.6;">
+              <b>Quy trình xử lý 3 bước:</b>
+              <ol style="margin: 6px 0 0 18px; padding: 0;">
+                <li>Tại thanh công cụ chọn hàm của Apps Script, chọn hàm <code>capQuyenGmail</code> rồi bấm <b>Chạy (Run)</b>.</li>
+                <li>Google sẽ lập tức hiện hộp thoại <b>"Yêu cầu quyền truy cập"</b> ➔ Bấm <b>Xem lại quyền</b> ➔ Chọn tài khoản Google của bạn ➔ Bấm <b>Nâng cao</b> ➔ Bấm <b>Đi tới dự án (Không an toàn)</b> ➔ Bấm <b>Cho phép</b>.</li>
+                <li>Sau khi cấp quyền thành công, bạn quay lại chọn hàm chính <code>guiBoEmailBienLaiMauDeTest</code> và bấm <b>Chạy</b> để nhận đủ 3 email biên lai mẫu vào hòm thư!</li>
+              </ol>
+            </div>
+          </div>
+        `
       },
       {
         badge: "08",

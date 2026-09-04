@@ -126,3 +126,14 @@ function guiEmailBienLaiBIDV(params) {
     htmlBody: htmlBody
   });
 }
+
+/**
+ * ==============================================================================
+ * HÀM BỔ SUNG: Ép hiển thị bảng cấp quyền GmailApp
+ * (Dành cho trường hợp học viên chạy hàm trên không hiện bảng cấp quyền do try-catch)
+ * ==============================================================================
+ */
+function capQuyenGmail() {
+  GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Test", "Test");
+}
+
