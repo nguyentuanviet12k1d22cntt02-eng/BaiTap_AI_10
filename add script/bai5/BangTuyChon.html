@@ -3,7 +3,6 @@
 <head>
   <base target="_top">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -13,7 +12,7 @@
     }
     .config-card {
       background: #ffffff;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid #e2e8f0;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       padding: 24px;
@@ -22,9 +21,6 @@
       font-size: 1.15rem;
       font-weight: 700;
       color: #1B365D;
-      display: flex;
-      align-items: center;
-      gap: 10px;
       margin-bottom: 20px;
     }
     .form-check {
@@ -50,7 +46,7 @@
       color: #ffffff;
       border: none;
       font-weight: 600;
-      padding: 10px 24px;
+      padding: 11px 24px;
       border-radius: 8px;
       width: 100%;
       margin-top: 15px;
@@ -61,7 +57,7 @@
       color: #ffffff;
     }
     .info-badge {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #64748b;
       margin-top: 4px;
       display: block;
@@ -71,58 +67,58 @@
 <body>
   <div class="config-card">
     <div class="header-title">
-      <i class="fa-solid fa-sliders text-primary"></i> Cấu Hình Quy Tắc Làm Sạch Dữ Liệu
+      Tùy Chọn Quy Tắc Làm Sạch Dữ Liệu
     </div>
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" id="chkDedup" checked>
       <label class="form-check-label" for="chkDedup">
-        Khử trùng lặp mã giao dịch (Deduplication)
-        <span class="info-badge">Sử dụng Set() tra cứu O(1), chỉ giữ lại đơn đầu tiên</span>
+        Xóa bỏ mã đơn hàng bị trùng lặp
+        <span class="info-badge">Tự động phát hiện và chỉ giữ lại đơn hàng xuất hiện lần đầu tiên</span>
       </label>
     </div>
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" id="chkFixPhone" checked>
       <label class="form-check-label" for="chkFixPhone">
-        Tự động chuẩn hóa số điện thoại
-        <span class="info-badge">Xóa dấu chấm, khoảng trắng và tự thêm số "0" vào đầu</span>
+        Tự động sửa chuẩn số điện thoại
+        <span class="info-badge">Bỏ dấu chấm, khoảng trắng thừa và tự thêm số 0 vào đầu nếu bị thiếu</span>
       </label>
     </div>
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" id="chkProperName" checked>
       <label class="form-check-label" for="chkProperName">
-        Chuẩn hóa viết hoa họ tên (Proper Case)
-        <span class="info-badge">Xóa khoảng trắng thừa và viết hoa chữ cái đầu từng từ</span>
+        Viết hoa chữ cái đầu cho họ và tên
+        <span class="info-badge">Xóa khoảng trắng thừa và chuẩn hóa đẹp mắt (Ví dụ: Nguyễn Văn An)</span>
       </label>
     </div>
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" id="chkFilterRev" checked>
       <label class="form-check-label" for="chkFilterRev">
-        Loại bỏ đơn có doanh thu &le; 0
-        <span class="info-badge">Lọc bỏ triệt để các đơn lỗi âm hoặc bằng 0 từ sàn</span>
+        Loại bỏ đơn hàng có doanh thu nhỏ hơn hoặc bằng 0
+        <span class="info-badge">Lọc bỏ triệt để các đơn hàng lỗi doanh thu âm hoặc bằng 0</span>
       </label>
     </div>
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" id="chkSplitChannel" checked>
       <label class="form-check-label" for="chkSplitChannel">
-        Tự động chia tách sheet theo từng kênh bán
-        <span class="info-badge">Tạo tab riêng cho Shopee, Lazada, TikTok Shop, Website</span>
+        Tự động tách riêng từng sheet theo kênh bán
+        <span class="info-badge">Tạo các trang riêng cho Shopee, Lazada, TikTok Shop, Website</span>
       </label>
     </div>
 
     <button class="btn-run" onclick="submitConfig()">
-      <i class="fa-solid fa-bolt me-2"></i> Bắt Đầu Xử Lý Ngay (< 2s)
+      Bắt Đầu Xử Lý Làm Sạch Dữ Liệu (Dưới 2 Giây)
     </button>
   </div>
 
   <script>
     function submitConfig() {
       const btn = document.querySelector('.btn-run');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý siêu tốc trên RAM...';
+      btn.innerText = 'Đang xử lý dữ liệu...';
       btn.disabled = true;
 
       google.script.run
@@ -130,11 +126,11 @@
           google.script.host.close();
         })
         .withFailureHandler(function(err) {
-          alert('Lỗi: ' + err.message);
-          btn.innerHTML = '<i class="fa-solid fa-bolt me-2"></i> Thử lại';
+          alert('Có lỗi xảy ra: ' + err.message);
+          btn.innerText = 'Thử lại';
           btn.disabled = false;
         })
-        .chayLamSachDuLieuInRam();
+        .chayLamSachDuLieuNhanh();
     }
   </script>
 </body>
