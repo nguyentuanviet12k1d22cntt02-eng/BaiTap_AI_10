@@ -1,7 +1,7 @@
 # KẾ HOẠCH THỰC HÀNH CHUẨN BÀI 5: TỰ ĐỘNG KIỂM TRA VÀ LÀM SẠCH DỮ LIỆU LỚN
 ## KIẾN TRÚC VI BƯỚC ĐỘC LẬP (1 BƯỚC = 1 FILE DUY NHẤT)
 
-> Dựa trên file dữ liệu `bai_tap_5_raw_data_1000_rows.csv` (sheet `RawData_BT5`), học viên sẽ xây dựng một ứng dụng Kiểm Tra Và Làm Sạch Dữ Liệu Đơn Hàng hoàn chỉnh. Mỗi bước chỉ tạo đúng 1 file trong Google Apps Script Editor và bấm chạy nghiệm thu ngay lập tức!
+> Dựa trên file dữ liệu `bai_tap_5_raw_data_1000_rows.xlsx` (sheet `RawData_BT5`), học viên sẽ xây dựng một ứng dụng Kiểm Tra Và Làm Sạch Dữ Liệu Đơn Hàng hoàn chỉnh. Mỗi bước chỉ tạo đúng 1 file trong Google Apps Script Editor và bấm chạy nghiệm thu ngay lập tức!
 
 ---
 

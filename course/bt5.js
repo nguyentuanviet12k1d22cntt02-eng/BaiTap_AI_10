@@ -8,7 +8,7 @@ COURSE_DATA.push(
     level: "Dành Cho Dân Văn Phòng",
     time: "25 phút",
     tags: ["Làm sạch dữ liệu", "Xử lý siêu tốc", "Xóa đơn trùng", "Sửa số điện thoại", "Viết hoa họ tên", "Tách sheet tự động", "Báo cáo tổng quan", "Hẹn giờ tự động"],
-    csvFile: "bai_tap_5_raw_data_1000_rows.csv",
+    csvFile: "bai_tap_5_raw_data_1000_rows.xlsx",
     scriptFile: "BaiTap5_LamSachDuLieuLon_Optimization.gs",
     scriptContent: `/**
  * BÀI TẬP 5: TỰ ĐỘNG KIỂM TRA VÀ LÀM SẠCH DỮ LIỆU LỚN SIÊU TỐC

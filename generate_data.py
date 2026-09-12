@@ -720,3 +720,11 @@ for title, headers, rows_data, color_hex in bt7_sheets:
 excel_path_bt7 = os.path.join(DATA_DIR, "bai_tap_7_quan_ly_ban_hang.xlsx")
 wb_bt7.save(excel_path_bt7)
 print(f"Created Exercise 7 standalone Excel workbook successfully at: {excel_path_bt7}")
+
+# 3. Tạo file Excel riêng cho bài 5
+wb_bt5 = openpyxl.Workbook()
+wb_bt5.remove(wb_bt5.active)
+create_and_style_sheet(wb_bt5, "RawData_BT5", headers_bt5, raw_rows, "1B365D")
+excel_path_bt5 = os.path.join(DATA_DIR, "bai_tap_5_raw_data_1000_rows.xlsx")
+wb_bt5.save(excel_path_bt5)
+print(f"Created Exercise 5 standalone Excel workbook successfully at: {excel_path_bt5}")
