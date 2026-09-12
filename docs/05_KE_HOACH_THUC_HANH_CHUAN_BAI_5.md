@@ -53,10 +53,12 @@ Chưa cần viết code ở bước này.
 
 ### BƯỚC 1: TẠO FILE `1_Menu_LamSach.gs` (MENU TIỆN ÍCH)
 
-* **Thao tác:** Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `1_Menu_LamSach.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `1_Menu_LamSach.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt Bước 1:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "1_Menu_LamSach.gs" để tạo một thanh menu tên "Làm Sạch Dữ Liệu" trên Google Sheets gồm các mục:
 1. 1. Xem Báo Cáo Tổng Quan
 2. 2. Kiểm Tra Dữ Liệu (Xuất Sheet Báo Cáo Lỗi)
@@ -73,10 +75,12 @@ Lưu ý: Không dùng biểu tượng cảm xúc trong menu và thông báo.
 
 ### BƯỚC 2: TẠO FILE `2_KiemTra_BaoCaoLoi.gs` (BƯỚC KIỂM TRA LỖI AN TOÀN)
 
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `2_KiemTra_BaoCaoLoi.gs` ➔ Dán mã quét kiểm tra an toàn xuất ra sheet `Bao_Cao_Loi`.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `2_KiemTra_BaoCaoLoi.gs` ➔ Dán mã quét kiểm tra an toàn xuất ra sheet `Bao_Cao_Loi`.
 * **Câu Prompt Bước 2:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "2_KiemTra_BaoCaoLoi.gs":
 Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) và xuất danh sách các dòng bị lỗi sang sheet mới tên "Bao_Cao_Loi" để tôi đối soát:
 - Tìm các lỗi: mã đơn bị để trống, mã đơn bị trùng lặp, doanh thu nhỏ hơn hoặc bằng 0, số điện thoại có dấu chấm hoặc mất số 0 đầu, họ tên viết hoa lộn xộn hoặc thừa khoảng trắng.
@@ -89,10 +93,12 @@ Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) v�
 
 ### BƯỚC 3: TẠO FILE `3_XuLy_LamSach.gs` (LÀM SẠCH DỮ LIỆU SIÊU TỐC DƯỚI 2 GIÂY)
 
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `3_XuLy_LamSach.gs` ➔ Dán mã xử lý làm sạch dữ liệu trong 2 giây ra sheet `DataCleaned_BT5`.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `3_XuLy_LamSach.gs` ➔ Dán mã xử lý làm sạch dữ liệu trong 2 giây ra sheet `DataCleaned_BT5`.
 * **Câu Prompt Bước 3:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "3_XuLy_LamSach.gs":
 Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lưu kết quả sang sheet mới tên "DataCleaned_BT5":
 - Xóa bỏ các dòng có mã đơn để trống, mã đơn bị trùng lặp hoặc doanh thu nhỏ hơn hay bằng 0.
@@ -106,10 +112,12 @@ Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lư
 
 ### BƯỚC 4: TẠO FILE `4_TachSheet_KenhBan.gs` (TỰ ĐỘNG TÁCH SHEET THEO KÊNH BÁN HÀNG)
 
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `4_TachSheet_KenhBan.gs` ➔ Dán mã tự động chia tách dữ liệu sạch thành các sheet từng sàn.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `4_TachSheet_KenhBan.gs` ➔ Dán mã tự động chia tách dữ liệu sạch thành các sheet từng sàn.
 * **Câu Prompt Bước 4:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
 Đọc dữ liệu từ sheet "DataCleaned_BT5" và tự động tách các đơn hàng ra từng sheet riêng theo cột Kênh Bán (gồm Shopee, Lazada, TikTok Shop, Website). Mỗi sheet có màu tiêu đề riêng để phân biệt và không dùng biểu tượng cảm xúc.
 ```
@@ -118,10 +126,12 @@ Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
 
 ### BƯỚC 5: TẠO FILE `5_BaoCao_TongQuan.gs` (TẠO TRANG BÁO CÁO VÀ BIỂU ĐỒ THỐNG KÊ)
 
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `5_BaoCao_TongQuan.gs` ➔ Dán mã tạo 4 thẻ con số tổng quan và 2 biểu đồ thống kê.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `5_BaoCao_TongQuan.gs` ➔ Dán mã tạo 4 thẻ con số tổng quan và 2 biểu đồ thống kê.
 * **Câu Prompt Bước 5:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "5_BaoCao_TongQuan.gs":
 Tạo trang "Bao_Cao_Tong_Quan" ở đầu bảng tính:
 - Hiển thị 4 ô số liệu lớn: Tổng dòng ban đầu, Dữ liệu sạch hợp lệ, Số dòng đã loại bỏ, Tỷ lệ dữ liệu đạt chuẩn (%).
@@ -133,10 +143,12 @@ Không dùng biểu tượng cảm xúc trong tiêu đề hoặc biểu đồ.
 
 ### BƯỚC 6: TẠO FILE `6_HenGio_TuDong.gs` (HẸN GIỜ TỰ ĐỘNG CHẠY LÚC 23:30 MỖI ĐÊM)
 
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `6_HenGio_TuDong.gs` ➔ Dán mã cài đặt hẹn giờ tự động hàng đêm.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `6_HenGio_TuDong.gs` ➔ Dán mã cài đặt hẹn giờ tự động hàng đêm.
 * **Câu Prompt Bước 6:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "6_HenGio_TuDong.gs":
 Cài đặt tính năng tự động chạy làm sạch dữ liệu, tách sheet và cập nhật báo cáo vào lúc 23:30 mỗi đêm mà tôi không cần phải mở máy tính. Có cả hàm để tắt hẹn giờ khi cần.
 ```
@@ -145,10 +157,12 @@ Cài đặt tính năng tự động chạy làm sạch dữ liệu, tách sheet
 
 ### BƯỚC 7: TẠO FILE `BangTuyChon.html` (CỬA SỔ TÙY CHỌN QUY TẮC LÀM SẠCH)
 
-* **Thao tác:** Bấm dấu (+) chọn HTML ➔ Đặt tên file là `BangTuyChon.html` ➔ Dán mã giao diện cửa sổ tùy chọn sạch sẽ, dễ nhìn.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn HTML ➔ Đặt tên file là `BangTuyChon.html` ➔ Dán mã giao diện cửa sổ tùy chọn sạch sẽ, dễ nhìn.
 * **Câu Prompt Bước 7:**
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy tạo file giao diện "BangTuyChon.html":
 Hiển thị một cửa sổ popup đơn giản, có các ô tích chọn để tôi có thể bật hoặc tắt:
 1. Xóa mã đơn trùng lặp

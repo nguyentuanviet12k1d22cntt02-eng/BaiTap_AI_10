@@ -24,6 +24,8 @@
 ### 2. MASTER PROMPT TỔNG HỢP (NẾU MUỐN LÀM TRỌN GÓI)
 
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Bạn là chuyên gia Google Sheets. Tôi có sheet "RawData_BT5" chứa hơn 1.000 dòng đơn hàng từ dòng 4 (gồm Mã Giao Dịch, Tên Khách Hàng, Số Điện Thoại, Kênh Bán, Doanh Thu, Ngày Tạo).
 
 Hãy viết trọn bộ mã Google Apps Script tự động hóa làm sạch dữ liệu:
@@ -70,9 +72,11 @@ Chưa cần viết code ở bước này.
 ---
 
 #### BƯỚC 1: TẠO FILE `1_Menu_LamSach.gs`
-* **Thao tác:** Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `1_Menu_LamSach.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `1_Menu_LamSach.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "1_Menu_LamSach.gs" để tạo một thanh menu tên "Làm Sạch Dữ Liệu" trên Google Sheets gồm các mục:
 1. 1. Xem Báo Cáo Tổng Quan
 2. 2. Kiểm Tra Dữ Liệu (Xuất Sheet Báo Cáo Lỗi)
@@ -88,9 +92,11 @@ Lưu ý: Không dùng biểu tượng cảm xúc trong menu và thông báo.
 ---
 
 #### BƯỚC 2: TẠO FILE `2_KiemTra_BaoCaoLoi.gs`
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `2_KiemTra_BaoCaoLoi.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `2_KiemTra_BaoCaoLoi.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "2_KiemTra_BaoCaoLoi.gs":
 Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) và xuất danh sách các dòng bị lỗi sang sheet mới tên "Bao_Cao_Loi" để tôi đối soát:
 - Tìm các lỗi: mã đơn bị để trống, mã đơn bị trùng lặp, doanh thu nhỏ hơn hoặc bằng 0, số điện thoại có dấu chấm hoặc mất số 0 đầu, họ tên viết hoa lộn xộn hoặc thừa khoảng trắng.
@@ -102,9 +108,11 @@ Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) v�
 ---
 
 #### BƯỚC 3: TẠO FILE `3_XuLy_LamSach.gs`
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `3_XuLy_LamSach.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `3_XuLy_LamSach.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "3_XuLy_LamSach.gs":
 Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lưu kết quả sang sheet mới tên "DataCleaned_BT5":
 - Xóa bỏ các dòng có mã đơn để trống, mã đơn bị trùng lặp hoặc doanh thu nhỏ hơn hay bằng 0.
@@ -117,9 +125,11 @@ Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lư
 ---
 
 #### BƯỚC 4: TẠO FILE `4_TachSheet_KenhBan.gs`
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `4_TachSheet_KenhBan.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `4_TachSheet_KenhBan.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
 Đọc dữ liệu từ sheet "DataCleaned_BT5" và tự động tách các đơn hàng ra từng sheet riêng theo cột Kênh Bán (gồm Shopee, Lazada, TikTok Shop, Website). Mỗi sheet có màu tiêu đề riêng để phân biệt và không dùng biểu tượng cảm xúc.
 ```
@@ -127,9 +137,11 @@ Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
 ---
 
 #### BƯỚC 5: TẠO FILE `5_BaoCao_TongQuan.gs`
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `5_BaoCao_TongQuan.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `5_BaoCao_TongQuan.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "5_BaoCao_TongQuan.gs":
 Tạo trang "Bao_Cao_Tong_Quan" ở đầu bảng tính:
 - Hiển thị 4 ô số liệu lớn: Tổng dòng ban đầu, Dữ liệu sạch hợp lệ, Số dòng đã loại bỏ, Tỷ lệ dữ liệu đạt chuẩn (%).
@@ -140,9 +152,11 @@ Không dùng biểu tượng cảm xúc trong tiêu đề hoặc biểu đồ.
 ---
 
 #### BƯỚC 6: TẠO FILE `6_HenGio_TuDong.gs`
-* **Thao tác:** Bấm dấu (+) chọn Script ➔ Đặt tên file là `6_HenGio_TuDong.gs` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là `6_HenGio_TuDong.gs` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy viết mã cho file "6_HenGio_TuDong.gs":
 Cài đặt tính năng tự động chạy làm sạch dữ liệu, tách sheet và cập nhật báo cáo vào lúc 23:30 mỗi đêm mà tôi không cần phải mở máy tính. Có cả hàm để tắt hẹn giờ khi cần.
 ```
@@ -150,9 +164,11 @@ Cài đặt tính năng tự động chạy làm sạch dữ liệu, tách sheet
 ---
 
 #### BƯỚC 7: TẠO FILE `BangTuyChon.html`
-* **Thao tác:** Bấm dấu (+) chọn HTML ➔ Đặt tên file là `BangTuyChon.html` ➔ Dán mã AI sinh ra vào.
+* **Thao tác:** Đính kèm file `QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md` ➔ Bấm dấu (+) chọn HTML ➔ Đặt tên file là `BangTuyChon.html` ➔ Dán mã AI sinh ra vào.
 * **Câu Prompt:**
 ```text
+[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
 Hãy tạo file giao diện "BangTuyChon.html":
 Hiển thị một cửa sổ popup đơn giản, có các ô tích chọn để tôi có thể bật hoặc tắt:
 1. Xóa mã đơn trùng lặp

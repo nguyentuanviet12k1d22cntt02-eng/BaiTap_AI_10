@@ -484,7 +484,9 @@ function chayTuDongBanDem() {
       { icon: "ph-chart-pie-slice", title: "5. Báo Cáo & Hẹn Giờ", desc: "Hiển thị 4 thẻ thống kê, biểu đồ và hẹn giờ chạy đêm 23:30" }
     ],
 
-    masterPrompt: `Bạn là chuyên gia Google Sheets. Tôi có sheet "RawData_BT5" chứa hơn 1.000 dòng đơn hàng từ dòng 4 (gồm Mã Giao Dịch, Tên Khách Hàng, Số Điện Thoại, Kênh Bán, Doanh Thu, Ngày Tạo).
+    masterPrompt: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Bạn là chuyên gia Google Sheets. Tôi có sheet "RawData_BT5" chứa hơn 1.000 dòng đơn hàng từ dòng 4 (gồm Mã Giao Dịch, Tên Khách Hàng, Số Điện Thoại, Kênh Bán, Doanh Thu, Ngày Tạo).
 
 Hãy viết trọn bộ mã Google Apps Script tự động hóa làm sạch dữ liệu:
 1. Tạo thanh menu "Làm Sạch Dữ Liệu" trên bảng tính để dễ bấm thao tác.
@@ -545,8 +547,10 @@ Chưa cần viết code ở bước này.`
       {
         badge: "01",
         title: "Bước 1: Tạo File 1_Menu_LamSach.gs (Tạo Menu Tiện Ích Trên Bảng Tính)",
-        desc: "Thao tác: Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 1_Menu_LamSach.gs ➔ Dán mã AI sinh ra vào.",
-        promptBox: `Hãy viết mã cho file "1_Menu_LamSach.gs" để tạo một thanh menu tên "Làm Sạch Dữ Liệu" trên Google Sheets gồm các mục:
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Mở Tiện ích mở rộng ➔ Apps Script ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 1_Menu_LamSach.gs ➔ Dán mã AI sinh ra vào.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "1_Menu_LamSach.gs" để tạo một thanh menu tên "Làm Sạch Dữ Liệu" trên Google Sheets gồm các mục:
 1. 1. Xem Báo Cáo Tổng Quan
 2. 2. Kiểm Tra Dữ Liệu (Xuất Sheet Báo Cáo Lỗi)
 3. 3. Chạy Làm Sạch Dữ Liệu (Dưới 2 Giây)
@@ -560,8 +564,10 @@ Lưu ý: Không dùng biểu tượng cảm xúc trong menu và thông báo.`
       {
         badge: "02",
         title: "Bước 2: Tạo File 2_KiemTra_BaoCaoLoi.gs (Kiểm Tra Và Lập Danh Sách Lỗi)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là 2_KiemTra_BaoCaoLoi.gs ➔ Dán mã quét kiểm tra an toàn xuất ra sheet Bao_Cao_Loi.",
-        promptBox: `Hãy viết mã cho file "2_KiemTra_BaoCaoLoi.gs":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 2_KiemTra_BaoCaoLoi.gs ➔ Dán mã quét kiểm tra an toàn xuất ra sheet Bao_Cao_Loi.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "2_KiemTra_BaoCaoLoi.gs":
 Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) và xuất danh sách các dòng bị lỗi sang sheet mới tên "Bao_Cao_Loi" để tôi đối soát:
 - Tìm các lỗi: mã đơn bị để trống, mã đơn bị trùng lặp, doanh thu nhỏ hơn hoặc bằng 0, số điện thoại có dấu chấm hoặc mất số 0 đầu, họ tên viết hoa lộn xộn hoặc thừa khoảng trắng.
 - Liệt kê rõ: Dòng lỗi, Mã giao dịch, Tên khách hàng, Số điện thoại, Kênh bán, Doanh thu, Phân loại lỗi và Chi tiết lỗi.
@@ -571,8 +577,10 @@ Quét toàn bộ dữ liệu ở sheet "RawData_BT5" (từ dòng 4 trở đi) v�
       {
         badge: "03",
         title: "Bước 3: Tạo File 3_XuLy_LamSach.gs (Làm Sạch Dữ Liệu Siêu Tốc Dưới 2 Giây)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là 3_XuLy_LamSach.gs ➔ Dán mã xử lý làm sạch dữ liệu trong 2 giây ra sheet DataCleaned_BT5.",
-        promptBox: `Hãy viết mã cho file "3_XuLy_LamSach.gs":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 3_XuLy_LamSach.gs ➔ Dán mã xử lý làm sạch dữ liệu trong 2 giây ra sheet DataCleaned_BT5.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "3_XuLy_LamSach.gs":
 Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lưu kết quả sang sheet mới tên "DataCleaned_BT5":
 - Xóa bỏ các dòng có mã đơn để trống, mã đơn bị trùng lặp hoặc doanh thu nhỏ hơn hay bằng 0.
 - Sửa họ tên: viết hoa chữ cái đầu của mỗi từ và xóa các khoảng trắng thừa.
@@ -583,15 +591,19 @@ Tự động làm sạch toàn bộ dữ liệu từ sheet "RawData_BT5" và lư
       {
         badge: "04",
         title: "Bước 4: Tạo File 4_TachSheet_KenhBan.gs (Tự Động Tách Sheet Theo Từng Kênh Bán)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là 4_TachSheet_KenhBan.gs ➔ Dán mã tự động chia tách dữ liệu sạch thành các sheet từng sàn.",
-        promptBox: `Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 4_TachSheet_KenhBan.gs ➔ Dán mã tự động chia tách dữ liệu sạch thành các sheet từng sàn.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "4_TachSheet_KenhBan.gs":
 Đọc dữ liệu từ sheet "DataCleaned_BT5" và tự động tách các đơn hàng ra từng sheet riêng theo cột Kênh Bán (gồm Shopee, Lazada, TikTok Shop, Website). Mỗi sheet có màu tiêu đề riêng để phân biệt và không dùng biểu tượng cảm xúc.`
       },
       {
         badge: "05",
         title: "Bước 5: Tạo File 5_BaoCao_TongQuan.gs (Tạo Trang Báo Cáo Và Biểu Đồ Thống Kê)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là 5_BaoCao_TongQuan.gs ➔ Dán mã tạo 4 thẻ con số tổng quan và 2 biểu đồ thống kê.",
-        promptBox: `Hãy viết mã cho file "5_BaoCao_TongQuan.gs":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 5_BaoCao_TongQuan.gs ➔ Dán mã tạo 4 thẻ con số tổng quan và 2 biểu đồ thống kê.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "5_BaoCao_TongQuan.gs":
 Tạo trang "Bao_Cao_Tong_Quan" ở đầu bảng tính:
 - Hiển thị 4 ô số liệu lớn: Tổng dòng ban đầu, Dữ liệu sạch hợp lệ, Số dòng đã loại bỏ, Tỷ lệ dữ liệu đạt chuẩn (%).
 - Vẽ 2 biểu đồ: một biểu đồ tròn thể hiện cơ cấu doanh thu theo kênh bán và một biểu đồ cột phân loại các dạng lỗi tìm thấy.
@@ -600,15 +612,19 @@ Không dùng biểu tượng cảm xúc trong tiêu đề hoặc biểu đồ.`
       {
         badge: "06",
         title: "Bước 6: Tạo File 6_HenGio_TuDong.gs (Hẹn Giờ Tự Động Chạy Lúc 23:30 Mỗi Đêm)",
-        desc: "Thao tác: Bấm dấu (+) chọn Script ➔ Đặt tên file là 6_HenGio_TuDong.gs ➔ Dán mã cài đặt hẹn giờ tự động hàng đêm.",
-        promptBox: `Hãy viết mã cho file "6_HenGio_TuDong.gs":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn Script ➔ Đặt tên file là 6_HenGio_TuDong.gs ➔ Dán mã cài đặt hẹn giờ tự động hàng đêm.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy viết mã cho file "6_HenGio_TuDong.gs":
 Cài đặt tính năng tự động chạy làm sạch dữ liệu, tách sheet và cập nhật báo cáo vào lúc 23:30 mỗi đêm mà tôi không cần phải mở máy tính. Có cả hàm để tắt hẹn giờ khi cần.`
       },
       {
         badge: "07",
         title: "Bước 7: Tạo File BangTuyChon.html (Cửa Sổ Tùy Chọn Quy Tắc Làm Sạch)",
-        desc: "Thao tác: Bấm dấu (+) chọn HTML ➔ Đặt tên file là BangTuyChon.html ➔ Dán mã giao diện cửa sổ tùy chọn sạch sẽ, dễ nhìn.",
-        promptBox: `Hãy tạo file giao diện "BangTuyChon.html":
+        desc: "Thao tác: Đính kèm file QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md ➔ Bấm dấu (+) chọn HTML ➔ Đặt tên file là BangTuyChon.html ➔ Dán mã giao diện cửa sổ tùy chọn sạch sẽ, dễ nhìn.",
+        promptBox: `[TIÊU CHUẨN KỸ THUẬT]: Hãy áp dụng toàn bộ quy tắc trong file "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
+
+Hãy tạo file giao diện "BangTuyChon.html":
 Hiển thị một cửa sổ popup đơn giản, có các ô tích chọn để tôi có thể bật hoặc tắt:
 1. Xóa mã đơn trùng lặp
 2. Tự động sửa số điện thoại
