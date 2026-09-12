@@ -1,42 +1,26 @@
-# HƯỚNG DẪN THỰC HÀNH BÀI 5: HỆ THỐNG KIỂM TOÁN & LÀM SẠCH DỮ LIỆU LỚN IN-MEMORY
-## TỐI ƯU HIỆU NĂNG XỬ LÝ 1.000 DÒNG TRONG DƯỚI 2 GIÂY TRÊN GOOGLE SHEETS
+# KẾ HOẠCH THỰC HÀNH CHUẨN BÀI 5: HỆ THỐNG KIỂM TOÁN & LÀM SẠCH DỮ LIỆU LỚN IN-MEMORY
+## KIẾN TRÚC VI BƯỚC ĐỘC LẬP (1 BƯỚC = 1 FILE DUY NHẤT)
+
+> **Mô hình 1 Vi Bước = 1 File Độc Lập:** Dựa trên file dữ liệu `bai_tap_5_raw_data_1000_rows.csv` (sheet `RawData_BT5`), học viên sẽ xây dựng một ứng dụng Kiểm Toán & Làm Sạch Dữ Liệu Lớn E-Commerce hoàn chỉnh. Mỗi bước chỉ tạo đúng 1 file trong Google Apps Script Editor và bấm chạy nghiệm thu ngay lập tức!
 
 ---
 
-### 📖 1. TÌNH HUỐNG DOANH NGHIỆP THỰC TẾ (CASE STUDY CONTEXT)
-
-* **Bối cảnh:** Bạn là Chuyên viên Phân tích Dữ liệu / Vận hành E-Commerce của chuỗi cửa hàng bán lẻ đa kênh. Hàng ngày, hệ thống trả về file log hơn 1.000 đơn hàng đổ về từ các sàn Shopee, Lazada, TikTok Shop và Website tại sheet `RawData_BT5`.
-* **Nỗi đau khi làm thủ công (Before):** 
-  - Mã đơn hàng bị rỗng hoặc bị trùng lặp do khách ấn mua 2 lần.
-  - Số điện thoại bị mất số '0' ở đầu do định dạng số, hoặc dính dấu chấm/khoảng trắng (`0903.123.456`, `988123456`).
-  - Họ tên viết hoa/thường tùy tiện và thừa nhiều khoảng trắng.
-  - Doanh thu có dòng bị âm hoặc bằng 0 do lỗi hệ thống chiết khấu.
-  - Dùng các hàm Excel thủ công (Trim, Proper, Filter, Remove Duplicates) mất cả buổi chiều, dễ làm đơ giật bảng tính và có nguy cơ làm hỏng dữ liệu gốc.
-* **Giải pháp AI Tự Động Hóa Toàn Diện (After):**
-  - Sử dụng kiến trúc **1 Vi Bước = 1 File Độc Lập**.
-  - Bước đệm kiểm toán an toàn: Quét dữ liệu thô và xuất báo cáo lỗi chi tiết ra sheet `Audit_Log` để đối soát trước.
-  - Động cơ **In-Memory RAM Engine**: Đọc dữ liệu 1 lần bằng `getValues()`, xử lý hoàn toàn trên mảng RAM với cấu trúc `Set()` khử trùng lặp O(1), ghi xuống sheet `DataCleaned_BT5` đúng 1 lần bằng `setValues()` trong **dưới 2 giây**!
-  - Tự động phân bổ dữ liệu sạch ra các tab từng sàn (`Sàn_Shopee`, `Sàn_Lazada`, `Sàn_TikTok Shop`, `Sàn_Website`).
-  - Xây dựng **Dashboard Kiểm Soát Chất Lượng** và cài đặt Trigger chạy ngầm 23:30 mỗi đêm.
-
----
-
-### 📂 2. CẤU TRÚC HỆ THỐNG TẬP TIN TRONG DỰ ÁN
+## 📂 SƠ ĐỒ TOÀN BỘ CÁC FILE ĐỘC LẬP TRONG DỰ ÁN
 
 ```
-📁 Hệ Thống Làm Sạch Dữ Liệu Lớn (Big Data Cleaning System)
-├── 📜 1_Menu_DataCleaning.gs    (Bước 1: Menu điều khiển trung tâm & gọi popup modal)
-├── 📜 2_AuditScan_BaoCaoLoi.gs   (Bước 2: Quét kiểm toán dữ liệu, xuất bảng Audit_Log đối soát an toàn)
-├── 📜 3_InRam_CleanEngine.gs    (Bước 3: Động cơ làm sạch mảng trên RAM siêu tốc < 2s, xuất DataCleaned_BT5)
+📁 Big Data Quality & Cleaning System
+├── 📜 1_Menu_DataCleaning.gs    (Bước 1: Menu tiện ích trên thanh công cụ & Gọi popup)
+├── 📜 2_AuditScan_BaoCaoLoi.gs   (Bước 2: Quét kiểm toán dữ liệu thô ra sheet Audit_Log)
+├── 📜 3_InRam_CleanEngine.gs    (Bước 3: Động cơ làm sạch mảng trên RAM < 2s, xuất DataCleaned_BT5)
 ├── 📜 4_Split_ByChannel.gs      (Bước 4: Tự động tách dữ liệu thành các sheet theo sàn bán hàng)
-├── 📜 5_Dashboard_DataQuality.gs(Bước 5: Dashboard phân tích chất lượng dữ liệu & tỷ trọng doanh thu)
-├── 📜 6_Trigger_NightlyClean.gs (Bước 6: Cài đặt Time-driven Trigger chạy tự động 23:30 hàng đêm)
-└── 🌐 CleanConfigForm.html      (Bước 7: Giao diện Pop-up cấu hình bộ lọc linh hoạt Aesthetic Blue)
+├── 📜 5_Dashboard_DataQuality.gs(Bước 5: Khởi tạo Dashboard KPI chất lượng & 2 Biểu đồ)
+├── 📜 6_Trigger_NightlyClean.gs (Bước 6: Cài đặt Time-driven Trigger chạy ngầm 23:30 mỗi đêm)
+└── 🌐 CleanConfigForm.html      (Bước 7: Giao diện Pop-up cấu hình quy tắc lọc Aesthetic Blue)
 ```
 
 ---
 
-### 🔄 3. LỘ TRÌNH 8 VI BƯỚC THỰC HÀNH CHI TIẾT
+## 🔄 LỘ TRÌNH 8 VI BƯỚC THỰC HÀNH CHI TIẾT
 
 ```mermaid
 graph TD
@@ -47,15 +31,17 @@ graph TD
     B4 --> B5[Bước 5: 5_Dashboard_DataQuality.gs - Dashboard KPI & Biểu Đồ]
     B5 --> B6[Bước 6: 6_Trigger_NightlyClean.gs - Hẹn Giờ 23:30 Ban Đêm]
     B6 --> B7[Bước 7: CleanConfigForm.html - Pop-up Cấu Hình Lọc]
+    B7 --> B8[Bước 8: Nghiệm Thu Toàn Diện & Tự Động Hóa]
 ```
 
 ---
 
-#### 🧠 BƯỚC 0: AI TRINH SÁT & KIỂM KÊ SHEET `RawData_BT5`
+### 🧠 BƯỚC 0: YÊU CẦU AI TỰ ĐỌC & NẮM RÕ SHEET `RawData_BT5`
+
 * **Mục tiêu:** Cho AI đọc link Google Sheets để hiểu cấu trúc 6 cột dữ liệu thô và nhận diện các dạng dữ liệu bẩn trước khi sinh mã.
-* **Câu Prompt:**
+* **Câu Prompt Bước 0:**
+
 ```text
-[YÊU CẦU TRINH SÁT BẢNG TÍNH]:
 Link Google Sheets: [Dán đường link bảng tính của bạn vào đây]
 
 Tôi đang có một file bảng tính quản lý dữ liệu log đơn hàng đa sàn tại trang tính "RawData_BT5".
@@ -70,9 +56,11 @@ Nhiệm vụ của bạn ở bước này:
 
 ---
 
-#### 📌 BƯỚC 1: TẠO FILE `1_Menu_DataCleaning.gs`
-* **Mục tiêu:** Tạo thanh Menu điều khiển trung tâm trên Google Sheets.
-* **Câu Prompt:**
+### 📌 BƯỚC 1: TẠO FILE `1_Menu_DataCleaning.gs` (MENU ĐIỀU KHIỂN TRUNG TÂM)
+
+* **Thao tác:** Mở Apps Script ➔ Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `1_Menu_DataCleaning.gs` ➔ Dán mã AI sinh ra vào.
+* **Câu Prompt Bước 1:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -98,9 +86,11 @@ Dựa vào bảng tính đã trinh sát ở Bước 0, hãy viết mã cho file 
 
 ---
 
-#### 🔍 BƯỚC 2: TẠO FILE `2_AuditScan_BaoCaoLoi.gs`
-* **Mục tiêu:** Quét kiểm toán an toàn dữ liệu thô, không đè lên dữ liệu gốc, xuất ra tab `Audit_Log` để đối soát.
-* **Câu Prompt:**
+### 🔍 BƯỚC 2: TẠO FILE `2_AuditScan_BaoCaoLoi.gs` (BƯỚC ĐỆM KIỂM TOÁN LỖI AN TOÀN)
+
+* **Thao tác:** Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `2_AuditScan_BaoCaoLoi.gs` ➔ Dán mã quét kiểm toán an toàn xuất ra sheet `Audit_Log`.
+* **Câu Prompt Bước 2:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -126,9 +116,11 @@ Hãy viết toàn bộ mã nguồn cho file độc lập "2_AuditScan_BaoCaoLoi.
 
 ---
 
-#### ⚡ BƯỚC 3: TẠO FILE `3_InRam_CleanEngine.gs`
-* **Mục tiêu:** Động cơ làm sạch trên RAM xử lý 1.000 dòng < 2 giây, khử trùng, chuẩn hóa họ tên & SĐT, xuất tab `DataCleaned_BT5`.
-* **Câu Prompt:**
+### ⚡ BƯỚC 3: TẠO FILE `3_InRam_CleanEngine.gs` (ĐỘNG CƠ LÀM SẠCH TRÊN RAM SIÊU TỐC < 2s)
+
+* **Thao tác:** Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `3_InRam_CleanEngine.gs` ➔ Dán mã động cơ làm sạch trên RAM xuất tab `DataCleaned_BT5`.
+* **Câu Prompt Bước 3:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm (In-Memory Batching, getValues/setValues đúng 1 lần).
 
@@ -157,9 +149,11 @@ Hãy viết mã cho file độc lập "3_InRam_CleanEngine.gs" chứa hàm chayL
 
 ---
 
-#### 📂 BƯỚC 4: TẠO FILE `4_Split_ByChannel.gs`
-* **Mục tiêu:** Tự động quét và tách dữ liệu sạch thành các sheet riêng cho từng kênh bán (`Sàn_Shopee`, `Sàn_Lazada`, `Sàn_TikTok Shop`, `Sàn_Website`).
-* **Câu Prompt:**
+### 📂 BƯỚC 4: TẠO FILE `4_Split_ByChannel.gs` (TỰ ĐỘNG PHÂN BỔ THEO KÊNH BÁN HÀNG)
+
+* **Thao tác:** Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `4_Split_ByChannel.gs` ➔ Dán mã tự động chia tách sheet theo từng sàn thương mại điện tử.
+* **Câu Prompt Bước 4:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -180,9 +174,11 @@ Hãy viết mã cho file độc lập "4_Split_ByChannel.gs" chứa hàm tachDuL
 
 ---
 
-#### 📊 BƯỚC 5: TẠO FILE `5_Dashboard_DataQuality.gs`
-* **Mục tiêu:** Xây dựng Dashboard hiển thị 4 thẻ KPI kiểm soát chất lượng (tỷ lệ sạch %) và 2 biểu đồ phân tích.
-* **Câu Prompt:**
+### 📊 BƯỚC 5: TẠO FILE `5_Dashboard_DataQuality.gs` (DASHBOARD THỐNG KÊ & KPI CHẤT LƯỢNG)
+
+* **Thao tác:** Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `5_Dashboard_DataQuality.gs` ➔ Dán mã tạo 4 thẻ KPI và 2 biểu đồ phân tích.
+* **Câu Prompt Bước 5:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm (Biểu đồ asPieChart, asColumnChart, setNumHeaders(1), Locale VN dấu ;).
 
@@ -210,9 +206,11 @@ Hãy viết toàn bộ mã nguồn cho file độc lập "5_Dashboard_DataQualit
 
 ---
 
-#### ⏰ BƯỚC 6: TẠO FILE `6_Trigger_NightlyClean.gs`
-* **Mục tiêu:** Cài đặt Time-driven Trigger chạy tự động lúc 23:30 mỗi đêm.
-* **Câu Prompt:**
+### ⏰ BƯỚC 6: TẠO FILE `6_Trigger_NightlyClean.gs` (TỰ ĐỘNG HÓA ĐỊNH KỲ 23:30 HÀNG ĐÊM)
+
+* **Thao tác:** Bấm dấu `(+)` chọn Script ➔ Đặt tên file là `6_Trigger_NightlyClean.gs` ➔ Dán mã cài đặt trigger tự động hóa ban đêm.
+* **Câu Prompt Bước 6:**
+
 ```text
 [TIÊU CHUẨN KỸ THUẬT]: Bạn là Chuyên gia Google Apps Script. Hãy tuân thủ nghiêm ngặt toàn bộ nguyên tắc trong tài liệu "QUY_TAC_SINH_CODE_APPS_SCRIPT_AI.md" đính kèm.
 
@@ -234,9 +232,11 @@ Hãy viết mã cho file độc lập "6_Trigger_NightlyClean.gs" để cài đ�
 
 ---
 
-#### 🌐 BƯỚC 7: TẠO FILE `CleanConfigForm.html`
-* **Mục tiêu:** Giao diện pop-up Aesthetic Blue cho phép người dùng tùy chọn cấu hình bộ lọc.
-* **Câu Prompt:**
+### 🌐 BƯỚC 7: TẠO FILE `CleanConfigForm.html` (GIAO DIỆN POP-UP CẤU HÌNH QUY TẮC LỌC)
+
+* **Thao tác:** Bấm dấu `(+)` chọn HTML ➔ Đặt tên file là `CleanConfigForm.html` ➔ Dán mã giao diện pop-up Aesthetic Blue.
+* **Câu Prompt Bước 7:**
+
 ```text
 Hãy thiết kế mã nguồn cho tệp giao diện pop-up "CleanConfigForm.html" phục vụ cấu hình bộ lọc dữ liệu:
 
@@ -259,13 +259,9 @@ Hãy thiết kế mã nguồn cho tệp giao diện pop-up "CleanConfigForm.html
 
 ---
 
-### ✅ 4. CHECKLIST NGHIỆM THU DỰ ÁN BÀI 5
-
-- [ ] Trang tính có sheet `RawData_BT5` chứa hơn 1.000 dòng dữ liệu bắt đầu từ dòng 4.
-- [ ] Đã tạo đủ 7 tệp độc lập trong Apps Script: `1_Menu_DataCleaning.gs`, `2_AuditScan_BaoCaoLoi.gs`, `3_InRam_CleanEngine.gs`, `4_Split_ByChannel.gs`, `5_Dashboard_DataQuality.gs`, `6_Trigger_NightlyClean.gs`, `CleanConfigForm.html`.
-- [ ] Menu `🧹 Làm Sạch Dữ Liệu` hiển thị trên thanh công cụ sau khi mở lại Google Sheets.
-- [ ] Quét kiểm toán thành công, sheet `Audit_Log` liệt kê đầy đủ các dòng lỗi kèm chi tiết.
-- [ ] Chạy làm sạch hoàn tất trong **dưới 2 giây**, sheet `DataCleaned_BT5` không còn dòng lỗi hay trùng lặp.
-- [ ] Tách thành công 4 tab riêng cho 4 sàn bán hàng với banner màu thương hiệu tương ứng.
-- [ ] Trang `📊 Dashboard Dữ Liệu` hiển thị đúng 4 thẻ KPI chất lượng (độ chính xác %) cùng 2 Biểu đồ tròn và Biểu đồ cột không bị lỗi `#ERROR!`.
-- [ ] Đã kích hoạt Time-driven Trigger 23:30 chạy ngầm định kỳ hàng đêm.
+### 🎯 BƯỚC 8: NGHIỆM THU TOÀN DIỆN & TỰ ĐỘNG HÓA HOÀN TẤT
+1. Bấm menu `🧹 Làm Sạch Dữ Liệu` ➔ `2. Quét Kiểm Toán Lỗi` ➔ Kiểm tra sheet `Audit_Log`.
+2. Bấm menu `3. Chạy Làm Sạch Dữ Liệu` ➔ Kiểm tra sheet `DataCleaned_BT5` xuất hiện trong dưới 2 giây.
+3. Bấm menu `4. Tách Dữ Liệu Theo Kênh Bán Hàng` ➔ Kiểm tra 4 tab của các sàn.
+4. Bấm menu `1. Dashboard Chất Lượng Dữ Liệu` ➔ Kiểm tra 4 thẻ KPI và 2 biểu đồ tròn/cột.
+5. Bật hẹn giờ 23:30 để hệ thống tự vận hành hàng đêm.
